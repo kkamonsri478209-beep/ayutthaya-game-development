@@ -8,7 +8,7 @@ const speaker=$('speaker'),dialogueText=$('dialogue-text'),nextBtn=$('dialogue-n
 const quizPanel=$('quiz-panel'),quizHeading=$('quiz-heading'),quizProgress=$('quiz-progress');
 const quizQuestion=$('quiz-question'),quizAnswers=$('quiz-answers'),quizFeedback=$('quiz-feedback');
 const quizNextBtn=$('quiz-next-btn');
-const keys={left:false,right:false,run:false};
+const keys={left:false,right:false};
 let selectedGender=null,playerName='นักเดินทาง',sceneIndex=0,dialogue=null,dialogueIndex=0,dialogueDone=null;
 let royalFirstAnswerLocked=false,royalResultSaved=false;
 let started=false,last=0,animationTime=0,coinFound=false,farmerTalked=false,quizActive=false,quizIndex=0,quizScore=0,quizShowingResult=false,quizRetrying=false,stage1Passed=false,farmIntroSeen=false,stage3Passed=false,stage4Passed=false,portIntroSeen=false,stage5Passed=false,stage6Passed=false,stage7Passed=false,stage8Passed=false,stage9Passed=false,stage9IntroSeen=false;
@@ -890,17 +890,15 @@ $('interact-btn').addEventListener('click',interact);
 window.addEventListener('keydown',e=>{
  if(document.activeElement===$('player-name'))return;
  if(['ArrowLeft','ArrowRight','Space','Enter','KeyE','KeyA','KeyD'].includes(e.code))e.preventDefault();
- if(e.code==='ShiftLeft'||e.code==='ShiftRight')keys.run=true;
  if(e.code==='ArrowLeft'||e.code==='KeyA')keys.left=true;
  if(e.code==='ArrowRight'||e.code==='KeyD')keys.right=true;
  if((e.code==='KeyE'||e.code==='Space'||e.code==='Enter')&&!e.repeat&&!$('game-screen').classList.contains('hidden'))interact();
 });
 window.addEventListener('keyup',e=>{
- if(e.code==='ShiftLeft'||e.code==='ShiftRight')keys.run=false;
  if(e.code==='ArrowLeft'||e.code==='KeyA')keys.left=false;
  if(e.code==='ArrowRight'||e.code==='KeyD')keys.right=false;
 });
-window.addEventListener('blur',()=>{keys.left=keys.right=keys.run=false;});
+window.addEventListener('blur',()=>{keys.left=keys.right=false;});
 function hold(id,key){
  const btn=$(id);
  btn.addEventListener('pointerdown',e=>{e.preventDefault();keys[key]=true;btn.setPointerCapture(e.pointerId);});
@@ -912,7 +910,7 @@ function update(dt){
  if(dialogue||quizActive||$('game-screen').classList.contains('hidden')){player.moving=false;return;}
  const dir=Number(keys.right)-Number(keys.left);
  player.moving=dir!==0;
- if(dir){player.facing=dir;player.x=Math.max(45,Math.min(worldWidth-80,player.x+dir*player.speed*(keys.run?1.45:1)*dt));}
+ if(dir){player.facing=dir;player.x=Math.max(45,Math.min(worldWidth-80,player.x+dir*player.speed*dt));}
  const id=scenes[sceneIndex].id;
  // นายท่าตะโกนเรียกครั้งแรกเมื่อนักเรียนเดินเข้ามาใกล้ท่ารับสินค้า
  if(id==='port'&&!portIntroSeen&&player.x>=745){
@@ -1043,37 +1041,16 @@ function draw(){
    if(Math.abs(player.x-merchant.x)<220){ctx.font='bold 21px system-ui';ctx.fillStyle='#fff6db';ctx.textAlign='center';ctx.fillText('แม่ค้า',merchant.x,ground-h-9);}
   }
  }
- // Girl must NEVER render the previous walk sprite, including while assets load.
+ const img=image('student-'+(selectedGender||'boy')+'-walk.webp');
+ // Original high-resolution six-frame walk animation for both characters.
  const hasMoved=Number.isFinite(draw.lastPlayerX)&&Math.abs(player.x-draw.lastPlayerX)>0.35;
  const sameScene=draw.lastSceneIndex===sceneIndex;
  const walking=!dialogue&&!quizActive&&(player.moving||(sameScene&&hasMoved));
- const now=performance.now();
- const dtFrame=Math.min(0.07,Math.max(0.008,(now-(draw.lastFrameTime||now))/1000));
- if(walking){draw.walkPhase=(draw.walkPhase||0)+dtFrame*9;}else{draw.walkPhase=0;}
+ if(walking){
+  draw.walkPhase=(draw.walkPhase||0)+Math.min(0.07,Math.max(0.008,(performance.now()-(draw.lastFrameTime||performance.now()))/1000))*9;
+ }else{draw.walkPhase=0;}
  const index=walking?Math.floor(draw.walkPhase)%6:2;
- draw.lastPlayerX=player.x;draw.lastSceneIndex=sceneIndex;draw.lastFrameTime=now;
- if(selectedGender==='girl'){
-  const idle=image('student-girl-idle-pixellab.png?v=20261110-3');
-  const run=image('student-girl-run-pixellab.png?v=20261110-3');
-  const valid=im=>im.complete&&im.naturalWidth>=288&&im.naturalHeight>=456;
-  const preferred=walking?run:idle;
-  const sheet=valid(preferred)?preferred:(valid(idle)?idle:(valid(run)?run:null));
-  if(sheet){
-   const animated=sheet===run&&walking;
-   const frame=Math.floor(now/(animated?(keys.run?95:175):165))%9;
-   const sx=(frame%3)*96,sy=Math.floor(frame/3)*152;
-   const spriteW=player.w*0.82,spriteH=player.h*0.82;
-   ctx.save();
-   ctx.translate(Math.round(player.x),Math.round(ground));
-   if(player.facing<0)ctx.scale(-1,1);
-   ctx.imageSmoothingEnabled=false;
-   ctx.drawImage(sheet,sx,sy,96,152,-spriteW/2,-spriteH,spriteW,spriteH);
-   ctx.restore();
-  }
-  // Never use the old girl walk art as a fallback.
-  return;
- }
- const img=image('student-boy-walk.webp');
+ draw.lastPlayerX=player.x;draw.lastSceneIndex=sceneIndex;draw.lastFrameTime=performance.now();
  drawWalkSprite(img,index,player.x,ground,player.w,player.h,player.facing);
 }
 function frame(t){const dt=Math.min((t-last)/1000||0,0.04);last=t;update(dt);draw();requestAnimationFrame(frame);}
