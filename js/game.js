@@ -1043,7 +1043,16 @@ function draw(){
  }
  const img=image('student-'+(selectedGender||'boy')+'-walk.webp');
  // Standing uses a near-neutral passing pose; moving cycles through all six frames.
- const index=player.moving?Math.floor(animationTime*8)%6:2;
+ // Animate from actual on-screen displacement, not only the movement flag.
+ // This also covers the automatic opening cinematic and avoids the frozen-leg pose.
+ const hasMoved=Number.isFinite(draw.lastPlayerX)&&Math.abs(player.x-draw.lastPlayerX)>0.35;
+ const sameScene=draw.lastSceneIndex===sceneIndex;
+ const walking=!dialogue&&!quizActive&&(player.moving||(sameScene&&hasMoved));
+ if(walking){
+  draw.walkPhase=(draw.walkPhase||0)+Math.min(0.07,Math.max(0.008,(performance.now()-(draw.lastFrameTime||performance.now()))/1000))*9;
+ }else{draw.walkPhase=0;}
+ const index=walking?Math.floor(draw.walkPhase)%6:2;
+ draw.lastPlayerX=player.x;draw.lastSceneIndex=sceneIndex;draw.lastFrameTime=performance.now();
  drawWalkSprite(img,index,player.x,ground,player.w,player.h,player.facing);
 }
 function frame(t){const dt=Math.min((t-last)/1000||0,0.04);last=t;update(dt);draw();requestAnimationFrame(frame);}
