@@ -23,6 +23,25 @@ const palettes={
  treasury:{notes:[261.63,329.63,392,523.25],nature:'wind'},
  royalPalace:{notes:[261.63,349.23,392,523.25],nature:'magic'}
 };
+
+// Approved Thai traditional soundtrack. If the MP3 has not been uploaded yet,
+// keep the original synthesized music as a safe fallback.
+const soundtrack=new Audio('audio/ayutthaya_thai_traditional_loop_96s.mp3');
+soundtrack.loop=true;soundtrack.preload='auto';soundtrack.volume=0;
+let soundtrackReady=false,soundtrackFailed=false;
+soundtrack.addEventListener('canplay',()=>{soundtrackReady=true;});
+soundtrack.addEventListener('error',()=>{soundtrackFailed=true;});
+function reading(){return !!document.querySelector('#dialogue-box:not(.hidden),#quiz-panel:not(.hidden)');}
+function updateSoundtrack(){
+ const s=screen();
+ const shouldPlay=enabled&&(s==='game'||s==='map'||s==='cover'||s==='result');
+ if(!shouldPlay){soundtrack.pause();return;}
+ if(!soundtrackReady||soundtrackFailed)return;
+ const target=volume*(reading()?.08:.24);
+ soundtrack.volume+=Math.max(-.025,Math.min(.025,target-soundtrack.volume));
+ if(soundtrack.paused)soundtrack.play().catch(()=>{});
+}
+
 function create(){
  if(ctx)return;
  ctx=new AudioContextClass();
@@ -34,7 +53,7 @@ function create(){
  for(let i=0;i<length;i++){x^=x<<13;x^=x>>>17;x^=x<<5;data[i]=((x>>>0)/2147483648-1)*.55;}
 }
 function note(freq,when,duration=.65,amp=.14,type='sine',target=music){
- if(!ctx||!active||!enabled)return;
+ if(!ctx||!active||!enabled||soundtrackReady)return;
  const o=ctx.createOscillator(),g=ctx.createGain();
  o.type=type;o.frequency.setValueAtTime(freq,when);
  g.gain.setValueAtTime(.0001,when);g.gain.exponentialRampToValueAtTime(Math.max(.001,amp),when+.045);
@@ -42,7 +61,7 @@ function note(freq,when,duration=.65,amp=.14,type='sine',target=music){
  o.connect(g);g.connect(target);o.start(when);o.stop(when+duration+.03);
 }
 function breath(when,duration,amp,cutoff){
- if(!ctx||!active||!enabled)return;
+ if(!ctx||!active||!enabled||soundtrackReady)return;
  const src=ctx.createBufferSource(),filter=ctx.createBiquadFilter(),g=ctx.createGain();
  src.buffer=noiseBuffer;src.loop=true;filter.type='lowpass';filter.frequency.value=cutoff;
  g.gain.setValueAtTime(.0001,when);g.gain.linearRampToValueAtTime(amp,when+.35);
@@ -50,7 +69,7 @@ function breath(when,duration,amp,cutoff){
  src.connect(filter);filter.connect(g);g.connect(ambience);src.start(when);src.stop(when+duration+.02);
 }
 function bird(when,index){
- if(!ctx||!active||!enabled)return;
+ if(!ctx||!active||!enabled||soundtrackReady)return;
  const o=ctx.createOscillator(),g=ctx.createGain(),f=780+index*110;
  o.type='sine';o.frequency.setValueAtTime(f,when);o.frequency.exponentialRampToValueAtTime(f*1.45,when+.10);o.frequency.exponentialRampToValueAtTime(f*.95,when+.23);
  g.gain.setValueAtTime(.0001,when);g.gain.linearRampToValueAtTime(.10,when+.04);g.gain.exponentialRampToValueAtTime(.0001,when+.26);
@@ -59,12 +78,14 @@ function bird(when,index){
 function stop(){
  active=false;lastBeat=-1;lastNature=-1;
  if(master&&ctx)master.gain.setTargetAtTime(0,ctx.currentTime,.15);
+ soundtrack.pause();
 }
 function start(){
  if(!enabled)return;
  create();ctx.resume().catch(()=>{});
  active=true;lastBeat=-1;lastNature=-1;
- master.gain.setTargetAtTime(volume,ctx.currentTime,.18);
+ master.gain.setTargetAtTime(soundtrackReady?0:volume*.4,ctx.currentTime,.18);
+ updateSoundtrack();
 }
 function tick(){
  const currentScreen=screen();
@@ -104,7 +125,7 @@ function attach(){
  document.body.appendChild(panel);
  $('sound-toggle').addEventListener('click',()=>{
   enabled=!enabled;
-  if(!enabled)stop();else {create();ctx.resume().then(()=>{if(screen()==='game'||screen()==='map')start();}).catch(()=>{});if(screen()==='game')start();}
+  if(!enabled)stop();else {create();ctx.resume().then(()=>{if(screen()==='game'||screen()==='map')start();}).catch(()=>{});if(screen()==='game'||screen()==='map')start();}
   updateUI();
  });
  $('sound-test').addEventListener('click',()=>{
@@ -121,7 +142,8 @@ function attach(){
  });
  $('sound-volume').addEventListener('input',e=>{
   volume=Number(e.target.value)/100;
-  if(master&&ctx)master.gain.setTargetAtTime(enabled?volume:0,ctx.currentTime,.08);
+  if(master&&ctx)master.gain.setTargetAtTime(enabled?(soundtrackReady?0:volume*.4):0,ctx.currentTime,.08);
+  updateSoundtrack();
  });
  updateUI();
  // Explicit tap on the sound button unlocks audio on Safari and iPad.
@@ -144,9 +166,10 @@ function attach(){
  });
  // Detect scene changes without modifying the game update loop.
  setInterval(()=>{
-  if(screen()!=='game'&&screen()!=='map'){if(active)stop();return;}
+  if(screen()!=='game'&&screen()!=='map'){if(active)stop();updateSoundtrack();return;}
   if(!active&&enabled&&ctx&&ctx.state==='running')start();
   tick();
+  updateSoundtrack();
  },300);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach);
