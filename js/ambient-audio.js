@@ -16,7 +16,7 @@ function updateUI(){
 }
 function update(){
  const s=scene();
- const allowed=unlocked&&enabled&&s!=='cover';
+ const allowed=unlocked&&enabled;
  if(!allowed){if(!audio.paused)audio.pause();return;}
  const quiet=visible('quiz-panel')||visible('dialogue-box');
  const target=volume*(quiet?.12:.48);
@@ -26,6 +26,7 @@ function update(){
 function unlock(){
  unlocked=true;
  if(enabled){
+  audio.volume=Math.max(.05,volume*.48);
   audio.play().then(()=>update()).catch(()=>{});
  }
 }
