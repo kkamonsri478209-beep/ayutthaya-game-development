@@ -1,6 +1,6 @@
 /* Ancient Temple Fantasy SFX hooks. Load the six approved Aztec WAV files from assets/sfx/. */
 (()=>{'use strict';
-const base='./assets/sfx/';
+const base='./';
 const files={click:'01_aztec_button.wav',dialogue:'02_aztec_dialogue.wav',correct:'03_aztec_correct.wav',incorrect:'04_aztec_incorrect.wav',coin:'05_aztec_coin.wav',victory:'06_aztec_victory.wav'};
 const audio=Object.fromEntries(Object.entries(files).map(([k,v])=>{const a=new Audio(base+v);a.preload='auto';return [k,a];}));
 let enabled=true,volume=.34,lastClick=0,lastFeedback='',lastHeading='',lastDialogue=false,lastResult=false;
