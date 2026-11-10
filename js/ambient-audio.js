@@ -26,7 +26,7 @@ const palettes={
 
 // Approved Thai traditional soundtrack. If the MP3 has not been uploaded yet,
 // keep the original synthesized music as a safe fallback.
-const soundtrack=new Audio('audio/ayutthaya_thai_traditional_loop_96s.mp3');
+const soundtrack=new Audio('ayutthaya_thai_traditional_loop_96s.mp3');
 soundtrack.loop=true;soundtrack.preload='auto';soundtrack.volume=0;
 let soundtrackReady=false,soundtrackFailed=false;
 soundtrack.addEventListener('canplay',()=>{soundtrackReady=true;});
