@@ -8,7 +8,7 @@ let ctx=null,master=null,music=null,ambience=null,noiseBuffer=null,enabled=false
 let active=false,lastScene='',lastBeat=-1,lastNature=-1,frameHandle=0;
 const $=id=>document.getElementById(id);
 const sceneId=()=>{try{return scenes[sceneIndex]?.id||'school'}catch(e){return 'school'}};
-const screen=()=>document.querySelector('#game-screen:not(.hidden)')?'game':document.querySelector('#cover-screen:not(.hidden)')?'cover':'other';
+const screen=()=>document.querySelector('#game-screen:not(.hidden)')?'game':document.querySelector('#adventure-map-screen:not(.hidden)')?'map':document.querySelector('#cover-screen:not(.hidden)')?'cover':'other';
 const palettes={
  school:{notes:[293.66,349.23,440,523.25],nature:'birds'},
  road:{notes:[293.66,392,440,587.33],nature:'birds'},
@@ -68,9 +68,9 @@ function start(){
 }
 function tick(){
  const currentScreen=screen();
- if(currentScreen!=='game'){if(active)stop();return;}
+ if(currentScreen!=='game'&&currentScreen!=='map'){if(active)stop();return;}
  if(!active||!ctx||ctx.state!=='running')return;
- const id=sceneId(),preset=palettes[id]||palettes.school;
+ const id=currentScreen==='map'?'royalPalace':sceneId(),preset=palettes[id]||palettes.school;
  if(id!==lastScene){lastScene=id;lastBeat=-1;lastNature=-1;}
  const t=ctx.currentTime;
  const beat=Math.floor(t/1.1);
@@ -100,12 +100,24 @@ function attach(){
  if($('sound-panel'))return;
  const panel=document.createElement('div');panel.id='sound-panel';
  panel.setAttribute('aria-label','ควบคุมเสียงเกม');
- panel.innerHTML='<button type="button" id="sound-toggle" aria-pressed="true">🔊 เสียงเปิด</button><label for="sound-volume">ระดับเสียง</label><input id="sound-volume" type="range" min="0" max="65" value="55" aria-label="ระดับเสียงเพลงและธรรมชาติ">';
+ panel.innerHTML='<button type="button" id="sound-toggle" aria-pressed="false">🔈 แตะเปิดเสียง</button><button type="button" id="sound-test">♪ ทดสอบเสียง</button><label for="sound-volume">ระดับเสียง</label><input id="sound-volume" type="range" min="0" max="100" value="55" aria-label="ระดับเสียงเพลงและธรรมชาติ">';
  document.body.appendChild(panel);
  $('sound-toggle').addEventListener('click',()=>{
   enabled=!enabled;
-  if(!enabled)stop();else {create();ctx.resume().then(()=>{if(screen()==='game')start();}).catch(()=>{});if(screen()==='game')start();}
+  if(!enabled)stop();else {create();ctx.resume().then(()=>{if(screen()==='game'||screen()==='map')start();}).catch(()=>{});if(screen()==='game')start();}
   updateUI();
+ });
+ $('sound-test').addEventListener('click',()=>{
+  create();
+  ctx.resume().then(()=>{
+   enabled=true;
+   master.gain.cancelScheduledValues(ctx.currentTime);
+   master.gain.setTargetAtTime(Math.max(volume,.55),ctx.currentTime,.015);
+   note(523.25,ctx.currentTime+.06,.6,.7,'sine',master);
+   note(659.25,ctx.currentTime+.25,.65,.6,'sine',master);
+   if(screen()==='game'||screen()==='map')start();
+   updateUI();
+  }).catch(()=>{$('sound-test').textContent='ตรวจสอบการอนุญาตเสียง';});
  });
  $('sound-volume').addEventListener('input',e=>{
   volume=Number(e.target.value)/100;
@@ -128,11 +140,11 @@ function attach(){
  });
  document.addEventListener('visibilitychange',()=>{
   if(document.hidden)stop();
-  else if(enabled&&screen()==='game'&&ctx&&ctx.state==='running')start();
+  else if(enabled&&(screen()==='game'||screen()==='map')&&ctx&&ctx.state==='running')start();
  });
  // Detect scene changes without modifying the game update loop.
  setInterval(()=>{
-  if(screen()!=='game'){if(active)stop();return;}
+  if(screen()!=='game'&&screen()!=='map'){if(active)stop();return;}
   if(!active&&enabled&&ctx&&ctx.state==='running')start();
   tick();
  },300);
