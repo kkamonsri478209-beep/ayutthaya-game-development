@@ -12,9 +12,13 @@
 #sound-panel button{cursor:pointer;color:#fff2d4;background:#44305e;border:1px solid #c7a35d;border-radius:8px;padding:6px 9px;font:inherit}
 #sound-panel input{width:78px;accent-color:#efc56d}
 @media(max-width:640px){#sound-panel{right:6px;bottom:5px;padding:5px;gap:5px;font-size:10px}#sound-panel input{width:52px}}
+#music-welcome{position:fixed;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:rgba(15,9,34,.78);backdrop-filter:blur(4px);padding:20px}
+#music-welcome.hidden{display:none}
+#music-welcome button{max-width:90vw;padding:20px 28px;border-radius:18px;border:2px solid #f1ce7b;background:linear-gradient(140deg,#63387e,#33235b);color:#fff2ce;font:700 clamp(17px,3vw,25px) system-ui;box-shadow:0 8px 36px #0009;cursor:pointer}
 </style>
 </head>
 <body>
+<div id="music-welcome"><button id="music-welcome-btn" type="button">♪ แตะเพื่อเข้าสู่โลกอยุธยาและเปิดเพลง</button></div>
 <main id="app">
   <div id="loading-overlay" class="loading-overlay hidden" role="status" aria-live="polite"><div class="loading-card"><div class="loading-spinner" aria-hidden="true"></div><strong>กำลังโหลดภาพการผจญภัย...</strong><span>โปรดรอสักครู่</span></div></div>
   <section id="cover-screen" class="screen" data-bg="game-cover.webp">
@@ -92,6 +96,6 @@
 <script src="js/game.js?v=living-environment-20261110"></script>
 <script src="js/adventure-map.js?v=1"></script>
 <script src="js/intro-cinematic.js?v=fix-overlap-20261110"></script>
-<script src="js/ambient-audio.js?v=mp3-cover-safari-fix-20261110-2213"></script>
+<script src="js/ambient-audio.js?v=welcome-music-20261110"></script>
 </body>
 </html>
