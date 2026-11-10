@@ -4,7 +4,7 @@
 'use strict';
 const AudioContextClass=window.AudioContext||window.webkitAudioContext;
 if(!AudioContextClass)return;
-let ctx=null,master=null,music=null,ambience=null,noiseBuffer=null,enabled=true,volume=.32;
+let ctx=null,master=null,music=null,ambience=null,noiseBuffer=null,enabled=false,volume=.55;
 let active=false,lastScene='',lastBeat=-1,lastNature=-1,frameHandle=0;
 const $=id=>document.getElementById(id);
 const sceneId=()=>{try{return scenes[sceneIndex]?.id||'school'}catch(e){return 'school'}};
@@ -27,8 +27,8 @@ function create(){
  if(ctx)return;
  ctx=new AudioContextClass();
  master=ctx.createGain();master.gain.value=0;master.connect(ctx.destination);
- music=ctx.createGain();music.gain.value=.24;music.connect(master);
- ambience=ctx.createGain();ambience.gain.value=.19;ambience.connect(master);
+ music=ctx.createGain();music.gain.value=.48;music.connect(master);
+ ambience=ctx.createGain();ambience.gain.value=.38;ambience.connect(master);
  const length=Math.floor(ctx.sampleRate*2);noiseBuffer=ctx.createBuffer(1,length,ctx.sampleRate);
  const data=noiseBuffer.getChannelData(0);let x=123456789;
  for(let i=0;i<length;i++){x^=x<<13;x^=x>>>17;x^=x<<5;data[i]=((x>>>0)/2147483648-1)*.55;}
@@ -93,18 +93,18 @@ function tick(){
 }
 function updateUI(){
  const b=$('sound-toggle'),v=$('sound-volume');
- if(b){b.textContent=enabled?'🔊 เสียงเปิด':'🔇 ปิดเสียง';b.setAttribute('aria-pressed',String(enabled));}
+ if(b){b.textContent=enabled?'🔊 เปิดเสียงแล้ว':'🔈 แตะเปิดเสียง';b.setAttribute('aria-pressed',String(enabled));}
  if(v)v.value=String(Math.round(volume*100));
 }
 function attach(){
  if($('sound-panel'))return;
  const panel=document.createElement('div');panel.id='sound-panel';
  panel.setAttribute('aria-label','ควบคุมเสียงเกม');
- panel.innerHTML='<button type="button" id="sound-toggle" aria-pressed="true">🔊 เสียงเปิด</button><label for="sound-volume">ระดับเสียง</label><input id="sound-volume" type="range" min="0" max="65" value="32" aria-label="ระดับเสียงเพลงและธรรมชาติ">';
+ panel.innerHTML='<button type="button" id="sound-toggle" aria-pressed="true">🔊 เสียงเปิด</button><label for="sound-volume">ระดับเสียง</label><input id="sound-volume" type="range" min="0" max="65" value="55" aria-label="ระดับเสียงเพลงและธรรมชาติ">';
  document.body.appendChild(panel);
  $('sound-toggle').addEventListener('click',()=>{
   enabled=!enabled;
-  if(!enabled)stop();else if(screen()==='game')start();
+  if(!enabled)stop();else {create();ctx.resume().then(()=>{if(screen()==='game')start();}).catch(()=>{});if(screen()==='game')start();}
   updateUI();
  });
  $('sound-volume').addEventListener('input',e=>{
@@ -112,6 +112,7 @@ function attach(){
   if(master&&ctx)master.gain.setTargetAtTime(enabled?volume:0,ctx.currentTime,.08);
  });
  updateUI();
+ // Explicit tap on the sound button unlocks audio on Safari and iPad.
  // Browsers require a genuine user gesture before starting audio.
  document.addEventListener('pointerdown',e=>{
   if(e.target.closest('#sound-panel'))return;
