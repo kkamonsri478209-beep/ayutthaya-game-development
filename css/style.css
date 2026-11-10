@@ -155,3 +155,21 @@ button:disabled{opacity:.55;cursor:not-allowed}
 .royal-result-button:hover,.royal-result-button:focus-visible{transform:scale(1.035);filter:brightness(1.12);outline:2px solid #fff3b7;outline-offset:1px;}
 .royal-result-status{position:absolute;bottom:1.1%;left:10%;right:10%;text-align:center;font-size:clamp(8px,.95vw,16px);font-weight:700;color:#fff2bf;text-shadow:0 2px 3px #491b10;margin:0;}
 @media(max-width:650px){.royal-result-content{top:24%;}.royal-result-copy{gap:.25vw;}.royal-result-message{font-size:clamp(8px,1.25vw,12px);}.royal-result-medal{width:11vw;bottom:-8%;}}
+
+/* Opening-cover cinematic: animated atmosphere without altering the artwork. */
+#cover-screen{isolation:isolate;animation:coverReveal 1.4s ease-out both}
+#cover-screen .cover-cinematic{position:absolute;inset:0;z-index:1;overflow:hidden;pointer-events:none}
+#cover-screen .cover-cinematic-light{position:absolute;inset:-25%;background:radial-gradient(ellipse at 50% 52%,rgba(255,224,130,.22),transparent 52%);mix-blend-mode:screen;animation:coverLight 6s ease-in-out infinite alternate}
+#cover-screen .cover-cinematic-mist{position:absolute;inset:0;background:linear-gradient(110deg,transparent 8%,rgba(255,241,204,.08) 34%,transparent 62%);animation:coverMist 11s ease-in-out infinite alternate}
+#cover-screen .cover-cinematic-particles{position:absolute;inset:0;background-image:radial-gradient(circle,#ffe5a1 1.8px,transparent 3px),radial-gradient(circle,#fff5d2 1.3px,transparent 2.5px),radial-gradient(circle,#ffe6a5 1px,transparent 2px);background-size:173px 151px,221px 179px,127px 199px;background-position:18px 26px,92px 68px,45px 111px;opacity:.45;filter:drop-shadow(0 0 4px #ffd26e);animation:coverParticles 15s linear infinite}
+#cover-screen .cover-cinematic-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at center,transparent 42%,rgba(25,12,42,.40) 100%)}
+#cover-screen .cover-cinematic-caption{position:absolute;z-index:2;left:10%;right:10%;bottom:23%;text-align:center;color:#fff1ca;font-weight:700;font-size:clamp(12px,1.65vw,22px);text-shadow:0 2px 8px #201026,0 0 14px #7a4a16;animation:coverCaption 2.3s ease-out both;pointer-events:none}
+#cover-screen .cover-start{z-index:3;animation:coverButton 2.8s ease-out both,coverButtonGlow 3s ease-in-out 2.8s infinite alternate}
+@keyframes coverReveal{from{opacity:0;filter:brightness(.55)}to{opacity:1;filter:brightness(1)}}
+@keyframes coverLight{from{transform:translate(-3%,2%) scale(.95);opacity:.55}to{transform:translate(4%,-3%) scale(1.14);opacity:1}}
+@keyframes coverMist{from{transform:translateX(-24%);opacity:.4}to{transform:translateX(26%);opacity:.85}}
+@keyframes coverParticles{from{background-position:18px 26px,92px 68px,45px 111px}to{background-position:62px -240px,120px -160px,10px -190px}}
+@keyframes coverCaption{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes coverButton{from{opacity:0;transform:translate(-50%,16px)}to{opacity:1;transform:translate(-50%,0)}}
+@keyframes coverButtonGlow{from{box-shadow:0 5px 0 #58351b,0 0 8px #f7cb69}to{box-shadow:0 5px 0 #58351b,0 0 25px #ffe49a}}
+@media(prefers-reduced-motion:reduce){#cover-screen,#cover-screen .cover-cinematic *,#cover-screen .cover-cinematic-caption,#cover-screen .cover-start{animation:none!important}}
