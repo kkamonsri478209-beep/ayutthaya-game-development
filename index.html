@@ -7,6 +7,12 @@
 <link rel="stylesheet" href="css/style.css?v=cover-cinematic-20261110">
 <link rel="stylesheet" href="css/adventure-map.css?v=1">
 <link rel="stylesheet" href="css/intro-cinematic.css?v=fix-overlap-20261110">
+<style>
+#sound-panel{position:fixed;right:12px;bottom:12px;z-index:70;display:flex;align-items:center;gap:8px;background:rgba(28,18,50,.92);border:1px solid #d9b76d;border-radius:12px;padding:7px 10px;color:#fff2d4;font:600 12px system-ui,sans-serif;box-shadow:0 4px 16px #0005}
+#sound-panel button{cursor:pointer;color:#fff2d4;background:#44305e;border:1px solid #c7a35d;border-radius:8px;padding:6px 9px;font:inherit}
+#sound-panel input{width:78px;accent-color:#efc56d}
+@media(max-width:640px){#sound-panel{right:6px;bottom:5px;padding:5px;gap:5px;font-size:10px}#sound-panel input{width:52px}}
+</style>
 </head>
 <body>
 <main id="app">
@@ -86,5 +92,6 @@
 <script src="js/game.js?v=living-environment-20261110"></script>
 <script src="js/adventure-map.js?v=1"></script>
 <script src="js/intro-cinematic.js?v=fix-overlap-20261110"></script>
+<script src="js/ambient-audio.js?v=scene-audio-20261110"></script>
 </body>
 </html>
