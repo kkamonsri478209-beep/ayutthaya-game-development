@@ -32,6 +32,8 @@ function unlock(){
 }
 function attach(){
  if($('sound-panel'))return;
+ const welcome=$('music-welcome'),welcomeBtn=$('music-welcome-btn');
+ if(welcomeBtn)welcomeBtn.addEventListener('click',()=>{unlock();welcome.classList.add('hidden');});
  const panel=document.createElement('div');
  panel.id='sound-panel';
  panel.setAttribute('aria-label','ควบคุมเสียงเกม');
