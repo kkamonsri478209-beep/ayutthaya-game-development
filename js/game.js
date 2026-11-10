@@ -1043,8 +1043,7 @@ function draw(){
    if(Math.abs(player.x-merchant.x)<220){ctx.font='bold 21px system-ui';ctx.fillStyle='#fff6db';ctx.textAlign='center';ctx.fillText('แม่ค้า',merchant.x,ground-h-9);}
   }
  }
- const img=image('student-'+(selectedGender||'boy')+'-walk.webp');
- // Keep the original six-frame walking artwork as a safe fallback.
+ // Girl must NEVER render the previous walk sprite, including while assets load.
  const hasMoved=Number.isFinite(draw.lastPlayerX)&&Math.abs(player.x-draw.lastPlayerX)>0.35;
  const sameScene=draw.lastSceneIndex===sceneIndex;
  const walking=!dialogue&&!quizActive&&(player.moving||(sameScene&&hasMoved));
@@ -1053,25 +1052,29 @@ function draw(){
  if(walking){draw.walkPhase=(draw.walkPhase||0)+dtFrame*9;}else{draw.walkPhase=0;}
  const index=walking?Math.floor(draw.walkPhase)%6:2;
  draw.lastPlayerX=player.x;draw.lastSceneIndex=sceneIndex;draw.lastFrameTime=now;
- // PixelLab sprite sheets: 3 columns x 3 rows, each frame 96x152.
- // They are optional: the game remains playable until PNG assets are uploaded.
- // Use one consistent PixelLab character for idle, walk and run.
- // Until a dedicated walk sheet exists, play the run sheet more slowly for walking.
- const girlSheet=selectedGender==='girl'?(walking?'student-girl-run-pixellab.png':'student-girl-idle-pixellab.png'):null;
- const sheet=girlSheet?image(girlSheet):null;
- const ready=sheet&&sheet.complete&&sheet.naturalWidth>=288&&sheet.naturalHeight>=456;
- if(ready){
-  const frame=Math.floor(now/(walking?(keys.run?95:175):165))%9;
-  const sx=(frame%3)*96,sy=Math.floor(frame/3)*152;
-  ctx.save();ctx.translate(Math.round(player.x),Math.round(ground));
-  if(player.facing<0)ctx.scale(-1,1);
-  ctx.imageSmoothingEnabled=false;
-  const spriteW=player.w*0.82,spriteH=player.h*0.82;
-  ctx.drawImage(sheet,sx,sy,96,152,-spriteW/2,-spriteH,spriteW,spriteH);
-  ctx.restore();
- }else{
-  drawWalkSprite(img,index,player.x,ground,player.w,player.h,player.facing);
+ if(selectedGender==='girl'){
+  const idle=image('student-girl-idle-pixellab.png?v=20261110-3');
+  const run=image('student-girl-run-pixellab.png?v=20261110-3');
+  const valid=im=>im.complete&&im.naturalWidth>=288&&im.naturalHeight>=456;
+  const preferred=walking?run:idle;
+  const sheet=valid(preferred)?preferred:(valid(idle)?idle:(valid(run)?run:null));
+  if(sheet){
+   const animated=sheet===run&&walking;
+   const frame=Math.floor(now/(animated?(keys.run?95:175):165))%9;
+   const sx=(frame%3)*96,sy=Math.floor(frame/3)*152;
+   const spriteW=player.w*0.82,spriteH=player.h*0.82;
+   ctx.save();
+   ctx.translate(Math.round(player.x),Math.round(ground));
+   if(player.facing<0)ctx.scale(-1,1);
+   ctx.imageSmoothingEnabled=false;
+   ctx.drawImage(sheet,sx,sy,96,152,-spriteW/2,-spriteH,spriteW,spriteH);
+   ctx.restore();
+  }
+  // Never use the old girl walk art as a fallback.
+  return;
  }
+ const img=image('student-boy-walk.webp');
+ drawWalkSprite(img,index,player.x,ground,player.w,player.h,player.facing);
 }
 function frame(t){const dt=Math.min((t-last)/1000||0,0.04);last=t;update(dt);draw();requestAnimationFrame(frame);}
 showScreen('cover-screen');
