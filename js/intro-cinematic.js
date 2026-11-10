@@ -5,7 +5,7 @@
  const overlay=document.createElement('div');
  overlay.className='intro-cinematic-ui hidden';
  overlay.innerHTML='<span class="intro-cinematic-label">บทนำ · การเดินทางข้ามกาลเวลา</span><button type="button" class="intro-cinematic-skip">ข้ามบทนำ ▶</button>';
- document.querySelector('#app').append(overlay);
+ document.querySelector('#game-screen').append(overlay);
  const spark=document.createElement('div');spark.className='intro-coin-spark hidden';spark.setAttribute('aria-hidden','true');document.querySelector('#game-screen').append(spark);
  function stop(){active=false;finished=true;overlay.classList.add('hidden');spark.classList.add('hidden');keys.left=keys.right=false;}
  function showMap(){stop();dialogue=null;dialogueDone=null;dialogueBox.classList.add('hidden');coinFound=true;goToScene(3);}
