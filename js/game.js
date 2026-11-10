@@ -1055,16 +1055,19 @@ function draw(){
  draw.lastPlayerX=player.x;draw.lastSceneIndex=sceneIndex;draw.lastFrameTime=now;
  // PixelLab sprite sheets: 3 columns x 3 rows, each frame 96x152.
  // They are optional: the game remains playable until PNG assets are uploaded.
- const girlSheet=selectedGender==='girl'?(walking&&keys.run?'student-girl-run-pixellab.png':!walking?'student-girl-idle-pixellab.png':null):null;
+ // Use one consistent PixelLab character for idle, walk and run.
+ // Until a dedicated walk sheet exists, play the run sheet more slowly for walking.
+ const girlSheet=selectedGender==='girl'?(walking?'student-girl-run-pixellab.png':'student-girl-idle-pixellab.png'):null;
  const sheet=girlSheet?image(girlSheet):null;
  const ready=sheet&&sheet.complete&&sheet.naturalWidth>=288&&sheet.naturalHeight>=456;
  if(ready){
-  const frame=Math.floor(now/(walking?95:165))%9;
+  const frame=Math.floor(now/(walking?(keys.run?95:175):165))%9;
   const sx=(frame%3)*96,sy=Math.floor(frame/3)*152;
   ctx.save();ctx.translate(Math.round(player.x),Math.round(ground));
   if(player.facing<0)ctx.scale(-1,1);
   ctx.imageSmoothingEnabled=false;
-  ctx.drawImage(sheet,sx,sy,96,152,-player.w/2,-player.h,player.w,player.h);
+  const spriteW=player.w*0.82,spriteH=player.h*0.82;
+  ctx.drawImage(sheet,sx,sy,96,152,-spriteW/2,-spriteH,spriteW,spriteH);
   ctx.restore();
  }else{
   drawWalkSprite(img,index,player.x,ground,player.w,player.h,player.facing);
