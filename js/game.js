@@ -956,6 +956,61 @@ function drawBackground(){
  ctx.drawImage(img,0,0,img.naturalWidth,img.naturalHeight,0,0,1280,720);
  return 0;
 }
+// Lightweight animated scenery drawn over the existing artwork; no external assets.
+function drawLivingEnvironment(id,t){
+ const waterScenes=['boat','port','internationalPort','foreignTrade'];
+ const natureScenes=['road','coin','farm','market','checkpoint'];
+ const magicScenes=['coin','farm','royalPalace'];
+ const isWater=waterScenes.includes(id),isNature=natureScenes.includes(id),isMagic=magicScenes.includes(id);
+ if(!isWater&&!isNature&&!isMagic)return;
+ ctx.save();
+ // Soft drifting clouds and sunlight. Restrained opacity keeps background artwork intact.
+ if(isNature||isMagic){
+  for(let i=0;i<3;i++){
+   const x=((i*465+t*(4+i*1.7))%1590)-160;
+   const y=85+i*38+Math.sin(t*.17+i)*5;
+   const grad=ctx.createRadialGradient(x,y,8,x,y,110);
+   grad.addColorStop(0,'rgba(255,250,220,0.055)');
+   grad.addColorStop(1,'rgba(255,250,220,0)');
+   ctx.fillStyle=grad;ctx.beginPath();ctx.ellipse(x,y,115,28,0,0,Math.PI*2);ctx.fill();
+  }
+ }
+ // Slow glints on rivers and ports, avoiding opaque painted water overlays.
+ if(isWater){
+  for(let i=0;i<15;i++){
+   const x=95+((i*97+t*(7+i%3*2))%1110);
+   const y=480+(i*47)%155;
+   const alpha=.10+.12*(.5+.5*Math.sin(t*1.8+i*2.1));
+   ctx.strokeStyle='rgba(255,245,190,'+alpha+')';
+   ctx.lineWidth=1.4;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+9+(i%4)*3,y);ctx.stroke();
+  }
+ }
+ // Fireflies / floating pollen on nature scenes.
+ if(isNature||isMagic){
+  const count=isMagic?21:12;
+  for(let i=0;i<count;i++){
+   const baseX=65+(i*197)%1150;
+   const baseY=315+(i*73)%320;
+   const x=baseX+Math.sin(t*(.38+i%4*.08)+i)*18;
+   const y=baseY+Math.cos(t*(.47+i%3*.09)+i*1.7)*12;
+   const opacity=(.16+.30*(.5+.5*Math.sin(t*1.5+i*2)))*(isMagic?1:.65);
+   ctx.fillStyle='rgba(255,229,129,'+opacity+')';
+   ctx.beginPath();ctx.arc(x,y,i%5===0?2.6:1.5,0,Math.PI*2);ctx.fill();
+  }
+ }
+ // Occasional small butterflies at field/market; subtle and independent of NPCs.
+ if(id==='farm'||id==='market'){
+  for(let i=0;i<3;i++){
+   const x=120+i*350+Math.sin(t*.8+i*2)*44;
+   const y=400+i*56+Math.cos(t*1.15+i)*23;
+   const wing=Math.abs(Math.sin(t*9+i));
+   ctx.fillStyle='rgba(250,204,245,0.60)';
+   ctx.beginPath();ctx.ellipse(x-3,y,2+wing*3,4,Math.PI/5,0,Math.PI*2);ctx.fill();
+   ctx.beginPath();ctx.ellipse(x+3,y,2+wing*3,4,-Math.PI/5,0,Math.PI*2);ctx.fill();
+  }
+ }
+ ctx.restore();
+}
 function drawWalkSprite(img,frameIndex,x,ground,width,height,facing){
  if(!img.complete||!img.naturalWidth)return false;
  // Per-frame source foot lines measured from the six-frame transparent sprite sheets.
@@ -985,6 +1040,7 @@ function draw(){
  ctx.clearRect(0,0,1280,720);
  drawBackground();
  const id=scenes[sceneIndex].id;
+ drawLivingEnvironment(id,animationTime);
  // ภาพฉากเรือมีนักเรียนและคนพายเรืออยู่ในภาพแล้ว จึงไม่วาดตัวละครซ้ำทับ
  if(id==='boat')return;
  // Raise both characters only in the farm scene so they stand safely inside the grassy path.
