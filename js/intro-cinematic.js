@@ -24,6 +24,7 @@
   const dt=Math.min((time-last)/1000,.05);last=time;
   if(quizActive){stop();return;}
   if(dialogue){
+   keys.right=false;player.moving=false;
    if(dialogueIndex!==dialoguePosition){dialoguePosition=dialogueIndex;dialogueAt=time;}
    if(time-dialogueAt>2350){advanceDialogue();dialogueAt=time;dialoguePosition=dialogueIndex;}
    return;
@@ -39,9 +40,9 @@
    }
    if(coinTriggered){showMap();return;}
   }
-  player.facing=1;player.moving=true;
-  player.x=Math.min(1148,player.x+260*dt);
-  if(sceneIndex<2&&player.x>=1120){goToScene(sceneIndex+1);return;}
+  // Use the original movement engine so walking sprites animate in sync with travel.
+  keys.left=false;keys.right=true;player.facing=1;
+  // The original update() advances school and road automatically at the edge.
  }
  requestAnimationFrame(tick);
 })();
