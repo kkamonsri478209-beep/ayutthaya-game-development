@@ -724,7 +724,7 @@ for(const items of [farmerQuiz,boatQuiz,marketQuiz,portQuiz,foreignTradeQuiz,int
   if(item.options.length===3)item.options.push('ถูกทุกข้อ');
  }
 }
-const ANSWER_SCRIPT_URL=''; // ใส่ Google Apps Script Web App URL /exec หลังเจ้าของบัญชีเผยแพร่
+const ANSWER_SCRIPT_URL='https://script.google.com/macros/s/AKfycbzxDMhsZe6AjfKRyYFitq8-LycZlVKJHNb2QWvo5I5BTATGBXbgRi8TV7hmXDlGpmAh/exec'; // Web App สำหรับรับคำตอบพิมพ์ตอบ
 const ANSWER_QUEUE_KEY='ayutthaya-typed-answer-queue-v1';
 const ANSWER_PLAYER_KEY='ayutthaya-research-player-v1';
 const ANSWER_SESSION_KEY='ayutthaya-research-session-v1';
