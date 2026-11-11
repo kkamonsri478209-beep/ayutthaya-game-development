@@ -684,10 +684,165 @@ function downloadRoyalResult(){
  $('result-save-status').textContent='บันทึกผลเป็นไฟล์ CSV แล้ว สามารถนำไฟล์ไปส่งให้ครูได้';
 }
 $('result-download-btn').addEventListener('click',downloadRoyalResult);
-$('result-restart-btn').addEventListener('click',()=>{showScreen('cover-screen');});
+$('result-restart-btn').addEventListener('click',()=>{
+// ===== AYUTTHAYA_TYPED_ANSWERS_V1 =====
+// คำถามปรับปรุงตามเอกสารครู: เลือกตอบ 32 + พิมพ์ตอบ 5 = 37 ข้อ
+// คำถามพิมพ์ตอบไม่ตรวจผิด/ถูกและไม่เพิ่มคะแนนแบบเลือกตอบ
+const typedQuestionByStage={
+ 1:'เพราะเหตุใดการปลูกข้าวจึงเหมาะกับพื้นที่อยุธยา และข้าวมีประโยชน์ต่อผู้คนอย่างไร?',
+ 3:'ถ้านักเรียนเป็นชาวบ้านในสมัยอยุธยา จะนำสินค้าอะไรไปขายในตลาด และเพราะเหตุใด?',
+ 5:'การมีพ่อค้าต่างชาติเข้ามาค้าขายในอยุธยาส่งผลดีต่อผู้คนหรือบ้านเมืองอย่างไร?',
+ 7:'เพราะเหตุใดกรุงศรีอยุธยาจึงต้องจัดเก็บภาษีจากการค้าขาย?',
+ 9:'หากเลือกส่งเสริมเศรษฐกิจอยุธยาได้หนึ่งด้าน ระหว่างการเกษตร การขนส่ง หรือการค้า นักเรียนจะเลือกด้านใด และเพราะเหตุใด?'
+};
+function appendTypedQuestion(items,stage,mcCount){
+ items.splice(mcCount);
+ items.push({type:'typed',id:'S'+stage+'-T1',q:typedQuestionByStage[stage]});
+}
+appendTypedQuestion(farmerQuiz,1,3);
+boatQuiz.splice(4);
+appendTypedQuestion(marketQuiz,3,3);
+portQuiz.splice(4);
+appendTypedQuestion(foreignTradeQuiz,5,3);
+internationalPortQuiz.splice(3);
+internationalPortQuiz.push({
+ q:'สินค้าจากประเทศอินเดียที่นำเข้ามาค้าขายในอยุธยามีลักษณะใด?',
+ options:['รถไฟและเครื่องบิน','เครื่องมือไฟฟ้า','ข้าวจากทุ่งนาอยุธยา','ผ้าชนิดต่าง ๆ อัญมณี และเครื่องเทศ'],
+ answer:3,explain:'พ่อค้าจากอินเดียนำผ้า อัญมณี และเครื่องเทศมาค้าขาย',
+ hint:'ลองนึกถึงผ้า อัญมณี และเครื่องเทศที่กล่าวถึงในท่าเรือ'});
+appendTypedQuestion(checkpointQuiz,7,3);
+treasuryQuiz.splice(4);
+appendTypedQuestion(finalRoyalQuiz,9,4);
+// เติมตัวเลือกที่ 4 สำหรับด่านที่ระบบเก่าแสดงเพียงสามตัวเลือก
+for(const items of [farmerQuiz,boatQuiz,marketQuiz,portQuiz,foreignTradeQuiz,internationalPortQuiz,checkpointQuiz,treasuryQuiz,finalRoyalQuiz]){
+ for(const item of items){
+  if(item.type==='typed')continue;
+  if(item.options.length===3)item.options.push('ถูกทุกข้อ');
+ }
+}
+const ANSWER_SCRIPT_URL=''; // ใส่ Google Apps Script Web App URL /exec หลังเจ้าของบัญชีเผยแพร่
+const ANSWER_QUEUE_KEY='ayutthaya-typed-answer-queue-v1';
+const ANSWER_PLAYER_KEY='ayutthaya-research-player-v1';
+const ANSWER_SESSION_KEY='ayutthaya-research-session-v1';
+function safeLocalGet(key,fallback){
+ try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch{return fallback;}
+}
+function safeLocalSet(key,value){try{localStorage.setItem(key,JSON.stringify(value));return true;}catch{return false;}}
+function answerIdentifier(){
+ if(typeof crypto!=='undefined'&&crypto.randomUUID)return crypto.randomUUID();
+ return String(Date.now())+'-'+Math.random().toString(36).slice(2);
+}
+function stableAnswerPlayerId(){
+ let id=safeLocalGet(ANSWER_PLAYER_KEY,'');
+ if(!id){id='P-'+answerIdentifier();safeLocalSet(ANSWER_PLAYER_KEY,id);}
+ return id;
+}
+function stableAnswerSessionId(){
+ let id=safeLocalGet(ANSWER_SESSION_KEY,'');
+ if(!id){id='R-'+answerIdentifier();safeLocalSet(ANSWER_SESSION_KEY,id);}
+ return id;
+}
+function pendingTypedAnswers(){return safeLocalGet(ANSWER_QUEUE_KEY,[]);}
+let answerSyncRunning=false;
+async function syncTypedAnswers(){
+ if(answerSyncRunning||!/^https:\/\/script\.google\.com\/macros\/s\/.+\/exec$/.test(ANSWER_SCRIPT_URL))return;
+ answerSyncRunning=true;
+ try{
+  const pending=pendingTypedAnswers();
+  for(const entry of pending){
+   if(entry.lastAttempt&&Date.now()-entry.lastAttempt<30000)continue;
+   // Apps Script Web Apps do not give browser CORS read access.
+   // Keep a local copy rather than falsely reporting confirmed receipt.
+   try{
+    const payload=new URLSearchParams(entry.payload);
+    await fetch(ANSWER_SCRIPT_URL,{method:'POST',mode:'no-cors',body:payload,redirect:'follow'});
+    entry.lastAttempt=Date.now();entry.status='sent-unverified';
+   }catch{entry.status='pending';entry.lastAttempt=Date.now();}
+  }
+  safeLocalSet(ANSWER_QUEUE_KEY,pending);
+ }finally{answerSyncRunning=false;}
+}
+function saveTypedResponse(stage,item,answer){
+ const record={
+  answerId:'A-'+answerIdentifier(),
+  playerId:stableAnswerPlayerId(),
+  displayName:String(playerName||'ผู้เล่น').slice(0,60),
+  gender:selectedGender==='girl'?'girl':'boy',
+  stage:String(stage),
+  questionId:item.id,
+  question:item.q,
+  answer:answer.slice(0,1200),
+  sessionId:stableAnswerSessionId()
+ };
+ const queue=pendingTypedAnswers();
+ queue.push({payload:record,status:'pending',createdAt:new Date().toISOString(),lastAttempt:0});
+ const saved=safeLocalSet(ANSWER_QUEUE_KEY,queue);
+ if(saved)void syncTypedAnswers();
+ return saved;
+}
+window.addEventListener('online',()=>void syncTypedAnswers());
+setTimeout(()=>void syncTypedAnswers(),2500);
+function renderResearchQuestion(items,stage,title,onMultipleChoice,royal=false){
+ const item=items[quizIndex];
+ quizHeading.textContent=title;
+ quizProgress.textContent='ข้อ '+(quizIndex+1)+' / '+items.length;
+ quizQuestion.textContent=item.q;
+ quizAnswers.replaceChildren();quizFeedback.textContent='';
+ quizNextBtn.classList.add('hidden');
+ if(item.type==='typed'){
+  const input=document.createElement('textarea');
+  input.rows=4;input.maxLength=1200;input.placeholder='เขียนคำตอบตามความเข้าใจของนักเรียน (ไม่มีถูกหรือผิด)';
+  input.setAttribute('aria-label','คำตอบแบบพิมพ์ตอบ');
+  input.style.cssText='width:100%;box-sizing:border-box;padding:14px;border-radius:12px;font:inherit;line-height:1.65;resize:vertical;min-height:105px;color:#1f2937;background:#fff;';
+  const submit=document.createElement('button');
+  submit.type='button';submit.className='quiz-answer';
+  submit.textContent='ส่งคำตอบและไปต่อ ▶';
+  submit.addEventListener('click',()=>{
+   const value=input.value.trim();
+   if(!value){quizFeedback.textContent='กรุณาพิมพ์คำตอบก่อนส่ง (ตอบตามความคิดของตนเองได้เลย)';input.focus();return;}
+   const locallySaved=saveTypedResponse(stage,item,value);
+   input.disabled=true;submit.disabled=true;
+   quizFeedback.textContent=locallySaved
+    ? 'บันทึกคำตอบในเครื่องแล้ว ไม่มีการตัดสินถูกหรือผิด และจะส่งเข้าระบบเมื่อเชื่อมต่อสำเร็จ'
+    : 'ส่งคำตอบแล้ว ไม่มีการตัดสินถูกหรือผิด (เบราว์เซอร์นี้อาจไม่อนุญาตให้เก็บสำรองข้อมูล)';
+   quizNextBtn.textContent=quizIndex===items.length-1?'ดูผลการเรียนรู้ ▶':'ข้อต่อไป ▶';
+   quizNextBtn.classList.remove('hidden');
+  });
+  quizAnswers.append(input,submit);input.focus();return;
+ }
+ if(royal)royalFirstAnswerLocked=false;
+ item.options.forEach((option,index)=>{
+  const button=document.createElement('button');button.type='button';button.className='quiz-answer';
+  button.textContent=['ก','ข','ค','ง'][index]+'. '+option;
+  button.addEventListener('click',()=>onMultipleChoice(index));
+  quizAnswers.append(button);
+ });
+}
+renderQuizQuestion=function(){renderResearchQuestion(farmerQuiz,1,'ด่านที่ ๑ : วิถีชีวิตชาวนา',selectQuizAnswer);};
+renderBoatQuizQuestion=function(){renderResearchQuestion(boatQuiz,2,'ด่านที่ ๒ : การเดินทางทางเรือ',selectBoatQuizAnswer);};
+renderMarketQuizQuestion=function(){renderResearchQuestion(marketQuiz,3,'ด่านที่ ๓ : ตลาดในกรุงศรีอยุธยา',selectMarketQuizAnswer);};
+renderPortQuizQuestion=function(){renderResearchQuestion(portQuiz,4,'ด่านที่ ๔ : ท่ารับสินค้าจากหัวเมือง',selectPortQuizAnswer);};
+renderForeignTradeQuizQuestion=function(){renderResearchQuestion(foreignTradeQuiz,5,'ด่านที่ ๕ : ย่านการค้าต่างชาติ',n=>handleStageQuizAnswer(n,foreignTradeQuiz,['ก','ข','ค','ง'],'ลองทบทวนคำอธิบายของพ่อค้าอีกครั้ง'));};
+renderInternationalPortQuizQuestion=function(){renderResearchQuestion(internationalPortQuiz,6,'ด่านที่ ๖ : ท่าเรือการค้าต่างประเทศ',n=>handleStageQuizAnswer(n,internationalPortQuiz,['ก','ข','ค','ง'],'ลองทบทวนคำอธิบายของกัปตันฌองอีกครั้ง'));};
+renderCheckpointQuizQuestion=function(){renderResearchQuestion(checkpointQuiz,7,'ด่านที่ ๗ : ด่านขนอน',n=>handleStageQuizAnswer(n,checkpointQuiz,['ก','ข','ค','ง'],'ลองทบทวนคำอธิบายของเจ้าหน้าที่ด่านอีกครั้ง'));};
+renderTreasuryQuizQuestion=function(){renderResearchQuestion(treasuryQuiz,8,'ด่านที่ ๘ : พระคลังสินค้า',n=>handleStageQuizAnswer(n,treasuryQuiz,['ก','ข','ค','ง'],'ลองทบทวนคำอธิบายของเจ้าพนักงานพระคลังอีกครั้ง'));};
+renderRoyalQuizQuestion=function(){renderResearchQuestion(finalRoyalQuiz,9,'บททดสอบสุดท้ายแห่งกรุงศรีอยุธยา',handleRoyalQuizAnswer,true);};
+// แก้การแสดงเฉลยด่านสุดท้ายให้รองรับ 4 ตัวเลือก
+handleRoyalQuizAnswer=function(selected){
+ if(royalFirstAnswerLocked)return;royalFirstAnswerLocked=true;
+ const item=finalRoyalQuiz[quizIndex];
+ const buttons=[...quizAnswers.querySelectorAll('button')];
+ buttons.forEach((button,index)=>{button.disabled=true;if(index===item.answer)button.classList.add('correct');if(index===selected&&selected!==item.answer)button.classList.add('incorrect');});
+ if(selected===item.answer)quizScore++;
+ quizFeedback.textContent=(selected===item.answer?'ถูกต้อง! ':'คำตอบที่ถูกต้องคือ '+['ก','ข','ค','ง'][item.answer]+'. '+item.options[item.answer]+' — ')+item.explain;
+ quizNextBtn.textContent=quizIndex===finalRoyalQuiz.length-1?'ดูผลการเรียนรู้ ▶':'ข้อต่อไป ▶';
+ quizNextBtn.classList.remove('hidden');
+};
+
+showScreen('cover-screen');});
 
 function finishRoyalQuiz(){
- quizShowingResult=true;stage9Passed=true;quizHeading.textContent='สรุปผลบททดสอบสุดท้าย';quizProgress.textContent='คะแนน '+quizScore+' / '+finalRoyalQuiz.length;quizQuestion.textContent='ทำแบบทดสอบครบทั้ง ๑๐ ข้อแล้ว!';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้ทบทวนความรู้เรื่องวิถีชีวิต การเดินทาง การค้า ด่านขนอน และพระคลังสินค้าของกรุงศรีอยุธยาแล้ว';quizNextBtn.textContent='รับฟังคำเฉลยและกลับบ้าน ▶';quizNextBtn.classList.remove('hidden');
+ quizShowingResult=true;stage9Passed=true;quizHeading.textContent='สรุปผลบททดสอบสุดท้าย';quizProgress.textContent='คะแนน '+quizScore+' / '+finalRoyalQuiz.length;quizQuestion.textContent='ทำแบบทดสอบครบทั้ง ๕ ข้อแล้ว!';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้ทบทวนความรู้เรื่องวิถีชีวิต การเดินทาง การค้า ด่านขนอน และพระคลังสินค้าของกรุงศรีอยุธยาแล้ว';quizNextBtn.textContent='รับฟังคำเฉลยและกลับบ้าน ▶';quizNextBtn.classList.remove('hidden');
 }
 function royalEndingDialogue(){
  return [
