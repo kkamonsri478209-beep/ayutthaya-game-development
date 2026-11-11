@@ -6,6 +6,8 @@ const audio=Object.fromEntries(Object.entries(files).map(([k,v])=>{const a=new A
 let enabled=true,volume=.34,lastClick=0,lastFeedback='',lastHeading='',lastDialogue=false,lastResult=false;
 function play(key){if(!enabled||document.hidden)return;const source=audio[key];if(!source)return;try{const a=source.cloneNode();a.volume=volume*(key==='victory'?.8:1);a.play().catch(()=>{});}catch(e){}}
 function attach(){
+ document.addEventListener('ayutthaya-map-select',()=>play('coin'));
+
  const panel=document.getElementById('sound-panel');if(panel){
   const label=document.createElement('label');label.htmlFor='sfx-volume';label.textContent='เอฟเฟกต์';
   const slider=document.createElement('input');slider.id='sfx-volume';slider.type='range';slider.min='0';slider.max='100';slider.value='34';slider.setAttribute('aria-label','ระดับเสียงเอฟเฟกต์');
@@ -13,7 +15,7 @@ function attach(){
   panel.append(label,slider);
  }
  document.addEventListener('click',e=>{
-  const target=e.target.closest('button');if(!target||target.closest('#sound-panel')||target.closest('#music-welcome'))return;
+  const target=e.target.closest('button');if(!target||target.closest('#sound-panel')||target.closest('#music-welcome')||target.closest('#adventure-map-screen'))return;
   const now=performance.now();if(now-lastClick<65)return;lastClick=now;play('click');
  },true);
  const feedback=document.getElementById('quiz-feedback');
