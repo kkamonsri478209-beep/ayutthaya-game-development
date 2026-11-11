@@ -13,6 +13,7 @@
  let portalTimer=null,transitioning=false;
  // Capture the map's scene handler so coin-dialogue callbacks cannot bypass the portal.
  const enterMapWithoutPortal=goToScene;
+ window.ayutthayaShowTimePortal=showMap;
  goToScene=function(n,direction='forward'){
   if(n===3&&active&&!finished){showMap();return;}
   return enterMapWithoutPortal(n,direction);
@@ -25,15 +26,16 @@
   // Warm the map artwork before its reveal, without blocking the transition.
   const mapArt=new Image();mapArt.decoding='async';mapArt.src='ayutthaya-map.png';
   portal.classList.remove('hidden');portal.classList.remove('intro-portal-reveal');
+  portal.style.display='grid';portal.style.position='fixed';portal.style.inset='0';portal.style.zIndex='10001';
   portalTimer=setTimeout(()=>{
    enterMapWithoutPortal(3);
    portal.classList.add('intro-portal-reveal');
-   portalTimer=setTimeout(()=>{portal.classList.add('hidden');portal.classList.remove('intro-portal-reveal');transitioning=false;portalTimer=null;},1750);
+   portalTimer=setTimeout(()=>{portal.classList.add('hidden');portal.style.display='none';portal.classList.remove('intro-portal-reveal');transitioning=false;portalTimer=null;},1750);
   },2450);
  }
  function begin(){
   if(portalTimer!==null){clearTimeout(portalTimer);portalTimer=null;}
-  transitioning=false;portal.classList.add('hidden');portal.classList.remove('intro-portal-reveal');
+  transitioning=false;portal.classList.add('hidden');portal.style.display='none';portal.classList.remove('intro-portal-reveal');
   active=true;finished=false;last=0;dialogueAt=0;dialoguePosition=-1;coinTriggered=false;
   overlay.classList.remove('hidden');spark.classList.add('hidden');
  }
