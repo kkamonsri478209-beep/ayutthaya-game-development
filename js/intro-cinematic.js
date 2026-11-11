@@ -20,21 +20,61 @@
  };
  const spark=document.createElement('div');spark.className='intro-coin-spark hidden';spark.setAttribute('aria-hidden','true');document.querySelector('#game-screen').append(spark);
  function stop(){active=false;finished=true;overlay.classList.add('hidden');spark.classList.add('hidden');keys.left=keys.right=false;}
+ const guardianVoice=new Audio('./ayutthaya_time_guardian_voice.mp3.wav');
+ guardianVoice.preload='auto';
+ let transitionToken=0;
  function showMap(){
   if(transitioning)return;
   transitioning=true;stop();dialogue=null;dialogueDone=null;dialogueBox.classList.add('hidden');coinFound=true;
-  // Warm the map artwork before its reveal, without blocking the transition.
+  const token=++transitionToken;
   const mapArt=new Image();mapArt.decoding='async';mapArt.src='ayutthaya-map.png';
-  portal.classList.remove('hidden');portal.classList.remove('intro-portal-reveal');
+  portal.classList.remove('hidden','intro-portal-reveal');
   portal.style.display='grid';portal.style.position='fixed';portal.style.inset='0';portal.style.zIndex='10001';
-  portalTimer=setTimeout(()=>{
+  let revealed=false;
+  const reveal=()=>{
+   if(revealed||token!==transitionToken)return;
+   revealed=true;
+   guardianVoice.onended=null;guardianVoice.onerror=null;
+   if(portalTimer!==null)clearTimeout(portalTimer);
    enterMapWithoutPortal(3);
    portal.classList.add('intro-portal-reveal');
-   portalTimer=setTimeout(()=>{portal.classList.add('hidden');portal.style.display='none';portal.classList.remove('intro-portal-reveal');transitioning=false;portalTimer=null;},1750);
-  },2450);
+   portalTimer=setTimeout(()=>{
+    if(token!==transitionToken)return;
+    portal.classList.add('hidden');portal.style.display='none';
+    portal.classList.remove('intro-portal-reveal');transitioning=false;portalTimer=null;
+   },1750);
+  };
+  guardianVoice.pause();guardianVoice.currentTime=0;
+  guardianVoice.onended=reveal;
+  guardianVoice.onerror=()=>{portalTimer=setTimeout(reveal,2200);};
+  // Give the portal time to appear before playing the guardian's narration.
+  portalTimer=setTimeout(()=>{
+   if(token!==transitionToken)return;
+   const p=guardianVoice.play();
+   if(p&&typeof p.catch==='function')p.catch(()=>{
+    // Browser autoplay restrictions: show an explicit listening button.
+    const b=document.createElement('button');
+    b.type='button';b.className='intro-portal-play';
+    b.textContent='▶ ฟังเสียงผู้พิทักษ์กาลเวลา';
+    portal.append(b);
+    b.addEventListener('click',()=>{
+     b.remove();guardianVoice.play().catch(()=>{reveal();});
+    },{once:true});
+    // Do not trap the player if audio playback is unavailable.
+    portalTimer=setTimeout(()=>{b.remove();reveal();},12000);
+   });
+   // Protect against unsupported media or missing end event.
+   if(!Number.isFinite(guardianVoice.duration)||guardianVoice.duration===Infinity){
+    // metadata will update the timeout below if available
+   }
+  },650);
+  // Safety fallback for audio that never fires ended.
+  setTimeout(()=>{if(token===transitionToken&&!revealed)reveal();},45000);
  }
  function begin(){
+  ++transitionToken;guardianVoice.pause();guardianVoice.currentTime=0;guardianVoice.onended=null;guardianVoice.onerror=null;
   if(portalTimer!==null){clearTimeout(portalTimer);portalTimer=null;}
+  portal.querySelector('.intro-portal-play')?.remove();
   transitioning=false;portal.classList.add('hidden');portal.style.display='none';portal.classList.remove('intro-portal-reveal');
   active=true;finished=false;last=0;dialogueAt=0;dialoguePosition=-1;coinTriggered=false;
   overlay.classList.remove('hidden');spark.classList.add('hidden');
