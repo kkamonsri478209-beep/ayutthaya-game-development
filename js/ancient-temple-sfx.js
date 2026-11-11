@@ -61,7 +61,7 @@ function attachThaiDialogueChime(){
   if(!enabled||volume<=0||document.hidden||!buffer||!AudioContextClass)return;
   try{
    if(!ctx)ctx=new AudioContextClass();
-   if(ctx.state==='suspended'){ctx.resume().catch(()=>{});return;}
+   if(ctx.state==='suspended'){ctx.resume().catch(()=>{});}
    const source=ctx.createBufferSource(),gain=ctx.createGain();
    source.buffer=buffer;gain.gain.value=Math.min(.18,volume*.24);
    source.connect(gain);gain.connect(ctx.destination);
@@ -77,6 +77,8 @@ function attachThaiDialogueChime(){
  const chars=s=>segmenter?Array.from(segmenter.segment(s),x=>x.segment):Array.from(s);
  function animate(value){
   stop();full=value;shown='';step=0;
+  // Cinematic dialogue advances without a click; ensure its first line has an audible cue.
+  if(visible()&&value)play('dialogue');
   if(!visible()||!full)return;
   const parts=chars(full);let i=0;const own=token;
   target.textContent='';
