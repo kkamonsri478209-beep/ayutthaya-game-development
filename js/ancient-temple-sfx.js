@@ -44,4 +44,63 @@ function attach(){
  }).observe(objective,{childList:true,characterData:true,subtree:true});
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach);else attach();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attachThaiDialogueChime);else attachThaiDialogueChime();
+/* Thai chime dialogue typewriter: preserve the game's original dialogue content and navigation. */
+function attachThaiDialogueChime(){
+ const box=document.getElementById('dialogue-box'),target=document.getElementById('dialogue-text');
+ const next=document.getElementById('dialogue-next-btn');
+ if(!box||!target||!next)return;
+ let full='',shown='',timer=null,token=0,step=0,ctx=null,buffer=null;
+ const AudioContextClass=window.AudioContext||window.webkitAudioContext;
+ function stop(){if(timer!==null){clearTimeout(timer);timer=null;}token++;}
+ function visible(){return !box.classList.contains('hidden');}
+ function finish(){stop();if(full&&target.textContent!==full){shown=full;target.textContent=full;}}
+ function chime(){
+  if(!enabled||volume<=0||document.hidden||!buffer||!AudioContextClass)return;
+  try{
+   if(!ctx)ctx=new AudioContextClass();
+   if(ctx.state==='suspended'){ctx.resume().catch(()=>{});return;}
+   const source=ctx.createBufferSource(),gain=ctx.createGain();
+   source.buffer=buffer;gain.gain.value=Math.min(.18,volume*.24);
+   source.connect(gain);gain.connect(ctx.destination);
+   source.start(0,Math.min(.28,Math.max(0,buffer.duration-.12)),Math.min(.105,buffer.duration-.29));
+  }catch(e){}
+ }
+ if(AudioContextClass){
+  fetch('./dialogue_thai_chime.wav').then(r=>{if(!r.ok)throw Error('chime unavailable');return r.arrayBuffer();})
+   .then(data=>{const temp=new AudioContextClass();return temp.decodeAudioData(data).then(decoded=>{buffer=decoded;return temp.close();});})
+   .catch(()=>{});
+ }
+ const segmenter=typeof Intl.Segmenter==='function'?new Intl.Segmenter('th',{granularity:'grapheme'}):null;
+ const chars=s=>segmenter?Array.from(segmenter.segment(s),x=>x.segment):Array.from(s);
+ function animate(value){
+  stop();full=value;shown='';step=0;
+  if(!visible()||!full)return;
+  const parts=chars(full);let i=0;const own=token;
+  target.textContent='';
+  function tick(){
+   if(own!==token||!visible())return;
+   const piece=parts[i++];if(piece===undefined){timer=null;return;}
+   shown+=piece;target.textContent=shown;
+   if(piece.trim()&&++step%3===0)chime();
+   if(i<parts.length)timer=setTimeout(tick,33);
+   else timer=null;
+  }
+  tick();
+ }
+ new MutationObserver(()=>{
+  if(!visible())return;
+  const current=target.textContent;
+  if(current===shown||current===full)return;
+  animate(current);
+ }).observe(target,{childList:true,characterData:true,subtree:true});
+ new MutationObserver(()=>{
+  if(!visible())stop();
+  else if(target.textContent&&!timer&&target.textContent!==full)animate(target.textContent);
+ }).observe(box,{attributes:true,attributeFilter:['class']});
+ next.addEventListener('click',e=>{
+  if(timer!==null){e.preventDefault();e.stopImmediatePropagation();finish();}
+ },true);
+}
+
 })();
