@@ -493,7 +493,7 @@ function finishPortQuiz(){
  quizShowingResult=true;stage4Passed=true;
  quizHeading.textContent='สรุปผลด่านที่ ๔';
  quizProgress.textContent='คะแนน '+quizScore+' / '+portQuiz.length;
- quizQuestion.textContent='ตอบถูกครบทั้ง ๕ ข้อ! ผ่านด่านท่ารับสินค้าจากหัวเมือง';
+ quizQuestion.textContent='ทำแบบทดสอบครบทั้ง ๔ ข้อแล้ว! ผ่านด่านท่ารับสินค้าจากหัวเมือง';
  quizAnswers.replaceChildren();
  quizFeedback.textContent='นายท่าอนุญาตให้เดินทางต่อไปยังย่านการค้าต่างชาติแล้ว (ด่านที่ ๕ จะเปิดเมื่อเตรียมฉากเสร็จ)';
  quizNextBtn.textContent='กลับไปสำรวจท่าเรือ ▶';
@@ -528,7 +528,7 @@ const foreignTradeQuiz=[
 ];
 function openForeignTradeQuiz(){quizIndex=0;quizScore=0;quizShowingResult=false;quizRetrying=false;quizActive=true;quizPanel.classList.remove('hidden');renderForeignTradeQuizQuestion();}
 function renderForeignTradeQuizQuestion(){const item=foreignTradeQuiz[quizIndex];quizHeading.textContent='ด่านที่ ๕ : ย่านการค้าต่างชาติ';quizProgress.textContent='ข้อ '+(quizIndex+1)+' / '+foreignTradeQuiz.length;quizQuestion.textContent=item.q;quizAnswers.replaceChildren();quizFeedback.textContent='';quizNextBtn.classList.add('hidden');item.options.forEach((option,index)=>{const button=document.createElement('button');button.type='button';button.className='quiz-answer';button.textContent=['ก','ข','ค','ง'][index]+'. '+option;button.addEventListener('click',()=>handleStageQuizAnswer(index,foreignTradeQuiz,['ก','ข','ค','ง'],'คำตอบยังไม่ถูกต้องนะ คำใบ้: '+item.hint+' ลองเลือกอีกครั้ง'));quizAnswers.append(button);});}
-function finishForeignTradeQuiz(){quizShowingResult=true;stage5Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๕';quizProgress.textContent='คะแนน '+quizScore+' / '+foreignTradeQuiz.length;quizQuestion.textContent='ตอบถูกครบทั้ง ๓ ข้อ! ผ่านด่านย่านการค้าต่างชาติ';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้เรื่องสินค้านำเข้าจากจีน การขนส่งทางเรือสำเภา และความสำคัญของการค้ากับชาวต่างชาติแล้ว';quizNextBtn.textContent='จบด่านที่ ๕ ✓';quizNextBtn.classList.remove('hidden');}
+function finishForeignTradeQuiz(){quizShowingResult=true;stage5Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๕';quizProgress.textContent='คะแนน '+quizScore+' / '+foreignTradeQuiz.length;quizQuestion.textContent='ทำแบบทดสอบครบทั้ง ๔ ข้อแล้ว! ผ่านด่านย่านการค้าต่างชาติ';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้เรื่องสินค้านำเข้าจากจีน การขนส่งทางเรือสำเภา และความสำคัญของการค้ากับชาวต่างชาติแล้ว';quizNextBtn.textContent='จบด่านที่ ๕ ✓';quizNextBtn.classList.remove('hidden');}
 
 
 function foreignExplorerLine(text,emotion='normal'){return {who:'foreignExplorer',emotion,text};}
@@ -555,7 +555,7 @@ const internationalPortQuiz=[
 ];
 function openInternationalPortQuiz(){quizIndex=0;quizScore=0;quizShowingResult=false;quizRetrying=false;quizActive=true;quizPanel.classList.remove('hidden');renderInternationalPortQuizQuestion();}
 function renderInternationalPortQuizQuestion(){const item=internationalPortQuiz[quizIndex];quizHeading.textContent='ด่านที่ ๖ : ท่าเรือการค้าต่างประเทศ';quizProgress.textContent='ข้อ '+(quizIndex+1)+' / '+internationalPortQuiz.length;quizQuestion.textContent=item.q;quizAnswers.replaceChildren();quizFeedback.textContent='';quizNextBtn.classList.add('hidden');item.options.forEach((option,index)=>{const button=document.createElement('button');button.type='button';button.className='quiz-answer';button.textContent=['ก','ข','ค','ง'][index]+'. '+option;button.addEventListener('click',()=>handleStageQuizAnswer(index,internationalPortQuiz,['ก','ข','ค','ง'],'คำตอบยังไม่ถูกต้องนะ คำใบ้: '+item.hint+' ลองเลือกอีกครั้ง'));quizAnswers.append(button);});}
-function finishInternationalPortQuiz(){quizShowingResult=true;stage6Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๖';quizProgress.textContent='คะแนน '+quizScore+' / '+internationalPortQuiz.length;quizQuestion.textContent='ตอบถูกครบทั้ง ๓ ข้อ! ผ่านด่านท่าเรือการค้าต่างประเทศ';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้สินค้าจากจีน ญี่ปุ่น อินเดีย ยุโรป และสินค้าจากฝรั่งเศส รวมถึงความสำคัญของการค้าระหว่างประเทศแล้ว';quizNextBtn.textContent='จบด่านที่ ๖ ✓';quizNextBtn.classList.remove('hidden');}
+function finishInternationalPortQuiz(){quizShowingResult=true;stage6Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๖';quizProgress.textContent='คะแนน '+quizScore+' / '+internationalPortQuiz.length;quizQuestion.textContent='ทำแบบทดสอบครบทั้ง ๔ ข้อแล้ว! ผ่านด่านท่าเรือการค้าต่างประเทศ';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้สินค้าจากจีน ญี่ปุ่น อินเดีย ยุโรป และสินค้าจากฝรั่งเศส รวมถึงความสำคัญของการค้าระหว่างประเทศแล้ว';quizNextBtn.textContent='จบด่านที่ ๖ ✓';quizNextBtn.classList.remove('hidden');}
 
 
 function checkpointOfficerLine(text,emotion='normal'){return {who:'checkpointOfficer',emotion,text};}
@@ -571,7 +571,7 @@ function checkpointDialogueLines(){return [
  checkpointOfficerLine('นอกจากนี้ยังอาจพิจารณาจากขนาดของพาหนะที่ใช้ขนส่งสินค้า เช่น น้ำหนัก ความยาว หรือความกว้างของเรือและพาหนะด้วยนะ! เห็นหรือไม่ว่างานของข้าต้องรอบคอบเพียงใด!','inspect'),
  student(()=>genderWord('อ๋อ! คล้ายกับการเก็บภาษีในยุคของผมเลยครับ แต่สมัยก่อนใช้คำว่า “จังกอบ” ใช่ไหมครับ?','อ๋อ! คล้ายกับการเก็บภาษีในยุคของหนูเลยค่ะ แต่สมัยก่อนใช้คำว่า “จังกอบ” ใช่ไหมคะ?'),'surprised'),
  checkpointOfficerLine('ถูกต้องแล้ว! เจ้านี่ช่างเรียนรู้ไวเสียจริง! ในสมัยนี้เราเรียกเงินที่เก็บจากสินค้าผ่านด่านว่า “จังกอบ” เห็นหรือไม่ว่าหน้าที่ของข้าสำคัญเพียงใด! ฮ่า ๆ!','proud'),
- checkpointOfficerLine('เอาล่ะ! ไหน ๆ เจ้าก็สนใจงานของข้านัก ข้าจะทดสอบความรู้ให้สัก ๔ ข้อ หากตอบถูกทั้งหมด ข้าจะอนุญาตให้เจ้าผ่านด่านขนอนไปได้!','point')
+ checkpointOfficerLine('เอาล่ะ! ไหน ๆ เจ้าก็สนใจงานของข้านัก ข้าจะทดสอบความรู้ให้สัก ๔ ข้อ เมื่อตอบครบทั้งหมด ข้าจะอนุญาตให้เจ้าผ่านด่านขนอนไปได้!','point')
 ];}
 const checkpointQuiz=[
  {q:'เงินที่เรียกเก็บจากสินค้าที่ผ่านด่านในสมัยอยุธยาเรียกว่าอะไร?',options:['ส่วย','จังกอบ','อากร','ฤชา'],answer:1,explain:'จังกอบ คือเงินหรือสิ่งของที่เรียกเก็บจากสินค้าที่ผ่านด่าน',hint:'เป็นคำเรียกการเก็บเงินจากสินค้าที่ผ่านด่านในสมัยอยุธยา'},
@@ -1187,7 +1187,7 @@ async function syncWrittenAnswers(){
  if(answerSyncRunning||!CLASSROOM_ANSWERS_WEBAPP_URL)return;
  answerSyncRunning=true;
  try{
-  for(const record of getAnswerQueue().filter(x=>x.status!=='sent')){
+  for(const record of getAnswerQueue()){
    try{
     // text/plain avoids cross-origin preflight; Apps Script can receive e.postData.contents.
     await fetch(CLASSROOM_ANSWERS_WEBAPP_URL,{method:'POST',mode:'no-cors',
@@ -1195,7 +1195,7 @@ async function syncWrittenAnswers(){
     // no-cors does not expose server confirmation, so do NOT delete a record:
     // deduplication by answerId is handled on the receiving Apps Script side.
     const queue=getAnswerQueue(), item=queue.find(x=>x.answerId===record.answerId);
-    if(item){item.status='sent-unverified';putAnswerQueue(queue);}
+    if(item){item.status='delivery-attempted-not-verified';putAnswerQueue(queue);}
    }catch(e){console.warn('Answer not sent; saved for retry',e);}
   }
  }finally{answerSyncRunning=false;}
@@ -1204,7 +1204,7 @@ function saveClassroomWrittenAnswer(stageIndex,item,answer){
  const sid=getClassroomSession();
  const record={answerId:crypto.randomUUID?crypto.randomUUID():'a-'+Date.now()+'-'+Math.random().toString(36).slice(2),
   submittedAt:new Date().toISOString(),playerId:sid,
-  playerName:String(playerName||'ผู้เล่น'),gender:selectedGender||'unknown',stage:stageIndex+1,
+  playerName:String(playerName||'ผู้เล่น'),displayName:String(playerName||'ผู้เล่น'),gender:selectedGender||'unknown',stage:stageIndex+1,
   questionId:item.questionId,question:item.q,answer,sessionId:sid,status:'pending'};
  const stored=putAnswerQueue([...getAnswerQueue(),record]);
  if(stored)syncWrittenAnswers();
@@ -1300,9 +1300,9 @@ downloadRoyalResult=function(){
  link.href=url;link.download='ayutthaya-stage9-result.csv';document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
  $('result-save-status').textContent='บันทึกผลเป็นไฟล์ CSV แล้ว';
 };
-const downloadBtn=$('result-download-btn');
-downloadBtn.removeEventListener('click',originalDownloadRoyalResult);
-downloadBtn.addEventListener('click',downloadRoyalResult);
+const classroomDownloadBtn=$('result-download-btn');
+classroomDownloadBtn.removeEventListener('click',originalDownloadRoyalResult);
+classroomDownloadBtn.addEventListener('click',downloadRoyalResult);
 window.addEventListener('online',syncWrittenAnswers);
 // Restore pending answers when a previously failed submission needs retry.
 syncWrittenAnswers();
