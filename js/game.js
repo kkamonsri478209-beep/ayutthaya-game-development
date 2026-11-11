@@ -157,7 +157,12 @@ function showScreen(id){
  const bg=screen.dataset.bg;
  if(bg){
   screen.style.backgroundImage='url("'+bg+'")';
-  waitForVisual(bg);
+  // Menus must remain clickable even if a background image is slow or fails to load.
+  if(id==='game-screen')waitForVisual(bg);
+  else {
+   loadingRequest++;visualLoading=false;$('loading-overlay').classList.add('hidden');
+   image(bg);
+  }
  }else if(id==='game-screen')waitForVisual(scenes[sceneIndex].bg);
  else {loadingRequest++;visualLoading=false;$('loading-overlay').classList.add('hidden');}
 }
