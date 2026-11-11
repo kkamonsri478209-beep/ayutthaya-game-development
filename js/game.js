@@ -103,18 +103,47 @@ const scenes=[
 ];
 // Display a clear loading state while the current scene's actual image is downloading.
 let loadingRequest=0;
+let visualLoading=false;
+window.ayutthayaVisualLoading=()=>visualLoading;
 function waitForVisual(path){
  const request=++loadingRequest;
  const overlay=$('loading-overlay');
- overlay.classList.remove('hidden');
+ const card=overlay.querySelector('.loading-card');
+ const detail=card.querySelector('span');
+ let retry=card.querySelector('.scene-load-retry');
+ if(!retry){
+  retry=document.createElement('button');
+  retry.type='button';retry.className='scene-load-retry';
+  retry.textContent='ลองโหลดฉากอีกครั้ง';
+  retry.style.cssText='display:none;margin:12px auto 0;padding:10px 18px;border-radius:9px;border:1px solid #d9b76d;background:#44305e;color:white;cursor:pointer';
+  card.appendChild(retry);
+ }
+ visualLoading=true;overlay.classList.remove('hidden');
+ detail.textContent='โปรดรอสักครู่';retry.style.display='none';
  const img=image(path);
- const finish=()=>{
+ let timeout=null,finished=false;
+ function complete(ok){
+  if(finished||request!==loadingRequest)return;
+  if(!ok){
+   if(timeout!==null)clearTimeout(timeout);
+   detail.textContent='ยังโหลดภาพฉากไม่สำเร็จ โปรดลองอีกครั้ง';
+   retry.style.display='block';
+   return;
+  }
+  finished=true;if(timeout!==null)clearTimeout(timeout);
+  visualLoading=false;overlay.classList.add('hidden');
+ }
+ retry.onclick=()=>{
   if(request!==loadingRequest)return;
-  overlay.classList.add('hidden');
+  // Retry with a fresh image, avoiding a stale failed cache entry.
+  delete images[path];
+  waitForVisual(path);
  };
- if(img.complete){finish();return;}
- img.addEventListener('load',finish,{once:true});
- img.addEventListener('error',finish,{once:true});
+ if(!path){complete(false);return;}
+ if(img.complete){complete(img.naturalWidth>0);return;}
+ img.addEventListener('load',()=>complete(img.naturalWidth>0),{once:true});
+ img.addEventListener('error',()=>complete(false),{once:true});
+ timeout=setTimeout(()=>complete(false),12000);
 }
 function showScreen(id){
  for(const s of screens)$(s).classList.toggle('hidden',s!==id);
@@ -125,7 +154,7 @@ function showScreen(id){
   screen.style.backgroundImage='url("'+bg+'")';
   waitForVisual(bg);
  }else if(id==='game-screen')waitForVisual(scenes[sceneIndex].bg);
- else {loadingRequest++;$('loading-overlay').classList.add('hidden');}
+ else {loadingRequest++;visualLoading=false;$('loading-overlay').classList.add('hidden');}
 }
 $('start-btn').addEventListener('click',()=>showScreen('select-screen'));
 function choose(gender){
@@ -907,7 +936,7 @@ function hold(id,key){
 hold('left-btn','left');hold('right-btn','right');
 function update(dt){
  animationTime+=dt;
- if(dialogue||quizActive||$('game-screen').classList.contains('hidden')){player.moving=false;return;}
+ if(visualLoading||dialogue||quizActive||$('game-screen').classList.contains('hidden')){player.moving=false;return;}
  const dir=Number(keys.right)-Number(keys.left);
  player.moving=dir!==0;
  if(dir){player.facing=dir;player.x=Math.max(45,Math.min(worldWidth-80,player.x+dir*player.speed*dt));}
@@ -1109,5 +1138,5 @@ function draw(){
  draw.lastPlayerX=player.x;draw.lastSceneIndex=sceneIndex;draw.lastFrameTime=performance.now();
  drawWalkSprite(img,index,player.x,ground,player.w,player.h,player.facing);
 }
-function frame(t){const dt=Math.min((t-last)/1000||0,0.04);last=t;update(dt);draw();requestAnimationFrame(frame);}
+function frame(t){const dt=Math.min((t-last)/1000||0,0.04);last=t;if(!visualLoading){update(dt);draw();}requestAnimationFrame(frame);}
 showScreen('cover-screen');
