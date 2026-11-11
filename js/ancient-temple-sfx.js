@@ -50,19 +50,36 @@ function attachThaiDialogueChime(){
  const next=document.getElementById('dialogue-next-btn');
  if(!box||!target||!next)return;
  let full='',shown='',timer=null,token=0,step=0,ctx=null,buffer=null;
+ const fallbackChime=new Audio('./dialogue_thai_chime.wav');fallbackChime.preload='auto';
+ let lastChimeAt=0;
  const AudioContextClass=window.AudioContext||window.webkitAudioContext;
  function stop(){if(timer!==null){clearTimeout(timer);timer=null;}token++;}
  function visible(){return !box.classList.contains('hidden');}
  function finish(){stop();if(full&&target.textContent!==full){shown=full;target.textContent=full;}}
  function chime(){
-  if(!enabled||volume<=0||document.hidden||!buffer||!AudioContextClass)return;
+  if(!enabled||volume<=0||document.hidden)return;
+  const now=performance.now();
+  if(now-lastChimeAt<95)return;
+  lastChimeAt=now;
+  // A short HTMLAudio fallback works even before Web Audio finishes decoding.
+  if(!buffer||!AudioContextClass){
+   try{
+    const a=fallbackChime.cloneNode();
+    a.volume=Math.min(.28,volume*.6);
+    a.currentTime=0;
+    a.play().catch(()=>{});
+    setTimeout(()=>{a.pause();},115);
+   }catch(e){}
+   return;
+  }
   try{
    if(!ctx)ctx=new AudioContextClass();
-   if(ctx.state==='suspended'){ctx.resume().catch(()=>{});}
+   if(ctx.state==='suspended')ctx.resume().catch(()=>{});
    const source=ctx.createBufferSource(),gain=ctx.createGain();
-   source.buffer=buffer;gain.gain.value=Math.min(.18,volume*.24);
+   source.buffer=buffer;gain.gain.value=Math.min(.28,volume*.6);
    source.connect(gain);gain.connect(ctx.destination);
-   source.start(0,Math.min(.28,Math.max(0,buffer.duration-.12)),Math.min(.105,buffer.duration-.29));
+   const offset=Math.min(.28,Math.max(0,buffer.duration-.12));
+   source.start(0,offset,Math.min(.115,Math.max(.02,buffer.duration-offset)));
   }catch(e){}
  }
  if(AudioContextClass){
