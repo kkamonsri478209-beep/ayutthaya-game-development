@@ -24,7 +24,7 @@
    b.style.left=area.left+'%';b.style.top=area.top+'%';
    b.setAttribute('aria-label',area.title+(unlocked?'':' (ยังไม่ปลดล็อก)'));
    b.innerHTML='<img src="'+area.file+'" alt=""><span>'+area.title+'</span>'+(unlocked?'':'<span class="adventure-map-lock">🔒</span>');
-   b.addEventListener('click',()=>{if(unlocked)openArea(index);else showLocked(area);});pinLayer.append(b);
+   b.addEventListener('click',()=>{document.dispatchEvent(new CustomEvent('ayutthaya-map-select'));if(unlocked)openArea(index);else showLocked(area);});pinLayer.append(b);
   });
  }
  function showLocked(area){
@@ -40,7 +40,7 @@
    const b=document.createElement('button');b.type='button';b.className='adventure-map-stage';
    const done=passed()[stage-1],ready=available(stage);
    b.textContent='ด่านที่ '+stage+' — '+stageNames[stage-1]+(done?' ✓ ผ่านแล้ว':ready?' ▶':' 🔒');
-   b.disabled=!ready;b.addEventListener('click',()=>launch(stage));list.append(b);
+   b.disabled=!ready;b.addEventListener('click',()=>{document.dispatchEvent(new CustomEvent('ayutthaya-map-select'));launch(stage);});list.append(b);
   });
   modal.classList.remove('hidden');
  }
