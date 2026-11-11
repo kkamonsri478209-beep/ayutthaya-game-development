@@ -132,6 +132,11 @@ function waitForVisual(path){
   }
   finished=true;if(timeout!==null)clearTimeout(timeout);
   visualLoading=false;overlay.classList.add('hidden');
+  // Load the next scene only after the current one is ready; avoid competing downloads.
+  if($('game-screen')&&!$('game-screen').classList.contains('hidden')){
+   const nextIndex=sceneIndex+1;
+   setTimeout(()=>{if(!visualLoading&&nextIndex===sceneIndex+1)preloadScene(nextIndex);},1800);
+  }
  }
  retry.onclick=()=>{
   if(request!==loadingRequest)return;
@@ -274,7 +279,7 @@ function startGame(){
  royalFirstAnswerLocked=false;royalResultSaved=false;
  sceneIndex=0;showScreen('game-screen');coinFound=false;farmerTalked=false;quizActive=false;quizShowingResult=false;quizRetrying=false;stage1Passed=false;stage2Passed=false;stage3Passed=false;stage4Passed=false;portIntroSeen=false;stage5Passed=false;stage6Passed=false;stage7Passed=false;stage8Passed=false;stage9Passed=false;stage9IntroSeen=false;farmIntroSeen=false;player.x=150;
  objective.textContent=scenes[0].objective;prompt.classList.add('hidden');
-  preloadScene(0);preloadScene(1);
+  preloadScene(0);
  if(!started){started=true;last=performance.now();requestAnimationFrame(frame);}
  openDialogue([
   student(()=>genderWord('วันนี้เลิกเรียนแล้ว รีบกลับบ้านดีกว่า','วันนี้เลิกเรียนแล้ว รีบกลับบ้านดีกว่า'),'normal'),
@@ -287,7 +292,7 @@ function goToScene(n,direction='forward'){
  player.facing=n===6?1:direction==='backward'?-1:1;
  player.moving=false;
  if(n===4)scenes[n].bg=selectedGender==='girl'?'boat-ride-girl.webp':'boat-ride-boy.webp';
- preloadScene(n);preloadScene(n+1);
+ preloadScene(n);
  waitForVisual(scenes[n].bg);
  objective.textContent=scenes[n].objective;
  prompt.classList.add('hidden');
