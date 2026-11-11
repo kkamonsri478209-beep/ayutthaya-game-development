@@ -11,6 +11,12 @@
  portal.innerHTML='<div class="intro-time-portal-aura"></div><div class="intro-time-portal-ring"></div><div class="intro-time-portal-core"></div><div class="intro-time-portal-stars"></div>';
  document.querySelector('#app').append(portal);
  let portalTimer=null,transitioning=false;
+ // Capture the map's scene handler so coin-dialogue callbacks cannot bypass the portal.
+ const enterMapWithoutPortal=goToScene;
+ goToScene=function(n,direction='forward'){
+  if(n===3&&active&&!finished){showMap();return;}
+  return enterMapWithoutPortal(n,direction);
+ };
  const spark=document.createElement('div');spark.className='intro-coin-spark hidden';spark.setAttribute('aria-hidden','true');document.querySelector('#game-screen').append(spark);
  function stop(){active=false;finished=true;overlay.classList.add('hidden');spark.classList.add('hidden');keys.left=keys.right=false;}
  function showMap(){
@@ -20,7 +26,7 @@
   const mapArt=new Image();mapArt.decoding='async';mapArt.src='ayutthaya-map.png';
   portal.classList.remove('hidden');portal.classList.remove('intro-portal-reveal');
   portalTimer=setTimeout(()=>{
-   goToScene(3);
+   enterMapWithoutPortal(3);
    portal.classList.add('intro-portal-reveal');
    portalTimer=setTimeout(()=>{portal.classList.add('hidden');portal.classList.remove('intro-portal-reveal');transitioning=false;portalTimer=null;},1750);
   },2450);
