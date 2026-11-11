@@ -19,6 +19,7 @@
  function tick(time){
   requestAnimationFrame(tick);
   if(!active)return;
+  if(window.ayutthayaVisualLoading?.()){last=time;return;}
   if(document.querySelector('#game-screen').classList.contains('hidden')){stop();return;}
   if(!last)last=time;
   const dt=Math.min((time-last)/1000,.05);last=time;
