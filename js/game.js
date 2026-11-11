@@ -906,7 +906,7 @@ function interact(){
  if(s==='coin'&&Math.abs(player.x-770)<140){
   const firstDiscovery=!coinFound;
   coinFound=true;
-  openDialogue(coinLines,()=>{if(firstDiscovery)goToScene(3);});
+  openDialogue(coinLines,()=>{if(firstDiscovery){if(typeof window.ayutthayaShowTimePortal==='function')window.ayutthayaShowTimePortal();else goToScene(3);}});
   return;
  }
  if(s==='farm'&&Math.abs(player.x-farmer.x)<260){
