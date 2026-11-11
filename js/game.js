@@ -327,7 +327,7 @@ function farmerLines(){
   student(()=>genderWord('แล้วข้าวมีความสำคัญต่อผู้คนอย่างไรหรือครับ?','แล้วข้าวมีความสำคัญต่อผู้คนอย่างไรหรือคะ?'),'curious'),
   npc('ข้าวเป็นอาหารหลักของผู้คนในบ้านเมืองเรา นอกจากเก็บไว้กินแล้ว ยังนำผลผลิตไปขายหรือแลกเปลี่ยนเป็นสิ่งของอื่นได้อีกด้วย','explain'),
   student(()=>genderWord('เข้าใจแล้วครับ ข้าวจึงเป็นสิ่งสำคัญต่อชีวิตของผู้คนในอยุธยาสินะ','เข้าใจแล้วค่ะ ข้าวจึงเป็นสิ่งสำคัญต่อชีวิตของผู้คนในอยุธยาสินะ'),'normal'),
-  npc('ถูกต้องแล้วจ้ะ เอาล่ะ! ไหนลองตอบคำถามจากเรื่องที่ข้าเล่าให้ฟังดูเถิด หากตอบถูกครบทั้ง ๕ ข้อ เจ้าก็จะผ่านด่านนี้ไปได้','smile')
+  npc('ถูกต้องแล้วจ้ะ เอาล่ะ! ไหนลองตอบคำถามจากเรื่องที่ข้าเล่าให้ฟังดูเถิด เมื่อตอบคำถามครบทั้ง ๔ ข้อ เจ้าก็จะผ่านด่านนี้ไปได้','smile')
  ];
 }
 
@@ -626,7 +626,7 @@ function kingNaraiDialogueLines(){
   kingNaraiLine('อย่าเพิ่งกังวลไป ข้าว่าข้าพอจะมีวิธีช่วยเจ้าได้','respect'),
   kingNaraiLine('จากที่เจ้าเดินทางสำรวจกรุงศรีอยุธยามา เจ้าคงได้เรียนรู้เรื่องราวต่าง ๆ มากมาย แล้วเจ้าจำอะไรได้บ้างเล่า?','teaching'),
   student(()=>genderWord('ผมได้เรียนรู้วิถีชีวิตของผู้คน การค้าขายกับชาวต่างชาติ การตรวจสินค้า การเก็บจังกอบ และหน้าที่ของพระคลังสินค้าครับ','หนูได้เรียนรู้วิถีชีวิตของผู้คน การค้าขายกับชาวต่างชาติ การตรวจสินค้า การเก็บจังกอบ และหน้าที่ของพระคลังสินค้าค่ะ'),'explain'),
-  kingNaraiLine('ดีมาก! ถ้าเช่นนั้น ข้าจะมอบบททดสอบให้เจ้า ๑๐ ข้อ หากเจ้าตอบคำถามได้ เจ้าก็จะมีโอกาสกลับไปยังโลกของเจ้าได้','determined')
+  kingNaraiLine('ดีมาก! ถ้าเช่นนั้น ข้าจะมอบบททดสอบให้เจ้า ๕ ข้อ หากเจ้าตอบคำถามครบทั้ง ๕ ข้อ เจ้าก็จะมีโอกาสกลับไปยังโลกของเจ้าได้','determined')
  ];
 }
 const finalRoyalQuiz=[
@@ -1145,3 +1145,164 @@ function draw(){
 }
 function frame(t){const dt=Math.min((t-last)/1000||0,0.04);last=t;if(!visualLoading){update(dt);draw();}requestAnimationFrame(frame);}
 showScreen('cover-screen');
+
+
+// ===== ปรับปรุงการเรียนรู้ 9 ด่าน: 32 ข้อเลือกตอบ + 5 ข้อพิมพ์ตอบ =====
+// ข้อพิมพ์ตอบไม่มีถูกผิด ไม่คิดคะแนน และเก็บในเครื่องชั่วคราวก่อนซิงก์ไป Google Sheets
+const classroomQuestions = [[{"q":"เหตุใดบริเวณอยุธยาจึงเหมาะแก่การทำนา?","options":["มีที่ราบลุ่ม แม่น้ำ และดินอุดมสมบูรณ์","มีภูเขาสูงและอากาศหนาว","มีพื้นที่แห้งแล้งเป็นส่วนใหญ่","อยู่ห่างจากแหล่งน้ำทุกสาย"],"answer":0,"explain":"พื้นที่ลุ่มและแหล่งน้ำเอื้อต่อการเพาะปลูก","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S1-Q1"},{"q":"ข้าวมีความสำคัญต่อเศรษฐกิจอยุธยาอย่างไร?","options":["ใช้ตกแต่งบ้านเรือน","ใช้เป็นอาหารเท่านั้น","เป็นอาหารและนำไปขายหรือแลกเปลี่ยนได้","ใช้สร้างเรือเป็นหลัก"],"answer":2,"explain":"ข้าวเป็นอาหารหลักและเป็นสินค้าสำคัญ","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S1-Q2"},{"q":"ข้อใดเป็นกลุ่มพืชที่ชาวอยุธยาปลูกนอกเหนือจากข้าว?","options":["พริกไทย หมาก และอ้อย","ยางพารา ชา และกาแฟ","ข้าวโพดเลี้ยงสัตว์และยางพารา","พืชที่ปลูกได้เฉพาะเขตหนาว"],"answer":0,"explain":"ชาวอยุธยาปลูกพืชหลายชนิด เช่น พริกไทย หมาก อ้อย มะพร้าว","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S1-Q3"},{"type":"text","q":"เพราะเหตุใดการปลูกข้าวจึงเหมาะกับพื้นที่อยุธยา และข้าวมีประโยชน์ต่อผู้คนอย่างไร?","questionId":"S1-Q4"}],[{"q":"เหตุใดผู้คนในสมัยอยุธยาจึงนิยมเดินทางทางเรือ?","options":["เพราะไม่มีทางบกเลย","เพราะมีแม่น้ำลำคลองเชื่อมต่อหลายพื้นที่","เพราะทุกคนมีเรือสำเภา","เพราะการเดินทางทางเรือไม่ต้องใช้แรงงาน"],"answer":1,"explain":"เครือข่ายแม่น้ำลำคลองทำให้เดินทางทางน้ำสะดวก","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S2-Q1"},{"q":"เรือช่วยเศรษฐกิจของอยุธยาอย่างไร?","options":["ใช้ขนสินค้าได้มากและเชื่อมตลาดต่าง ๆ","ใช้แทนพื้นที่เพาะปลูก","ใช้เก็บภาษีทุกประเภท","ใช้ผลิตเครื่องถ้วย"],"answer":0,"explain":"เรือขนผลผลิตจากชุมชนไปขายตามตลาด","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S2-Q2"},{"q":"อาชีพใดสัมพันธ์กับการใช้ประโยชน์จากแม่น้ำโดยตรง?","options":["ช่างแกะสลักหิน","ช่างทำเครื่องประดับ","ชาวประมง","ช่างทำอิฐ"],"answer":2,"explain":"ผู้คนบางส่วนจับปลาเพื่อกินและขาย","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S2-Q3"},{"q":"หากชาวบ้านริมแม่น้ำต้องการนำผลไม้จำนวนมากไปขายในตลาด ควรเลือกวิธีใด?","options":["เดินแบกทั้งหมด","รอให้คนจากตลาดมารับเท่านั้น","ขนด้วยช้างข้ามแม่น้ำ","บรรทุกเรือไปตามลำน้ำ"],"answer":3,"explain":"การใช้เรือเหมาะกับการขนสินค้าในพื้นที่ที่มีทางน้ำ","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S2-Q4"}],[{"q":"ตลาดหน้าคุกมีบทบาทสำคัญอย่างไร?","options":["เป็นที่ฝึกทหาร","เป็นสถานที่ซื้อขายและแลกเปลี่ยนสินค้า","เป็นที่เก็บเรือรบ","เป็นที่พักของคณะทูตเท่านั้น"],"answer":1,"explain":"ตลาดเป็นพื้นที่ซื้อขายและแลกเปลี่ยนสินค้า","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S3-Q1"},{"q":"เหตุใดตลาดในอยุธยาจึงมีสินค้าหลากหลาย?","options":["เพราะขายเฉพาะสินค้าจากในวัง","เพราะทุกเมืองปลูกพืชชนิดเดียวกัน","เพราะมีสินค้าเฉพาะจากต่างชาติ","เพราะมีสินค้าจากชุมชน หัวเมือง และต่างชาติ"],"answer":3,"explain":"ตลาดรับสินค้าจากหลายแหล่ง","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S3-Q2"},{"q":"ข้อใดเป็นพาหนะขนส่งสินค้าเข้าสู่ตลาดที่กล่าวถึงในเรื่อง?","options":["เรือและเกวียน","เรือและรถไฟ","รถยนต์และเกวียน","เครื่องบินและเรือ"],"answer":0,"explain":"การขนส่งใช้ทั้งทางน้ำและทางบก","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S3-Q3"},{"type":"text","q":"ถ้านักเรียนเป็นชาวบ้านในสมัยอยุธยา จะนำสินค้าอะไรไปขายในตลาด และเพราะเหตุใด?","questionId":"S3-Q4"}],[{"q":"หัวเมืองในเรื่องหมายถึงข้อใด?","options":["เมืองที่ตั้งอยู่ในต่างประเทศเท่านั้น","เมืองที่เกี่ยวข้องกับการปกครองหรือมีความสัมพันธ์กับอยุธยา","ชุมชนที่อยู่เฉพาะในพระราชวัง","ตลาดที่ตั้งอยู่กลางทะเล"],"answer":1,"explain":"หัวเมืองมีความสัมพันธ์กับอยุธยาและส่งผลผลิตมาค้าขาย","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S4-Q1"},{"q":"สินค้ากลุ่มใดมาจากหัวเมืองตามบทสนทนา?","options":["ข้าว ปลาแห้ง และของป่า","เครื่องเคลือบจากจีนทั้งหมด","แป้งสาลีจากฝรั่งเศสทั้งหมด","เครื่องประดับจากยุโรปทั้งหมด"],"answer":0,"explain":"หัวเมืองส่งผลผลิตทางเกษตรและของป่ามายังพระนคร","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S4-Q2"},{"q":"เจ้าพนักงานประจำท่ามีหน้าที่ใด?","options":["กำหนดชนิดพืชที่ชาวนาต้องปลูก","ดูแลพระราชพิธี","จดบันทึกและดูแลการขนถ่ายสินค้า","ผลิตสินค้าจากต่างประเทศ"],"answer":2,"explain":"เจ้าพนักงานตรวจดูแลและบันทึกสินค้าที่เข้ามา","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S4-Q3"},{"q":"ท่ารับสินค้าจากหัวเมืองสำคัญต่อการค้าอย่างไร?","options":["ทำให้เลิกค้าขายทางน้ำ","ทำให้สินค้าอยู่แต่ในหัวเมือง","ทำให้ตลาดไม่มีสินค้า","ช่วยรับและกระจายสินค้าจากหลายพื้นที่"],"answer":3,"explain":"ท่าเรือเป็นจุดเชื่อมการขนส่งสินค้าเข้าสู่พระนคร","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S4-Q4"}],[{"q":"สินค้ากลุ่มใดเป็นสินค้าที่พ่อค้าชาวจีนนำมาขาย?","options":["ข้าว ปลาแห้ง และไม้","เครื่องเคลือบ ผ้าไหม และกระทะเหล็ก","ดีบุกและครั่งจากหัวเมือง","ข้าวและผลไม้จากท้องนา"],"answer":1,"explain":"พ่อค้าจีนนำเครื่องเคลือบ ผ้าไหม ผ้าแพร และกระทะเหล็ก","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S5-Q1"},{"q":"พ่อค้าชาวจีนขนสินค้าข้ามทะเลด้วยพาหนะใด?","options":["เรือสำเภา","เกวียนเทียมวัว","แพขนาดเล็กสำหรับคลอง","ช้างบรรทุกของ"],"answer":0,"explain":"เรือสำเภาเหมาะกับการขนสินค้าทางทะเล","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S5-Q2"},{"q":"การค้ากับต่างชาติส่งผลต่ออยุธยาอย่างไร?","options":["ทำให้สินค้าทุกชนิดหายไป","ทำให้ตลาดในเมืองปิด","ทำให้คนเลิกใช้เรือ","สร้างรายได้และเกิดการแลกเปลี่ยนวัฒนธรรม"],"answer":3,"explain":"การค้าระหว่างชาตินำทั้งสินค้า รายได้ และวัฒนธรรม","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S5-Q3"},{"type":"text","q":"การมีพ่อค้าต่างชาติเข้ามาค้าขายในอยุธยาส่งผลดีต่อผู้คนหรือบ้านเมืองอย่างไร?","questionId":"S5-Q4"}],[{"q":"สินค้าจากจีนที่กล่าวถึงในท่าเรือคือข้อใด?","options":["เครื่องเคลือบและผ้าไหม","ปลาแห้งและผลไม้","ดีบุกและครั่ง","แป้งสาลีและสินค้าหัตถกรรม"],"answer":0,"explain":"จีนมีเครื่องเคลือบ ผ้าไหม ผ้าแพร และกระทะเหล็ก","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S6-Q1"},{"q":"สินค้ากลุ่มใดมาจากญี่ปุ่นตามบทสนทนา?","options":["เครื่องเทศและอัญมณี","ข้าวและไม้","ทองแดง เหรียญเงิน และกล่องลงรัก","แป้งสาลีและผ้าฝ้าย"],"answer":2,"explain":"ญี่ปุ่นนำทองแดง เหรียญเงิน และกล่องลงรัก","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S6-Q2"},{"q":"เหตุใดอยุธยาจึงมีบทบาทเป็นศูนย์กลางการค้าสำคัญ?","options":["เพราะอยู่ห่างจากเส้นทางเดินเรือ","เพราะมีทางน้ำและการติดต่อค้าขายกับหลายดินแดน","เพราะห้ามเรือต่างชาติเข้าเมือง","เพราะผลิตสินค้าทุกชนิดเองได้"],"answer":1,"explain":"การคมนาคมทางน้ำและการติดต่อค้าขายช่วยส่งเสริมเศรษฐกิจ","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S6-Q3"},{"q":"ข้อใดเป็นผลของการค้าระหว่างประเทศ?","options":["ผู้คนหยุดซื้อขาย","สินค้าจากหัวเมืองหายไป","การเดินเรือสิ้นสุดลง","เกิดรายได้และการแลกเปลี่ยนสินค้าและวัฒนธรรม"],"answer":3,"explain":"การค้าระหว่างประเทศสร้างรายได้และการแลกเปลี่ยน","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S6-Q4"}],[{"q":"ภาษีที่เรียกเก็บจากสินค้าผ่านด่านในสมัยอยุธยาเรียกว่าอะไร?","options":["ส่วย","จังกอบ","อากรจากการเพาะปลูก","เครื่องราชบรรณาการ"],"answer":1,"explain":"จังกอบเป็นภาษีที่เก็บจากสินค้าผ่านด่าน","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S7-Q1"},{"q":"หากเก็บจังกอบแบบ “สิบชักหนึ่ง” จากสินค้า 20 หน่วย จะเก็บกี่หน่วย?","options":["1 หน่วย","10 หน่วย","2 หน่วย","20 หน่วย"],"answer":2,"explain":"สิบชักหนึ่งคือเก็บหนึ่งในสิบ ดังนั้น 20 หน่วยเก็บ 2 หน่วย","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S7-Q2"},{"q":"เหตุใดรัฐจึงจัดเก็บจังกอบ?","options":["เพื่อเป็นรายได้ของบ้านเมือง","เพื่อยกเลิกตลาดทั้งหมด","เพื่อห้ามชาวบ้านปลูกข้าว","เพื่อให้พ่อค้าไม่ต้องใช้เรือ"],"answer":0,"explain":"จังกอบเป็นรายได้ส่วนหนึ่งของรัฐ","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S7-Q3"},{"type":"text","q":"เพราะเหตุใดกรุงศรีอยุธยาจึงต้องจัดเก็บภาษีจากการค้าขาย?","questionId":"S7-Q4"}],[{"q":"การค้าผูกขาดในเรื่องหมายถึงอะไร?","options":["ประชาชนซื้อขายทุกอย่างได้โดยไม่มีกฎ","พ่อค้าต่างชาติห้ามเข้าอยุธยา","สินค้าบางชนิดต้องซื้อขายผ่านพระคลังสินค้า","ตลาดทั้งหมดเป็นของชาวต่างชาติ"],"answer":2,"explain":"ราชสำนักควบคุมการซื้อขายสินค้าบางชนิดผ่านพระคลังสินค้า","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S8-Q1"},{"q":"ข้อใดเป็นตัวอย่างสินค้าที่ราชสำนักควบคุมตามบทสนทนา?","options":["นอแรดและไม้กฤษณา","ผักและผลไม้ทั่วไป","ข้าวสุกและขนม","เครื่องปั้นดินเผาทุกชนิด"],"answer":0,"explain":"นอแรดและไม้กฤษณาเป็นตัวอย่างสินค้าควบคุม","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S8-Q2"},{"q":"คำว่า “จิ้มก้อง” หมายถึงข้อใด?","options":["การเก็บภาษีจากเรือ","การขายของในตลาด","การขนข้าวทางเรือ","การส่งคณะทูตและเครื่องราชบรรณาการไปจีน"],"answer":3,"explain":"จิ้มก้องเกี่ยวข้องกับความสัมพันธ์แบบบรรณาการและการค้า","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S8-Q3"},{"q":"ข้อใดเป็นแหล่งรายได้ของรัฐอยุธยาที่กล่าวถึง?","options":["การค้าของราชสำนักเท่านั้น","ส่วย อากร จังกอบ และรายได้จากการค้า","การรับเงินจากชาวต่างชาติอย่างเดียว","การเก็บข้าวจากชาวนาทั้งหมดโดยไม่ซื้อขาย"],"answer":1,"explain":"รัฐมีรายได้จากหลายทาง ทั้งภาษีและการค้าของราชสำนัก","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S8-Q4"}],[{"q":"เหตุใดอยุธยาจึงเหมาะแก่การปลูกข้าว?","options":["เพราะมีพื้นที่ภูเขาสูง","เพราะมีที่ราบลุ่มและแหล่งน้ำอุดมสมบูรณ์","เพราะไม่มีน้ำท่วมถึงเลย","เพราะอยู่กลางทะเลทราย"],"answer":1,"explain":"พื้นที่ลุ่มและแหล่งน้ำช่วยให้เพาะปลูกได้ดี","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S9-Q1"},{"q":"แม่น้ำมีส่วนส่งเสริมเศรษฐกิจอยุธยาอย่างไร?","options":["ทำให้การค้าทางบกทั้งหมดหยุดลง","ทำให้ไม่ต้องมีตลาด","ช่วยเดินทาง ขนส่ง และเชื่อมชุมชนค้าขาย","ทำให้ผู้คนไม่ต้องประกอบอาชีพ"],"answer":2,"explain":"แม่น้ำเป็นเส้นทางขนส่งและเชื่อมการค้า","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S9-Q2"},{"q":"เหตุใดการค้ากับต่างชาติจึงสำคัญต่ออยุธยา?","options":["ทำให้มีสินค้าและรายได้เพิ่มขึ้น รวมถึงแลกเปลี่ยนวัฒนธรรม","ทำให้สินค้าท้องถิ่นไม่มีคุณค่า","ทำให้ผู้คนหยุดเดินทาง","ทำให้ไม่ต้องมีท่าเรือ"],"answer":0,"explain":"การค้าต่างชาติสร้างรายได้และการแลกเปลี่ยน","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S9-Q3"},{"q":"ข้อใดแสดงความสัมพันธ์ระหว่างการค้าและรายได้ของรัฐได้ถูกต้อง?","options":["รัฐไม่มีรายได้จากการค้า","รัฐมีรายได้จากการทำนาเพียงอย่างเดียว","ภาษีจังกอบเป็นการแลกเปลี่ยนของขวัญ","รัฐเก็บจังกอบและมีรายได้จากการค้าบางประเภท"],"answer":3,"explain":"รัฐมีรายได้จากภาษีและการค้าของราชสำนัก","hint":"ลองทบทวนคำอธิบายของตัวละครในด่านนี้ แล้วพิจารณาตัวเลือกอีกครั้ง","questionId":"S9-Q4"},{"type":"text","q":"หากเลือกส่งเสริมเศรษฐกิจอยุธยาได้หนึ่งด้าน ระหว่างการเกษตร การขนส่ง หรือการค้า นักเรียนจะเลือกด้านใด และเพราะเหตุใด?","questionId":"S9-Q5"}]];
+const classroomStages = [
+ {name:'วิถีชีวิตชาวนา',items:farmerQuiz,render:'renderQuizQuestion'},
+ {name:'การเดินทางทางเรือ',items:boatQuiz,render:'renderBoatQuizQuestion'},
+ {name:'ตลาดในกรุงศรีอยุธยา',items:marketQuiz,render:'renderMarketQuizQuestion'},
+ {name:'ท่ารับสินค้าจากหัวเมือง',items:portQuiz,render:'renderPortQuizQuestion'},
+ {name:'ย่านการค้าต่างชาติ',items:foreignTradeQuiz,render:'renderForeignTradeQuizQuestion'},
+ {name:'ท่าเรือการค้าต่างประเทศ',items:internationalPortQuiz,render:'renderInternationalPortQuizQuestion'},
+ {name:'ด่านขนอน',items:checkpointQuiz,render:'renderCheckpointQuizQuestion'},
+ {name:'พระคลังสินค้า',items:treasuryQuiz,render:'renderTreasuryQuizQuestion'},
+ {name:'พระราชวัง',items:finalRoyalQuiz,render:'renderRoyalQuizQuestion'}
+];
+classroomStages.forEach((stage,index)=>stage.items.splice(0,stage.items.length,...classroomQuestions[index]));
+// Put the deployed Apps Script /exec URL here after deploying it.
+// Do NOT put a Google Sheet sharing URL here.
+const CLASSROOM_ANSWERS_WEBAPP_URL = '';
+const ANSWER_QUEUE_KEY = 'ayutthaya-written-answers-v1';
+const PLAYER_SESSION_KEY = 'ayutthaya-player-session-v1';
+function getClassroomSession(){
+ try{
+  let session=sessionStorage.getItem(PLAYER_SESSION_KEY);
+  if(!session){session=crypto.randomUUID();sessionStorage.setItem(PLAYER_SESSION_KEY,session);}
+  return session;
+ }catch(e){return 'session-'+String(Date.now());}
+}
+function getAnswerQueue(){
+ try{const q=JSON.parse(localStorage.getItem(ANSWER_QUEUE_KEY)||'[]');return Array.isArray(q)?q:[];}
+ catch(e){return [];}
+}
+function putAnswerQueue(queue){
+ try{localStorage.setItem(ANSWER_QUEUE_KEY,JSON.stringify(queue));return true;}
+ catch(e){console.warn('Cannot store written answer',e);return false;}
+}
+let answerSyncRunning=false;
+async function syncWrittenAnswers(){
+ if(answerSyncRunning||!CLASSROOM_ANSWERS_WEBAPP_URL)return;
+ answerSyncRunning=true;
+ try{
+  for(const record of getAnswerQueue().filter(x=>x.status!=='sent')){
+   try{
+    // text/plain avoids cross-origin preflight; Apps Script can receive e.postData.contents.
+    await fetch(CLASSROOM_ANSWERS_WEBAPP_URL,{method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify(record)});
+    // no-cors does not expose server confirmation, so do NOT delete a record:
+    // deduplication by answerId is handled on the receiving Apps Script side.
+    const queue=getAnswerQueue(), item=queue.find(x=>x.answerId===record.answerId);
+    if(item){item.status='sent-unverified';putAnswerQueue(queue);}
+   }catch(e){console.warn('Answer not sent; saved for retry',e);}
+  }
+ }finally{answerSyncRunning=false;}
+}
+function saveClassroomWrittenAnswer(stageIndex,item,answer){
+ const sid=getClassroomSession();
+ const record={answerId:crypto.randomUUID?crypto.randomUUID():'a-'+Date.now()+'-'+Math.random().toString(36).slice(2),
+  submittedAt:new Date().toISOString(),playerId:sid,
+  playerName:String(playerName||'ผู้เล่น'),gender:selectedGender||'unknown',stage:stageIndex+1,
+  questionId:item.questionId,question:item.q,answer,sessionId:sid,status:'pending'};
+ const stored=putAnswerQueue([...getAnswerQueue(),record]);
+ if(stored)syncWrittenAnswers();
+ return stored;
+}
+function renderClassroomQuestion(stageIndex){
+ const stage=classroomStages[stageIndex],items=stage.items,item=items[quizIndex];
+ const isRoyal=stageIndex===8;
+ if(!item)return;
+ if(isRoyal)royalFirstAnswerLocked=false;
+ quizHeading.textContent=isRoyal?'บททดสอบสุดท้ายแห่งกรุงศรีอยุธยา':'ด่านที่ '+['๑','๒','๓','๔','๕','๖','๗','๘'][stageIndex]+' : '+stage.name;
+ quizProgress.textContent='ข้อ '+(quizIndex+1)+' / '+items.length;
+ quizQuestion.textContent=item.q;
+ quizAnswers.replaceChildren();
+ quizFeedback.textContent='';
+ quizNextBtn.classList.add('hidden');
+ if(item.type==='text'){
+  const textarea=document.createElement('textarea');
+  textarea.className='classroom-written-answer';
+  textarea.rows=4;textarea.maxLength=1200;
+  textarea.placeholder='เขียนคำตอบหรือความคิดเห็นของนักเรียนที่นี่ (ไม่มีถูกหรือผิด)';
+  textarea.setAttribute('aria-label','พิมพ์คำตอบของนักเรียน');
+  Object.assign(textarea.style,{width:'100%',boxSizing:'border-box',padding:'12px',borderRadius:'12px',fontSize:'17px',resize:'vertical',background:'#fffdf5',color:'#172133',lineHeight:'1.6'});
+  const submit=document.createElement('button');
+  submit.type='button';submit.className='quiz-answer';submit.textContent='ส่งคำตอบ ✓';
+  submit.addEventListener('click',()=>{
+   const answer=textarea.value.trim();
+   if(!answer){quizFeedback.textContent='ลองเขียนคำตอบหรือความคิดเห็นสักเล็กน้อยก่อนส่งนะ';textarea.focus();return;}
+   const saved=saveClassroomWrittenAnswer(stageIndex,item,answer);
+   if(!saved){quizFeedback.textContent='ไม่สามารถบันทึกคำตอบในเครื่องได้ กรุณาตรวจสอบพื้นที่เก็บข้อมูลแล้วลองใหม่';return;}
+   textarea.disabled=true;submit.disabled=true;
+   quizFeedback.textContent=CLASSROOM_ANSWERS_WEBAPP_URL?
+    'รับคำตอบแล้ว ✓ ไม่มีถูกหรือผิด ระบบเก็บสำรองไว้และกำลังส่งไปยังฐานข้อมูลของครู':
+    'รับคำตอบแล้ว ✓ ไม่มีถูกหรือผิด บันทึกสำรองไว้ในเครื่อง (รอเชื่อม Google Sheets)';
+   quizNextBtn.textContent=quizIndex===items.length-1?'ดูผลการเรียนรู้ ▶':'ข้อต่อไป ▶';
+   quizNextBtn.classList.remove('hidden');
+  });
+  quizAnswers.append(textarea,submit);
+  quizFeedback.textContent='ข้อนี้ไม่มีถูกหรือผิด นักเรียนสามารถตอบด้วยความคิดของตนเองได้';
+  return;
+ }
+ item.options.forEach((option,index)=>{
+  const button=document.createElement('button');
+  button.type='button';button.className='quiz-answer';
+  button.textContent=['ก','ข','ค','ง'][index]+'. '+option;
+  button.addEventListener('click',()=>isRoyal?handleRoyalQuizAnswer(index):
+    handleStageQuizAnswer(index,items,['ก','ข','ค','ง'],'ยังไม่ถูกต้อง คำใบ้: '+item.hint));
+  quizAnswers.append(button);
+ });
+}
+renderQuizQuestion = ()=>renderClassroomQuestion(0);
+renderBoatQuizQuestion = ()=>renderClassroomQuestion(1);
+renderMarketQuizQuestion = ()=>renderClassroomQuestion(2);
+renderPortQuizQuestion = ()=>renderClassroomQuestion(3);
+renderForeignTradeQuizQuestion = ()=>renderClassroomQuestion(4);
+renderInternationalPortQuizQuestion = ()=>renderClassroomQuestion(5);
+renderCheckpointQuizQuestion = ()=>renderClassroomQuestion(6);
+renderTreasuryQuizQuestion = ()=>renderClassroomQuestion(7);
+renderRoyalQuizQuestion = ()=>renderClassroomQuestion(8);
+const originalFinishFunctions=[finishFarmerQuiz,finishBoatQuiz,finishMarketQuiz,finishPortQuiz,finishForeignTradeQuiz,finishInternationalPortQuiz,finishCheckpointQuiz,finishTreasuryQuiz,finishRoyalQuiz];
+const wrapClassroomFinish=(index)=>{
+ originalFinishFunctions[index]();
+ const points=classroomQuestions[index].filter(x=>x.type!=='text').length;
+ quizProgress.textContent='คะแนนเลือกตอบ '+quizScore+' / '+points+' • ตอบคำถามพิมพ์ตอบแล้ว '+classroomQuestions[index].filter(x=>x.type==='text').length+' ข้อ';
+ if(index===8)quizQuestion.textContent='ทำแบบทดสอบสุดท้ายครบทั้ง 5 ข้อแล้ว!';
+};
+finishFarmerQuiz = ()=>wrapClassroomFinish(0);
+finishBoatQuiz = ()=>wrapClassroomFinish(1);
+finishMarketQuiz = ()=>wrapClassroomFinish(2);
+finishPortQuiz = ()=>wrapClassroomFinish(3);
+finishForeignTradeQuiz = ()=>wrapClassroomFinish(4);
+finishInternationalPortQuiz = ()=>wrapClassroomFinish(5);
+finishCheckpointQuiz = ()=>wrapClassroomFinish(6);
+finishTreasuryQuiz = ()=>wrapClassroomFinish(7);
+finishRoyalQuiz = ()=>wrapClassroomFinish(8);
+const originalRoyalResult=showRoyalResult;
+showRoyalResult=function(){
+ originalRoyalResult();
+ const max=classroomQuestions[8].filter(x=>x.type!=='text').length;
+ $('result-score').textContent=String(quizScore)+' / '+String(max);
+ $('result-message').textContent=quizScore===max?'ยอดเยี่ยม! เจ้าเรียนรู้เรื่องเศรษฐกิจอยุธยาได้ดีมาก':
+  'ขอบใจที่ร่วมเดินทาง ทุกคำตอบช่วยให้เราเรียนรู้และพัฒนาต่อไปได้';
+};
+const originalDownloadRoyalResult=downloadRoyalResult;
+downloadRoyalResult=function(){
+ // The original result CSV uses old denominators; create an updated CSV.
+ const quote=v=>'"'+String(v).replaceAll('"','""')+'"';
+ const rows=[['ชื่อที่ใช้ในเกม','คะแนนเลือกตอบ','คะแนนเต็มเลือกตอบ','คำถามพิมพ์ตอบ','วันที่บันทึก'],
+  [playerName,quizScore,4,1,new Date().toLocaleString('th-TH')]];
+ const csv='\uFEFF'+rows.map(r=>r.map(quote).join(',')).join('\r\n');
+ const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
+ const link=document.createElement('a');
+ link.href=url;link.download='ayutthaya-stage9-result.csv';document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
+ $('result-save-status').textContent='บันทึกผลเป็นไฟล์ CSV แล้ว';
+};
+const downloadBtn=$('result-download-btn');
+downloadBtn.removeEventListener('click',originalDownloadRoyalResult);
+downloadBtn.addEventListener('click',downloadRoyalResult);
+window.addEventListener('online',syncWrittenAnswers);
+// Restore pending answers when a previously failed submission needs retry.
+syncWrittenAnswers();
