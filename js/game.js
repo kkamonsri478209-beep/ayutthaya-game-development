@@ -272,7 +272,7 @@ previousBtn.addEventListener('click',goBackDialogue);
 nextBtn.addEventListener('click',advanceDialogue);
 function startGame(){
  royalFirstAnswerLocked=false;royalResultSaved=false;
- showScreen('game-screen');sceneIndex=0;coinFound=false;farmerTalked=false;quizActive=false;quizShowingResult=false;quizRetrying=false;stage1Passed=false;stage2Passed=false;stage3Passed=false;stage4Passed=false;portIntroSeen=false;stage5Passed=false;stage6Passed=false;stage7Passed=false;stage8Passed=false;stage9Passed=false;stage9IntroSeen=false;farmIntroSeen=false;player.x=150;
+ sceneIndex=0;showScreen('game-screen');coinFound=false;farmerTalked=false;quizActive=false;quizShowingResult=false;quizRetrying=false;stage1Passed=false;stage2Passed=false;stage3Passed=false;stage4Passed=false;portIntroSeen=false;stage5Passed=false;stage6Passed=false;stage7Passed=false;stage8Passed=false;stage9Passed=false;stage9IntroSeen=false;farmIntroSeen=false;player.x=150;
  objective.textContent=scenes[0].objective;prompt.classList.add('hidden');
   preloadScene(0);preloadScene(1);
  if(!started){started=true;last=performance.now();requestAnimationFrame(frame);}
