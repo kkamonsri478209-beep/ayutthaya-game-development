@@ -22,6 +22,11 @@
  function stop(){active=false;finished=true;overlay.classList.add('hidden');spark.classList.add('hidden');keys.left=keys.right=false;}
  const guardianVoice=new Audio('./ayutthaya_time_guardian_voice.mp3.wav');
  guardianVoice.preload='auto';
+ // A slower, lower-pitched guardian voice, while keeping the original recording intact.
+ guardianVoice.playbackRate=0.84;
+ guardianVoice.preservesPitch=false;
+ guardianVoice.mozPreservesPitch=false;
+ guardianVoice.webkitPreservesPitch=false;
  let transitionToken=0;
  function showMap(){
   if(transitioning)return;
