@@ -34,6 +34,9 @@
  }
  function openArea(index){
   selectedArea=index;const area=areas[index];
+  // Warm the first unlocked destination while the player reads the stage list.
+  const first=area.stages.find(available);
+  if(first){const scene=scenes[first+2];if(scene){const path=first===2?(selectedGender==='girl'?'boat-ride-girl.webp':'boat-ride-boy.webp'):scene.bg;if(path)image(path);}}
   map.querySelector('.adventure-map-area-title').textContent=area.title;
   const list=map.querySelector('.adventure-map-stage-list');list.replaceChildren();
   area.stages.forEach(stage=>{
@@ -47,6 +50,8 @@
  function openMap(){
   if(!discovered)return;
   mapOpen=true;refresh();modal.classList.add('hidden');
+  // Load the farm image while the player explores the map, before stage selection.
+  image('stage1-farm.webp');
   document.querySelector('#game-screen').classList.add('hidden');
   document.querySelector('#controls').classList.add('hidden');
   map.classList.remove('hidden');mapButton.classList.add('hidden');
