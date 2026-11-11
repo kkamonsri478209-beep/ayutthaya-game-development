@@ -4,7 +4,9 @@ const base='./';
 const files={click:'01_aztec_button.wav',dialogue:'02_aztec_dialogue.wav',correct:'03_aztec_correct.wav',incorrect:'04_aztec_incorrect.wav',coin:'05_aztec_coin.wav',victory:'06_aztec_victory.wav'};
 const audio=Object.fromEntries(Object.entries(files).map(([k,v])=>{const a=new Audio(base+v);a.preload='auto';return [k,a];}));
 let enabled=true,volume=.34,lastClick=0,lastFeedback='',lastHeading='',lastDialogue=false,lastResult=false;
-function play(key){if(!enabled||document.hidden)return;const source=audio[key];if(!source)return;try{const a=source.cloneNode();a.volume=volume*(key==='victory'?.8:1);a.play().catch(()=>{});}catch(e){}}
+function play(key){if(!enabled||document.hidden)return;
+ // While a conversation is open, only the typewriter's Thai chime may sound.
+ if((key==='click'||key==='dialogue')&&!document.getElementById('dialogue-box')?.classList.contains('hidden'))return;const source=audio[key];if(!source)return;try{const a=source.cloneNode();a.volume=volume*(key==='victory'?.8:1);a.play().catch(()=>{});}catch(e){}}
 function attach(){
  document.addEventListener('ayutthaya-map-select',()=>play('coin'));
 
@@ -15,7 +17,7 @@ function attach(){
   panel.append(label,slider);
  }
  document.addEventListener('click',e=>{
-  const target=e.target.closest('button');if(!target||target.closest('#sound-panel')||target.closest('#music-welcome')||target.closest('#adventure-map-screen')||target.closest('#dialogue-box')||target.closest('#intro-cinematic-ui')||target.classList.contains('intro-cinematic-skip'))return;
+  const target=e.target.closest('button');if(!target||!document.getElementById('dialogue-box')?.classList.contains('hidden')||target.closest('#sound-panel')||target.closest('#music-welcome')||target.closest('#adventure-map-screen')||target.closest('#dialogue-box')||target.closest('#intro-cinematic-ui')||target.classList.contains('intro-cinematic-skip'))return;
   const now=performance.now();if(now-lastClick<65)return;lastClick=now;play('click');
  },true);
  const feedback=document.getElementById('quiz-feedback');
