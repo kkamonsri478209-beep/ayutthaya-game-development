@@ -27,3 +27,5 @@
 @keyframes introPortalStars{0%{opacity:0;transform:scale(.7)}50%{opacity:1}100%{opacity:.15;transform:scale(1.5)}}
 @keyframes introPortalReveal{0%{opacity:1}35%{opacity:.92}100%{opacity:0}}
 @media(prefers-reduced-motion:reduce){.intro-time-portal *{animation-duration:.01ms!important}.intro-time-portal{animation:none}.intro-time-portal.intro-portal-reveal{animation:introPortalReveal 1.7s ease-in-out forwards}}
+
+.intro-portal-play{position:absolute;z-index:2;left:50%;bottom:12%;transform:translateX(-50%);max-width:90vw;padding:12px 20px;border-radius:14px;border:2px solid #ffe39b;background:#352051;color:#fff3c9;font:700 clamp(14px,2vw,20px) system-ui;box-shadow:0 0 24px #e5c17a66;cursor:pointer}
