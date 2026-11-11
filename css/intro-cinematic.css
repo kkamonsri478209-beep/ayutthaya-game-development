@@ -13,7 +13,7 @@
 @media(max-width:650px){#game-screen .intro-cinematic-label{top:14%;max-width:64%;font-size:10px;padding:4px 7px}#game-screen .intro-cinematic-skip{padding:5px 8px;font-size:11px}}
 
 /* Lightweight golden time portal: pure CSS, no video downloads or new sounds. */
-.intro-time-portal{position:absolute;inset:0;z-index:65;overflow:hidden;pointer-events:none;display:grid;place-items:center;background:radial-gradient(ellipse at center,#37215c 0%,#130b29 70%,#070613 100%);opacity:1;animation:introPortalEnter .65s ease-out both}
+.intro-time-portal{position:fixed;inset:0;z-index:10001;overflow:hidden;pointer-events:none;display:grid;place-items:center;background:radial-gradient(ellipse at center,#37215c 0%,#130b29 70%,#070613 100%);opacity:1;animation:introPortalEnter .65s ease-out both}
 .intro-time-portal.hidden{display:none!important}
 .intro-time-portal-aura{position:absolute;width:110vmax;height:110vmax;border-radius:50%;background:repeating-conic-gradient(from 10deg,transparent 0deg 14deg,#f5d57a19 17deg 20deg,transparent 23deg 39deg);animation:introPortalSpin 12s linear infinite;filter:blur(5px)}
 .intro-time-portal-ring{position:absolute;width:min(68vw,65vh);aspect-ratio:1;border-radius:50%;border:clamp(8px,1.4vw,18px) solid #f9d67c;box-shadow:0 0 24px #fff1ad,0 0 75px #d59bff,0 0 130px #c08aff88,inset 0 0 28px #fff5bc,inset 0 0 80px #d5a4ff;border-top-color:#fff5ca;border-left-color:#c68cff;animation:introPortalRing 2.5s ease-in forwards}
