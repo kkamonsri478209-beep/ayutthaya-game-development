@@ -11,3 +11,19 @@
 #game-screen .intro-cinematic-label{position:absolute;left:2%;top:11%;max-width:68%;font-size:clamp(10px,1.2vw,16px);padding:5px 10px;opacity:.9}
 #game-screen .intro-cinematic-skip{position:absolute;top:2%;right:2%;font-size:clamp(11px,1.2vw,16px);padding:7px 12px}
 @media(max-width:650px){#game-screen .intro-cinematic-label{top:14%;max-width:64%;font-size:10px;padding:4px 7px}#game-screen .intro-cinematic-skip{padding:5px 8px;font-size:11px}}
+
+/* Lightweight golden time portal: pure CSS, no video downloads or new sounds. */
+.intro-time-portal{position:absolute;inset:0;z-index:65;overflow:hidden;pointer-events:none;display:grid;place-items:center;background:radial-gradient(ellipse at center,#37215c 0%,#130b29 70%,#070613 100%);opacity:1;animation:introPortalEnter .65s ease-out both}
+.intro-time-portal.hidden{display:none!important}
+.intro-time-portal-aura{position:absolute;width:110vmax;height:110vmax;border-radius:50%;background:repeating-conic-gradient(from 10deg,transparent 0deg 14deg,#f5d57a19 17deg 20deg,transparent 23deg 39deg);animation:introPortalSpin 12s linear infinite;filter:blur(5px)}
+.intro-time-portal-ring{position:absolute;width:min(68vw,65vh);aspect-ratio:1;border-radius:50%;border:clamp(8px,1.4vw,18px) solid #f9d67c;box-shadow:0 0 24px #fff1ad,0 0 75px #d59bff,0 0 130px #c08aff88,inset 0 0 28px #fff5bc,inset 0 0 80px #d5a4ff;border-top-color:#fff5ca;border-left-color:#c68cff;animation:introPortalRing 2.5s ease-in forwards}
+.intro-time-portal-core{position:absolute;width:min(54vw,52vh);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle,#fffbd5 0%,#ffe7a6 18%,#dbb6ff 42%,#8d5dd1aa 63%,transparent 73%);filter:blur(5px);animation:introPortalCore 2.5s ease-in forwards}
+.intro-time-portal-stars{position:absolute;inset:0;background-image:radial-gradient(circle,#fff8d9 1.5px,transparent 2.5px),radial-gradient(circle,#f4c7ff 1px,transparent 2px);background-size:83px 79px,127px 103px;background-position:12px 22px,50px 60px;animation:introPortalStars 2.5s ease-in forwards}
+.intro-time-portal.intro-portal-reveal{animation:introPortalReveal 1.7s ease-in-out forwards}
+@keyframes introPortalEnter{from{opacity:0}to{opacity:1}}
+@keyframes introPortalSpin{to{transform:rotate(360deg)}}
+@keyframes introPortalRing{0%{transform:scale(.15) rotate(-70deg);opacity:0}25%{opacity:1}80%{transform:scale(1.3) rotate(110deg)}100%{transform:scale(5) rotate(180deg);opacity:.8}}
+@keyframes introPortalCore{0%{transform:scale(.12);opacity:.2}60%{opacity:.85}100%{transform:scale(4);opacity:1}}
+@keyframes introPortalStars{0%{opacity:0;transform:scale(.7)}50%{opacity:1}100%{opacity:.15;transform:scale(1.5)}}
+@keyframes introPortalReveal{0%{opacity:1}35%{opacity:.92}100%{opacity:0}}
+@media(prefers-reduced-motion:reduce){.intro-time-portal *{animation-duration:.01ms!important}.intro-time-portal{animation:none}.intro-time-portal.intro-portal-reveal{animation:introPortalReveal 1.7s ease-in-out forwards}}
