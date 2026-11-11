@@ -174,7 +174,11 @@ $('choose-girl').addEventListener('click',()=>choose('girl'));
 $('select-next').addEventListener('click',()=>{if(selectedGender)showScreen('name-screen');});
 $('name-form').addEventListener('submit',e=>{
  e.preventDefault();const name=$('player-name').value.trim();if(!name){$('player-name').focus();return;}
- playerName=name;startGame();
+ playerName=name;
+ // สร้างรหัสใหม่สำหรับนักเรียนแต่ละคน แม้เล่นบนเครื่องเดียวกัน
+ safeLocalSet(ANSWER_PLAYER_KEY,'P-'+answerIdentifier());
+ safeLocalSet(ANSWER_SESSION_KEY,'R-'+answerIdentifier());
+ startGame();
 });
 function genderWord(boy,girl){return selectedGender==='girl'?girl:boy;}
 function student(text,emotion='normal'){return{who:'student',emotion,text};}
@@ -492,7 +496,7 @@ function selectPortQuizAnswer(selected){
 function finishPortQuiz(){
  quizShowingResult=true;stage4Passed=true;
  quizHeading.textContent='สรุปผลด่านที่ ๔';
- quizProgress.textContent='คะแนน '+quizScore+' / '+portQuiz.length;
+ quizProgress.textContent='คะแนน '+quizScore+' / '+portQuiz.filter(item=>item.type!=='typed').length;
  quizQuestion.textContent='ทำแบบทดสอบครบทั้ง ๔ ข้อแล้ว! ผ่านด่านท่ารับสินค้าจากหัวเมือง';
  quizAnswers.replaceChildren();
  quizFeedback.textContent='นายท่าอนุญาตให้เดินทางต่อไปยังย่านการค้าต่างชาติแล้ว (ด่านที่ ๕ จะเปิดเมื่อเตรียมฉากเสร็จ)';
@@ -528,7 +532,7 @@ const foreignTradeQuiz=[
 ];
 function openForeignTradeQuiz(){quizIndex=0;quizScore=0;quizShowingResult=false;quizRetrying=false;quizActive=true;quizPanel.classList.remove('hidden');renderForeignTradeQuizQuestion();}
 function renderForeignTradeQuizQuestion(){const item=foreignTradeQuiz[quizIndex];quizHeading.textContent='ด่านที่ ๕ : ย่านการค้าต่างชาติ';quizProgress.textContent='ข้อ '+(quizIndex+1)+' / '+foreignTradeQuiz.length;quizQuestion.textContent=item.q;quizAnswers.replaceChildren();quizFeedback.textContent='';quizNextBtn.classList.add('hidden');item.options.forEach((option,index)=>{const button=document.createElement('button');button.type='button';button.className='quiz-answer';button.textContent=['ก','ข','ค','ง'][index]+'. '+option;button.addEventListener('click',()=>handleStageQuizAnswer(index,foreignTradeQuiz,['ก','ข','ค','ง'],'คำตอบยังไม่ถูกต้องนะ คำใบ้: '+item.hint+' ลองเลือกอีกครั้ง'));quizAnswers.append(button);});}
-function finishForeignTradeQuiz(){quizShowingResult=true;stage5Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๕';quizProgress.textContent='คะแนน '+quizScore+' / '+foreignTradeQuiz.length;quizQuestion.textContent='ทำแบบทดสอบครบทั้ง ๔ ข้อแล้ว! ผ่านด่านย่านการค้าต่างชาติ';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้เรื่องสินค้านำเข้าจากจีน การขนส่งทางเรือสำเภา และความสำคัญของการค้ากับชาวต่างชาติแล้ว';quizNextBtn.textContent='จบด่านที่ ๕ ✓';quizNextBtn.classList.remove('hidden');}
+function finishForeignTradeQuiz(){quizShowingResult=true;stage5Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๕';quizProgress.textContent='คะแนน '+quizScore+' / '+foreignTradeQuiz.filter(item=>item.type!=='typed').length;quizQuestion.textContent='ทำแบบทดสอบครบทั้ง ๔ ข้อแล้ว! ผ่านด่านย่านการค้าต่างชาติ';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้เรื่องสินค้านำเข้าจากจีน การขนส่งทางเรือสำเภา และความสำคัญของการค้ากับชาวต่างชาติแล้ว';quizNextBtn.textContent='จบด่านที่ ๕ ✓';quizNextBtn.classList.remove('hidden');}
 
 
 function foreignExplorerLine(text,emotion='normal'){return {who:'foreignExplorer',emotion,text};}
@@ -555,7 +559,7 @@ const internationalPortQuiz=[
 ];
 function openInternationalPortQuiz(){quizIndex=0;quizScore=0;quizShowingResult=false;quizRetrying=false;quizActive=true;quizPanel.classList.remove('hidden');renderInternationalPortQuizQuestion();}
 function renderInternationalPortQuizQuestion(){const item=internationalPortQuiz[quizIndex];quizHeading.textContent='ด่านที่ ๖ : ท่าเรือการค้าต่างประเทศ';quizProgress.textContent='ข้อ '+(quizIndex+1)+' / '+internationalPortQuiz.length;quizQuestion.textContent=item.q;quizAnswers.replaceChildren();quizFeedback.textContent='';quizNextBtn.classList.add('hidden');item.options.forEach((option,index)=>{const button=document.createElement('button');button.type='button';button.className='quiz-answer';button.textContent=['ก','ข','ค','ง'][index]+'. '+option;button.addEventListener('click',()=>handleStageQuizAnswer(index,internationalPortQuiz,['ก','ข','ค','ง'],'คำตอบยังไม่ถูกต้องนะ คำใบ้: '+item.hint+' ลองเลือกอีกครั้ง'));quizAnswers.append(button);});}
-function finishInternationalPortQuiz(){quizShowingResult=true;stage6Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๖';quizProgress.textContent='คะแนน '+quizScore+' / '+internationalPortQuiz.length;quizQuestion.textContent='ทำแบบทดสอบครบทั้ง ๔ ข้อแล้ว! ผ่านด่านท่าเรือการค้าต่างประเทศ';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้สินค้าจากจีน ญี่ปุ่น อินเดีย ยุโรป และสินค้าจากฝรั่งเศส รวมถึงความสำคัญของการค้าระหว่างประเทศแล้ว';quizNextBtn.textContent='จบด่านที่ ๖ ✓';quizNextBtn.classList.remove('hidden');}
+function finishInternationalPortQuiz(){quizShowingResult=true;stage6Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๖';quizProgress.textContent='คะแนน '+quizScore+' / '+internationalPortQuiz.filter(item=>item.type!=='typed').length;quizQuestion.textContent='ทำแบบทดสอบครบทั้ง ๔ ข้อแล้ว! ผ่านด่านท่าเรือการค้าต่างประเทศ';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้สินค้าจากจีน ญี่ปุ่น อินเดีย ยุโรป และสินค้าจากฝรั่งเศส รวมถึงความสำคัญของการค้าระหว่างประเทศแล้ว';quizNextBtn.textContent='จบด่านที่ ๖ ✓';quizNextBtn.classList.remove('hidden');}
 
 
 function checkpointOfficerLine(text,emotion='normal'){return {who:'checkpointOfficer',emotion,text};}
@@ -581,7 +585,7 @@ const checkpointQuiz=[
 ];
 function openCheckpointQuiz(){quizIndex=0;quizScore=0;quizShowingResult=false;quizRetrying=false;quizActive=true;quizPanel.classList.remove('hidden');renderCheckpointQuizQuestion();}
 function renderCheckpointQuizQuestion(){const item=checkpointQuiz[quizIndex];quizHeading.textContent='ด่านที่ ๗ : ด่านขนอน';quizProgress.textContent='ข้อ '+(quizIndex+1)+' / '+checkpointQuiz.length;quizQuestion.textContent=item.q;quizAnswers.replaceChildren();quizFeedback.textContent='';quizNextBtn.classList.add('hidden');item.options.forEach((option,index)=>{const button=document.createElement('button');button.type='button';button.className='quiz-answer';button.textContent=['ก','ข','ค','ง'][index]+'. '+option;button.addEventListener('click',()=>handleStageQuizAnswer(index,checkpointQuiz,['ก','ข','ค','ง'],'ยังไม่ถูกต้องนะ! คำใบ้: '+item.hint+' ลองเลือกใหม่อีกครั้ง'));quizAnswers.append(button);});}
-function finishCheckpointQuiz(){quizShowingResult=true;stage7Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๗';quizProgress.textContent='คะแนน '+quizScore+' / '+checkpointQuiz.length;quizQuestion.textContent='ยอดเยี่ยม! ผ่านด่านขนอนแล้ว';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้เรื่องจังกอบ วิธีการจัดเก็บ และหน้าที่ของด่านขนอนแล้ว';quizNextBtn.textContent='จบด่านที่ ๗ ✓';quizNextBtn.classList.remove('hidden');}
+function finishCheckpointQuiz(){quizShowingResult=true;stage7Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๗';quizProgress.textContent='คะแนน '+quizScore+' / '+checkpointQuiz.filter(item=>item.type!=='typed').length;quizQuestion.textContent='ยอดเยี่ยม! ผ่านด่านขนอนแล้ว';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้เรื่องจังกอบ วิธีการจัดเก็บ และหน้าที่ของด่านขนอนแล้ว';quizNextBtn.textContent='จบด่านที่ ๗ ✓';quizNextBtn.classList.remove('hidden');}
 
 
  // ===== ด่านที่ ๘ : พระคลังสินค้า =====
@@ -611,7 +615,7 @@ const treasuryQuiz=[
 ];
 function openTreasuryQuiz(){quizIndex=0;quizScore=0;quizShowingResult=false;quizRetrying=false;quizActive=true;quizPanel.classList.remove('hidden');renderTreasuryQuizQuestion();}
 function renderTreasuryQuizQuestion(){const item=treasuryQuiz[quizIndex];quizHeading.textContent='ด่านที่ ๘ : พระคลังสินค้า';quizProgress.textContent='ข้อ '+(quizIndex+1)+' / '+treasuryQuiz.length;quizQuestion.textContent=item.q;quizAnswers.replaceChildren();quizFeedback.textContent='';quizNextBtn.classList.add('hidden');item.options.forEach((option,index)=>{const button=document.createElement('button');button.type='button';button.className='quiz-answer';button.textContent=['ก','ข','ค','ง'][index]+'. '+option;button.addEventListener('click',()=>handleStageQuizAnswer(index,treasuryQuiz,['ก','ข','ค','ง'],'ยังไม่ถูกต้องนะ! คำใบ้: '+item.hint+' ลองเลือกคำตอบใหม่อีกครั้ง'));quizAnswers.append(button);});}
-function finishTreasuryQuiz(){quizShowingResult=true;stage8Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๘';quizProgress.textContent='คะแนน '+quizScore+' / '+treasuryQuiz.length;quizQuestion.textContent='ยอดเยี่ยม! ผ่านด่านพระคลังสินค้าแล้ว';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้หน้าที่ของพระคลังสินค้า การตรวจนับและเก็บรักษาสินค้า รวมถึงความสำคัญต่อกิจการค้าของกรุงศรีอยุธยาแล้ว';quizNextBtn.textContent='จบด่านที่ ๘ ✓';quizNextBtn.classList.remove('hidden');}
+function finishTreasuryQuiz(){quizShowingResult=true;stage8Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๘';quizProgress.textContent='คะแนน '+quizScore+' / '+treasuryQuiz.filter(item=>item.type!=='typed').length;quizQuestion.textContent='ยอดเยี่ยม! ผ่านด่านพระคลังสินค้าแล้ว';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้หน้าที่ของพระคลังสินค้า การตรวจนับและเก็บรักษาสินค้า รวมถึงความสำคัญต่อกิจการค้าของกรุงศรีอยุธยาแล้ว';quizNextBtn.textContent='จบด่านที่ ๘ ✓';quizNextBtn.classList.remove('hidden');}
 
 
 function kingNaraiLine(text,emotion='normal'){return {who:'kingNarai',emotion,text};}
@@ -842,7 +846,7 @@ handleRoyalQuizAnswer=function(selected){
 showScreen('cover-screen');});
 
 function finishRoyalQuiz(){
- quizShowingResult=true;stage9Passed=true;quizHeading.textContent='สรุปผลบททดสอบสุดท้าย';quizProgress.textContent='คะแนน '+quizScore+' / '+finalRoyalQuiz.length;quizQuestion.textContent='ทำแบบทดสอบครบทั้ง ๕ ข้อแล้ว!';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้ทบทวนความรู้เรื่องวิถีชีวิต การเดินทาง การค้า ด่านขนอน และพระคลังสินค้าของกรุงศรีอยุธยาแล้ว';quizNextBtn.textContent='รับฟังคำเฉลยและกลับบ้าน ▶';quizNextBtn.classList.remove('hidden');
+ quizShowingResult=true;stage9Passed=true;quizHeading.textContent='สรุปผลบททดสอบสุดท้าย';quizProgress.textContent='คะแนน '+quizScore+' / '+finalRoyalQuiz.filter(item=>item.type!=='typed').length;quizQuestion.textContent='ทำแบบทดสอบครบทั้ง ๕ ข้อแล้ว!';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้ทบทวนความรู้เรื่องวิถีชีวิต การเดินทาง การค้า ด่านขนอน และพระคลังสินค้าของกรุงศรีอยุธยาแล้ว';quizNextBtn.textContent='รับฟังคำเฉลยและกลับบ้าน ▶';quizNextBtn.classList.remove('hidden');
 }
 function royalEndingDialogue(){
  return [
@@ -889,7 +893,7 @@ function selectMarketQuizAnswer(selected){
 function finishMarketQuiz(){
  quizShowingResult=true;stage3Passed=true;
  quizHeading.textContent='สรุปผลด่านที่ ๓';
- quizProgress.textContent='คะแนน '+quizScore+' / '+marketQuiz.length;
+ quizProgress.textContent='คะแนน '+quizScore+' / '+marketQuiz.filter(item=>item.type!=='typed').length;
  quizQuestion.textContent='ทำแบบทดสอบครบแล้ว! ผ่านด่านตลาดในกรุงศรีอยุธยา';
  quizAnswers.replaceChildren();
  quizFeedback.textContent='เจ้าได้เรียนรู้เรื่องสินค้าที่ซื้อขาย แหล่งที่มาของสินค้า และความสำคัญของตลาดริมน้ำแล้ว';
@@ -929,7 +933,7 @@ function selectBoatQuizAnswer(selected){
 function finishBoatQuiz(){
  quizShowingResult=true;stage2Passed=true;
  quizHeading.textContent='สรุปผลด่านที่ ๒';
- quizProgress.textContent='คะแนน '+quizScore+' / '+boatQuiz.length;
+ quizProgress.textContent='คะแนน '+quizScore+' / '+boatQuiz.filter(item=>item.type!=='typed').length;
  quizQuestion.textContent='ทำแบบทดสอบครบแล้ว! ผ่านด่านการเดินทางทางเรือ';
  quizAnswers.replaceChildren();
  quizFeedback.textContent='เจ้าได้เรียนรู้เรื่องการเดินทางทางน้ำ การขนส่งสินค้า และวิถีชีวิตริมแม่น้ำแล้ว';
@@ -973,7 +977,7 @@ function finishFarmerQuiz(){
  // เมื่อทำครบทุกข้อ ถือว่าผ่านด่านและปลดล็อกพื้นที่ถัดไป คะแนนเก็บไว้เพื่อสะท้อนผลการเรียนรู้
  stage1Passed=true;
  quizHeading.textContent='สรุปผลด่านที่ ๑';
- quizProgress.textContent='คะแนน '+quizScore+' / '+farmerQuiz.length;
+ quizProgress.textContent='คะแนน '+quizScore+' / '+farmerQuiz.filter(item=>item.type!=='typed').length;
  quizQuestion.textContent='ทำแบบทดสอบครบแล้ว! ผ่านด่านวิถีชีวิตชาวนา';
  quizAnswers.replaceChildren();
  quizFeedback.textContent='ได้รับตราผ่านด่านที่ ๑ แล้ว สามารถเดินทางต่อหรือย้อนกลับมาทบทวนความรู้ได้ทุกเมื่อ';
