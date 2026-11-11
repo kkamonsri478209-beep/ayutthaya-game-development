@@ -15,7 +15,7 @@ function attach(){
   panel.append(label,slider);
  }
  document.addEventListener('click',e=>{
-  const target=e.target.closest('button');if(!target||target.closest('#sound-panel')||target.closest('#music-welcome')||target.closest('#adventure-map-screen'))return;
+  const target=e.target.closest('button');if(!target||target.closest('#sound-panel')||target.closest('#music-welcome')||target.closest('#adventure-map-screen')||target.closest('#dialogue-box')||target.closest('#intro-cinematic-ui')||target.classList.contains('intro-cinematic-skip'))return;
   const now=performance.now();if(now-lastClick<65)return;lastClick=now;play('click');
  },true);
  const feedback=document.getElementById('quiz-feedback');
@@ -30,11 +30,6 @@ function attach(){
   const s=heading.textContent;if(s===lastHeading)return;lastHeading=s;
   if(/สรุปผลด่าน/.test(s))play('victory');
  }).observe(heading,{childList:true,characterData:true,subtree:true});
- const dialogue=document.getElementById('dialogue-box');
- if(dialogue)new MutationObserver(()=>{
-  const open=!dialogue.classList.contains('hidden');
-  if(open&&!lastDialogue)play('dialogue');lastDialogue=open;
- }).observe(dialogue,{attributes:true,attributeFilter:['class']});
  const result=document.getElementById('result-screen');
  if(result)new MutationObserver(()=>{
   const open=!result.classList.contains('hidden');
@@ -77,8 +72,6 @@ function attachThaiDialogueChime(){
  const chars=s=>segmenter?Array.from(segmenter.segment(s),x=>x.segment):Array.from(s);
  function animate(value){
   stop();full=value;shown='';step=0;
-  // Cinematic dialogue advances without a click; ensure its first line has an audible cue.
-  if(visible()&&value)play('dialogue');
   if(!visible()||!full)return;
   const parts=chars(full);let i=0;const own=token;
   target.textContent='';
