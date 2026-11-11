@@ -6,10 +6,28 @@
  overlay.className='intro-cinematic-ui hidden';
  overlay.innerHTML='<span class="intro-cinematic-label">บทนำ · การเดินทางข้ามกาลเวลา</span><button type="button" class="intro-cinematic-skip">ข้ามบทนำ ▶</button>';
  document.querySelector('#game-screen').append(overlay);
+ const portal=document.createElement('div');
+ portal.className='intro-time-portal hidden';portal.setAttribute('aria-hidden','true');
+ portal.innerHTML='<div class="intro-time-portal-aura"></div><div class="intro-time-portal-ring"></div><div class="intro-time-portal-core"></div><div class="intro-time-portal-stars"></div>';
+ document.querySelector('#app').append(portal);
+ let portalTimer=null,transitioning=false;
  const spark=document.createElement('div');spark.className='intro-coin-spark hidden';spark.setAttribute('aria-hidden','true');document.querySelector('#game-screen').append(spark);
  function stop(){active=false;finished=true;overlay.classList.add('hidden');spark.classList.add('hidden');keys.left=keys.right=false;}
- function showMap(){stop();dialogue=null;dialogueDone=null;dialogueBox.classList.add('hidden');coinFound=true;goToScene(3);}
+ function showMap(){
+  if(transitioning)return;
+  transitioning=true;stop();dialogue=null;dialogueDone=null;dialogueBox.classList.add('hidden');coinFound=true;
+  // Warm the map artwork before its reveal, without blocking the transition.
+  const mapArt=new Image();mapArt.decoding='async';mapArt.src='ayutthaya-map.png';
+  portal.classList.remove('hidden');portal.classList.remove('intro-portal-reveal');
+  portalTimer=setTimeout(()=>{
+   goToScene(3);
+   portal.classList.add('intro-portal-reveal');
+   portalTimer=setTimeout(()=>{portal.classList.add('hidden');portal.classList.remove('intro-portal-reveal');transitioning=false;portalTimer=null;},1750);
+  },2450);
+ }
  function begin(){
+  if(portalTimer!==null){clearTimeout(portalTimer);portalTimer=null;}
+  transitioning=false;portal.classList.add('hidden');portal.classList.remove('intro-portal-reveal');
   active=true;finished=false;last=0;dialogueAt=0;dialoguePosition=-1;coinTriggered=false;
   overlay.classList.remove('hidden');spark.classList.add('hidden');
  }
