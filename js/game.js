@@ -180,9 +180,8 @@ $('select-next').addEventListener('click',()=>{if(selectedGender)showScreen('nam
 $('name-form').addEventListener('submit',e=>{
  e.preventDefault();const name=$('player-name').value.trim();if(!name){$('player-name').focus();return;}
  playerName=name;
- // สร้างรหัสใหม่สำหรับนักเรียนแต่ละคน แม้เล่นบนเครื่องเดียวกัน
- safeLocalSet(ANSWER_PLAYER_KEY,'P-'+answerIdentifier());
- safeLocalSet(ANSWER_SESSION_KEY,'R-'+answerIdentifier());
+ // แยกรอบการเล่นเมื่อนักเรียนคนใหม่เริ่มเกมบนเครื่องเดียวกัน
+ try{sessionStorage.removeItem(PLAYER_SESSION_KEY);}catch(error){console.warn('Session storage unavailable',error);}
  startGame();
 });
 function genderWord(boy,girl){return selectedGender==='girl'?girl:boy;}
