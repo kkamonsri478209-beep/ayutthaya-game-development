@@ -1411,5 +1411,21 @@ kingNaraiDialogueLines=()=>createTeacherDialogue(8,'before');
 royalEndingDialogue=()=>createTeacherDialogue(8,'after');
 const classroomDepartureLines=teacherReviewedDialogue.map((_,i)=>()=>createTeacherDialogue(i,'after'));
 
-// Start the cover only after question and dialogue configuration is ready.
-showScreen('cover-screen');
+// Preview-only shortcut for the separate test site. Never activate on the production game.
+// Example: /ayutthaya-game-preview/?preview=ending
+const endingPreviewMode=location.hostname==='kkamonsri478209-beep.github.io' &&
+ location.pathname.startsWith('/ayutthaya-game-preview/') &&
+ new URLSearchParams(location.search).get('preview')==='ending';
+if(endingPreviewMode){
+ playerName='ผู้เล่นทดสอบ';
+ quizScore=2;
+ showRoyalResult();
+ const previewStatus=$('result-save-status');
+ previewStatus.textContent='โหมดดูตัวอย่างฉากจบ — คะแนนสมมติ ไม่ใช่ผลการเรียนจริง';
+ const saveButton=$('result-download-btn');
+ saveButton.disabled=true;
+ saveButton.setAttribute('aria-label','ไม่สามารถบันทึกคะแนนในโหมดดูตัวอย่าง');
+ saveButton.title='โหมดดูตัวอย่างไม่บันทึกคะแนนสมมติ';
+}else{
+ showScreen('cover-screen');
+}
