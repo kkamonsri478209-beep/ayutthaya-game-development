@@ -1237,7 +1237,8 @@ async function syncWrittenAnswers(){
   // Limit uploads so old answers cannot saturate image downloads on every launch.
   const queue=getAnswerQueue();
   const now=Date.now();
-  const next=queue.find(record=>!record.lastAttemptAt ||
+  // Send newly written answers first so previous retry history cannot delay classwork.
+  const next=[...queue].reverse().find(record=>!record.lastAttemptAt ||
    now-record.lastAttemptAt>(record.status==='delivery-attempted-not-verified'?900000:60000));
   if(!next)return;
   const answerId=next.answerId;
@@ -1256,7 +1257,12 @@ async function syncWrittenAnswers(){
    if(item){item.status='pending';item.lastAttemptAt=Date.now();putAnswerQueue(current);}
    console.warn('Answer delivery deferred; local copy preserved',error);
   }
- }finally{answerSyncRunning=false;}
+ }finally{
+  answerSyncRunning=false;
+  // Continue only for never-attempted answers; keep network work bounded.
+  if(getAnswerQueue().some(record=>!record.lastAttemptAt))
+   setTimeout(syncWrittenAnswers,3000);
+ }
 }
 function saveClassroomWrittenAnswer(stageIndex,item,answer){
  const sid=getClassroomSession();
