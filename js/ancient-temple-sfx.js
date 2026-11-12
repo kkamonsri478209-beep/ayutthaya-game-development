@@ -2,11 +2,12 @@
 (()=>{'use strict';
 const base='./';
 const files={click:'01_aztec_button.wav',dialogue:'02_aztec_dialogue.wav',correct:'03_aztec_correct.wav',incorrect:'04_aztec_incorrect.wav',coin:'05_aztec_coin.wav',victory:'06_aztec_victory.wav'};
-const audio=Object.fromEntries(Object.entries(files).map(([k,v])=>{const a=new Audio(base+v);a.preload='auto';a.load();return [k,a];}));
+const audio={};
+function getAudio(key){if(!files[key])return null;if(!audio[key]){const a=new Audio(base+files[key]);a.preload='none';audio[key]=a;}return audio[key];}
 let enabled=true,volume=.34,lastClick=0,lastFeedback='',lastHeading='',lastDialogue=false,lastResult=false;
 function play(key){if(!enabled||document.hidden)return;
  // While a conversation is open, only the typewriter's Thai chime may sound.
- if((key==='click'||key==='dialogue')&&!document.getElementById('dialogue-box')?.classList.contains('hidden'))return;const source=audio[key];if(!source)return;try{let a=source;if(!a.paused){a=source.cloneNode();a.preload='auto';}else{try{a.currentTime=0;}catch(e){}}a.volume=volume*(key==='victory'?.8:1);a.play().catch(()=>{});}catch(e){}}
+ if((key==='click'||key==='dialogue')&&!document.getElementById('dialogue-box')?.classList.contains('hidden'))return;const source=getAudio(key);if(!source)return;try{let a=source;if(!a.paused){a=source.cloneNode();a.preload='auto';}else{try{a.currentTime=0;}catch(e){}}a.volume=volume*(key==='victory'?.8:1);a.play().catch(()=>{});}catch(e){}}
 function attach(){
  document.addEventListener('ayutthaya-map-select',()=>play('coin'));
 
