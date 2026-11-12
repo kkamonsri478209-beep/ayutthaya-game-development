@@ -21,7 +21,7 @@
  const spark=document.createElement('div');spark.className='intro-coin-spark hidden';spark.setAttribute('aria-hidden','true');document.querySelector('#game-screen').append(spark);
  function stop(){active=false;finished=true;overlay.classList.add('hidden');spark.classList.add('hidden');keys.left=keys.right=false;}
  const guardianVoice=new Audio('./ayutthaya_time_guardian_voice.mp3.wav');
- guardianVoice.preload='auto';
+ guardianVoice.preload='none';
  // A slower, lower-pitched guardian voice, while keeping the original recording intact.
  guardianVoice.playbackRate=0.84;
  guardianVoice.preservesPitch=false;
