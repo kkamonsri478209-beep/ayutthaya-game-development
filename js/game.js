@@ -25,7 +25,18 @@ const checkpointOfficer={x:1035,w:260,h:390};
 const treasuryOfficer={x:1040,w:255,h:390};
 const kingNarai={x:1040,w:260,h:390};
 const images={};
-function image(path){if(!images[path]){const img=new Image();img.decoding='async';img.loading='eager';img.src=path;images[path]=img;}return images[path];}
+function image(path,priority='auto'){
+ if(!path)return null;
+ if(!images[path]){
+  const img=new Image();
+  img.decoding='async';
+  img.loading='eager';
+  img.fetchPriority=priority;
+  img.src=path;
+  images[path]=img;
+ }else if(priority==='high'){images[path].fetchPriority='high';}
+ return images[path];
+}
 const royalPortraitCache=new WeakMap();
 // Stage 9 only: remove an opaque white/gray/checkered image backdrop at display
 // time. Preserve the actual king sprite, costume, and golden halo.
@@ -70,7 +81,7 @@ function royalPortraitSrc(img){
  royalPortraitCache.set(img,img.src);return img.src;
 }
 // เตรียมภาพฉากถัดไปล่วงหน้า เพื่อลดเวลารอเมื่อผู้เล่นเดินทางเปลี่ยนด่าน
-function preloadScene(index){const scene=scenes[index];if(scene&&scene.bg)image(scene.bg);}
+function preloadScene(index){const scene=scenes[index];if(scene&&scene.bg)image(scene.bg,'low');}
 // โหลดภาพใบหน้าตัวละครทุกอารมณ์ไว้ก่อนเริ่มบทสนทนา ลดอาการสะดุดตอนกด “ถัดไป”
 function preloadDialoguePortraits(){
  const emotions=['normal','curious','surprised','worried','explain','smile','point'];
@@ -118,12 +129,16 @@ function waitForVisual(path){
   retry.style.cssText='display:none;margin:12px auto 0;padding:10px 18px;border-radius:9px;border:1px solid #d9b76d;background:#44305e;color:white;cursor:pointer';
   card.appendChild(retry);
  }
- visualLoading=true;overlay.classList.remove('hidden');
+ visualLoading=true;
  detail.textContent='โปรดรอสักครู่';retry.style.display='none';
- const img=image(path);
+ // Avoid flashing the loading overlay for cached or fast-loading images.
+ overlay.classList.add('hidden');
+ const img=image(path,'high');
  let timeout=null,finished=false;
+ const indicator=setTimeout(()=>{if(!finished&&request===loadingRequest)overlay.classList.remove('hidden');},180);
  function complete(ok){
   if(finished||request!==loadingRequest)return;
+  clearTimeout(indicator);
   if(!ok){
    finished=true;
    if(timeout!==null)clearTimeout(timeout);
@@ -292,7 +307,6 @@ function startGame(){
  royalFirstAnswerLocked=false;royalResultSaved=false;
  sceneIndex=0;showScreen('game-screen');coinFound=false;farmerTalked=false;quizActive=false;quizShowingResult=false;quizRetrying=false;stage1Passed=false;stage2Passed=false;stage3Passed=false;stage4Passed=false;portIntroSeen=false;stage5Passed=false;stage6Passed=false;stage7Passed=false;stage8Passed=false;stage9Passed=false;stage9IntroSeen=false;farmIntroSeen=false;player.x=150;
  objective.textContent=scenes[0].objective;prompt.classList.add('hidden');
-  preloadScene(0);
  if(!started){started=true;last=performance.now();requestAnimationFrame(frame);}
  openDialogue([
   student(()=>genderWord('วันนี้เลิกเรียนแล้ว รีบกลับบ้านดีกว่า','วันนี้เลิกเรียนแล้ว รีบกลับบ้านดีกว่า'),'normal'),
@@ -305,7 +319,6 @@ function goToScene(n,direction='forward'){
  player.facing=n===6?1:direction==='backward'?-1:1;
  player.moving=false;
  if(n===4)scenes[n].bg=selectedGender==='girl'?'boat-ride-girl.webp':'boat-ride-boy.webp';
- preloadScene(n);
  waitForVisual(scenes[n].bg);
  objective.textContent=scenes[n].objective;
  prompt.classList.add('hidden');
@@ -1166,17 +1179,19 @@ function draw(){
  drawWalkSprite(img,index,player.x,ground,player.w,player.h,player.facing);
 }
 function frame(t){
+ // Cap drawing at ~40 FPS to reduce image scaling and particle GPU work.
+ requestAnimationFrame(frame);
+ if(frame.lastPaintAt&&t-frame.lastPaintAt<25)return;
+ frame.lastPaintAt=t;
  const dt=Math.min((t-last)/1000||0,0.04);last=t;
  try{
   if(!visualLoading){update(dt);draw();}
  }catch(error){
-  // Never permanently stop requestAnimationFrame because one frame throws.
   if(!frame.lastErrorAt||t-frame.lastErrorAt>4000){
    console.error('[Ayutthaya] Frame error in scene '+scenes[sceneIndex].id,error);
    frame.lastErrorAt=t;
   }
  }
- requestAnimationFrame(frame);
 }
 // ===== ปรับปรุงการเรียนรู้ 9 ด่าน: 32 ข้อเลือกตอบ + 5 ข้อพิมพ์ตอบ =====
 // ข้อพิมพ์ตอบไม่มีถูกผิด ไม่คิดคะแนน และเก็บในเครื่องชั่วคราวก่อนซิงก์ไป Google Sheets
@@ -1215,19 +1230,31 @@ function putAnswerQueue(queue){
 }
 let answerSyncRunning=false;
 async function syncWrittenAnswers(){
- if(answerSyncRunning||!CLASSROOM_ANSWERS_WEBAPP_URL)return;
+ if(answerSyncRunning||!CLASSROOM_ANSWERS_WEBAPP_URL||!navigator.onLine)return;
  answerSyncRunning=true;
  try{
-  for(const record of getAnswerQueue()){
-   try{
-    // text/plain avoids cross-origin preflight; Apps Script can receive e.postData.contents.
-    await fetch(CLASSROOM_ANSWERS_WEBAPP_URL,{method:'POST',mode:'no-cors',
-      body:new URLSearchParams({answerId:record.answerId,playerId:record.playerId,displayName:record.displayName,gender:record.gender,stage:String(record.stage),questionId:(/^S[13579]-Q[45]$/.test(record.questionId)?'S'+record.stage+'-T1':record.questionId),question:record.question,answer:record.answer,sessionId:record.sessionId})});
-    // no-cors does not expose server confirmation, so do NOT delete a record:
-    // deduplication by answerId is handled on the receiving Apps Script side.
-    const queue=getAnswerQueue(), item=queue.find(x=>x.answerId===record.answerId);
-    if(item){item.status='delivery-attempted-not-verified';putAnswerQueue(queue);}
-   }catch(e){console.warn('Answer not sent; saved for retry',e);}
+  // A no-cors response cannot confirm Sheets receipt; keep an offline copy.
+  // Limit uploads so old answers cannot saturate image downloads on every launch.
+  const queue=getAnswerQueue();
+  const now=Date.now();
+  const next=queue.find(record=>!record.lastAttemptAt ||
+   now-record.lastAttemptAt>(record.status==='delivery-attempted-not-verified'?900000:60000));
+  if(!next)return;
+  const answerId=next.answerId;
+  const stored=queue.find(record=>record.answerId===answerId);
+  if(stored){stored.lastAttemptAt=now;stored.status='sending';putAnswerQueue(queue);}
+  try{
+   await fetch(CLASSROOM_ANSWERS_WEBAPP_URL,{method:'POST',mode:'no-cors',
+    body:new URLSearchParams({answerId:next.answerId,playerId:next.playerId,displayName:next.displayName,
+     gender:next.gender,stage:String(next.stage),
+     questionId:(/^S[13579]-Q[45]$/.test(next.questionId)?'S'+next.stage+'-T1':next.questionId),
+     question:next.question,answer:next.answer,sessionId:next.sessionId})});
+   const current=getAnswerQueue(),item=current.find(record=>record.answerId===answerId);
+   if(item){item.status='delivery-attempted-not-verified';item.lastAttemptAt=Date.now();putAnswerQueue(current);}
+  }catch(error){
+   const current=getAnswerQueue(),item=current.find(record=>record.answerId===answerId);
+   if(item){item.status='pending';item.lastAttemptAt=Date.now();putAnswerQueue(current);}
+   console.warn('Answer delivery deferred; local copy preserved',error);
   }
  }finally{answerSyncRunning=false;}
 }
@@ -1338,9 +1365,9 @@ downloadRoyalResult=function(){
 const classroomDownloadBtn=$('result-download-btn');
 classroomDownloadBtn.removeEventListener('click',originalDownloadRoyalResult);
 classroomDownloadBtn.addEventListener('click',downloadRoyalResult);
-window.addEventListener('online',syncWrittenAnswers);
-// Restore pending answers when a previously failed submission needs retry.
-syncWrittenAnswers();
+window.addEventListener('online',()=>setTimeout(syncWrittenAnswers,1500));
+// Sync after essential game assets are allowed to load; never block the first scene.
+setTimeout(syncWrittenAnswers,5000);
 
 
 // ===== Revised dialogue copied from teacher-review Word document =====
