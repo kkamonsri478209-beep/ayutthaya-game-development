@@ -92,11 +92,11 @@ function preloadDialoguePortraits(stage=sceneIndex){
   4:['boatman-normal.webp','boatman-explain.webp','boatman-point.webp','boatman-greeting.webp'],
   5:['merchant-smile.webp','merchant-explain.webp','merchant-point.webp'],
   6:['port-officer-normal.webp','port-officer-explain.webp','port-officer-point.webp'],
-  7:['chinese_merchant_happy.png','chinese_merchant_explain.png','chinese_merchant_point_left.png','chinese_merchant_surprised.png'],
-  8:['foreign_explorer_friendly.png','foreign_explorer_explaining.png','foreign_explorer_pointing.png'],
-  9:['npc_checkpoint_neutral.png','npc_checkpoint_inspect_document.png','npc_checkpoint_point_left.png'],
-  10:['npc_treasury_idle.png','npc_treasury_wave.png','npc_treasury_show_records.png'],
-  11:['king_narai_idle.png','king_narai_welcome.png','king_narai_thinking.png']
+  7:['chinese_merchant_happy.webp','chinese_merchant_explain.webp','chinese_merchant_point_left.webp','chinese_merchant_surprised.webp'],
+  8:['foreign_explorer_friendly.webp','foreign_explorer_explaining.webp','foreign_explorer_pointing.webp'],
+  9:['npc_checkpoint_neutral.webp','npc_checkpoint_inspect_document.webp','npc_checkpoint_point_left.webp'],
+  10:['npc_treasury_idle.webp','npc_treasury_wave.webp','npc_treasury_show_records.webp'],
+  11:['king_narai_idle.webp','king_narai_welcome.webp','king_narai_thinking.webp']
  };
  files.push(...(groups[stage]||[]));
  files.forEach(path=>image(path,'low'));
@@ -110,11 +110,11 @@ const scenes=[
  {id:'boat',bg:null,objective:'ด่านที่ ๒ : การเดินทางทางเรือเข้าสู่พระนคร'},
  {id:'market',bg:'marketplace-bg.jpg',objective:'ด่านที่ ๓ : สำรวจตลาดในกรุงศรีอยุธยา'},
  {id:'port',bg:'stage4-port.webp',objective:'ด่านที่ ๔ : เดินไปทางขวาเพื่อสำรวจท่ารับสินค้าจากหัวเมือง'},
- {id:'foreignTrade',bg:'foreign_trade_district_bg.png',objective:'ด่านที่ ๕ : เดินไปพูดคุยกับพ่อค้าชาวจีนในย่านการค้าต่างชาติ'},
- {id:'internationalPort',bg:'international_trade_port.png',objective:'ด่านที่ ๖ : เดินไปพูดคุยกับกัปตันฌองที่ท่าเรือการค้าต่างประเทศ'},
- {id:'checkpoint',bg:'checkpoint_gate.png',objective:'ด่านที่ ๗ : เดินไปพูดคุยกับเจ้าหน้าที่ประจำด่านขนอน'},
- {id:'treasury',bg:'scene_treasury.png',objective:'ด่านที่ ๘ : เดินไปพูดคุยกับเจ้าพนักงานพระคลังสินค้า'},
- {id:'royalPalace',bg:'stage9_palace_background.png',objective:'ด่านที่ ๙ : เดินสำรวจพระราชวังและพบชายปริศนา'}
+ {id:'foreignTrade',bg:'foreign_trade_district_bg.webp',objective:'ด่านที่ ๕ : เดินไปพูดคุยกับพ่อค้าชาวจีนในย่านการค้าต่างชาติ'},
+ {id:'internationalPort',bg:'international_trade_port.webp',objective:'ด่านที่ ๖ : เดินไปพูดคุยกับกัปตันฌองที่ท่าเรือการค้าต่างประเทศ'},
+ {id:'checkpoint',bg:'checkpoint_gate.webp',objective:'ด่านที่ ๗ : เดินไปพูดคุยกับเจ้าหน้าที่ประจำด่านขนอน'},
+ {id:'treasury',bg:'scene_treasury.webp',objective:'ด่านที่ ๘ : เดินไปพูดคุยกับเจ้าพนักงานพระคลังสินค้า'},
+ {id:'royalPalace',bg:'stage9_palace_background.webp',objective:'ด่านที่ ๙ : เดินสำรวจพระราชวังและพบชายปริศนา'}
 ];
 // Display a clear loading state while the current scene's actual image is downloading.
 let loadingRequest=0;
@@ -261,11 +261,11 @@ function showDialogueLine(){
  else if(d.who==='boatman')portraitPath='boatman-'+(d.emotion==='smile'?'greeting':d.emotion)+'.webp';
  else if(d.who==='merchant')portraitPath='merchant-'+d.emotion+'.webp';
  else if(d.who==='portOfficer')portraitPath='port-officer-'+d.emotion+'.webp';
-  else if(d.who==='chineseMerchant')portraitPath=({normal:'chinese_merchant_happy.png',smile:'chinese_merchant_happy.png',explain:'chinese_merchant_explain.png',point:'chinese_merchant_point_left.png',surprised:'chinese_merchant_surprised.png',proud:'chinese_merchant_present_gold.png'})[d.emotion]||'chinese_merchant_happy.png';
- else if(d.who==='foreignExplorer')portraitPath=({normal:'foreign_explorer_friendly.png',smile:'foreign_explorer_welcoming.png',explain:'foreign_explorer_explaining.png',point:'foreign_explorer_pointing.png',surprised:'foreign_explorer_surprised.png',laugh:'foreign_explorer_laughing..png',proud:'foreign_explorer_welcoming.png'})[d.emotion]||'foreign_explorer_friendly.png';
- else if(d.who==='checkpointOfficer')portraitPath=({normal:'npc_checkpoint_neutral.png',stop:'npc_checkpoint_stop.png',proud:'npc_checkpoint_show_emblem.png',explain:'npc_checkpoint_inspect_document.png',inspect:'npc_checkpoint_inspect_document.png',point:'npc_checkpoint_point_left.png',celebrate:'npc_checkpoint_celebrate.png'})[d.emotion]||'npc_checkpoint_neutral.png';
- else if(d.who==='treasuryOfficer')portraitPath=({normal:'npc_treasury_idle.png',wave:'npc_treasury_wave.png',proud:'npc_treasury_present.png',present:'npc_treasury_present.png',records:'npc_treasury_show_records.png',explain:'npc_treasury_show_records.png',point:'npc_treasury_point.png',thinking:'npc_treasury_thinking.png'})[d.emotion]||'npc_treasury_idle.png';
- else if(d.who==='kingNarai')portraitPath=({normal:'king_narai_idle.png',welcome:'king_narai_welcome.png',thinking:'king_narai_thinking.png',determined:'king_narai_determined.png',stop:'king_narai_stop.png',teaching:'king_narai_teaching.png',respect:'king_narai_respect.png',pointing:'king_narai_pointing.png'})[d.emotion]||'king_narai_idle.png';
+  else if(d.who==='chineseMerchant')portraitPath=({normal:'chinese_merchant_happy.webp',smile:'chinese_merchant_happy.webp',explain:'chinese_merchant_explain.webp',point:'chinese_merchant_point_left.webp',surprised:'chinese_merchant_surprised.webp',proud:'chinese_merchant_present_gold.webp'})[d.emotion]||'chinese_merchant_happy.webp';
+ else if(d.who==='foreignExplorer')portraitPath=({normal:'foreign_explorer_friendly.webp',smile:'foreign_explorer_welcoming.webp',explain:'foreign_explorer_explaining.webp',point:'foreign_explorer_pointing.webp',surprised:'foreign_explorer_surprised.webp',laugh:'foreign_explorer_laughing..webp',proud:'foreign_explorer_welcoming.webp'})[d.emotion]||'foreign_explorer_friendly.webp';
+ else if(d.who==='checkpointOfficer')portraitPath=({normal:'npc_checkpoint_neutral.webp',stop:'npc_checkpoint_stop.webp',proud:'npc_checkpoint_show_emblem.webp',explain:'npc_checkpoint_inspect_document.webp',inspect:'npc_checkpoint_inspect_document.webp',point:'npc_checkpoint_point_left.webp',celebrate:'npc_checkpoint_celebrate.webp'})[d.emotion]||'npc_checkpoint_neutral.webp';
+ else if(d.who==='treasuryOfficer')portraitPath=({normal:'npc_treasury_idle.webp',wave:'npc_treasury_wave.webp',proud:'npc_treasury_present.webp',present:'npc_treasury_present.webp',records:'npc_treasury_show_records.webp',explain:'npc_treasury_show_records.webp',point:'npc_treasury_point.webp',thinking:'npc_treasury_thinking.webp'})[d.emotion]||'npc_treasury_idle.webp';
+ else if(d.who==='kingNarai')portraitPath=({normal:'king_narai_idle.webp',welcome:'king_narai_welcome.webp',thinking:'king_narai_thinking.webp',determined:'king_narai_determined.webp',stop:'king_narai_stop.webp',teaching:'king_narai_teaching.webp',respect:'king_narai_respect.webp',pointing:'king_narai_pointing.webp'})[d.emotion]||'king_narai_idle.webp';
  else portraitPath='student-'+selectedGender+'-'+d.emotion+'.webp';
  const portraitAsset=image(portraitPath);
  // Do not display the previous speaker while a new portrait is downloading.
@@ -1142,15 +1142,15 @@ function draw(){
   }
  }
  if(id==='checkpoint'){
-  const img=image('npc_checkpoint_fullbody.png');if(img.complete&&img.naturalWidth){const w=checkpointOfficer.w,h=checkpointOfficer.h;ctx.drawImage(img,Math.round(checkpointOfficer.x-w/2),Math.round(ground-h),w,h);if(Math.abs(player.x-checkpointOfficer.x)<260){ctx.font='bold 20px system-ui';ctx.fillStyle='#fff6db';ctx.textAlign='center';ctx.fillText('เจ้าหน้าที่ด่านขนอน',checkpointOfficer.x,ground-h-9);}}
+  const img=image('npc_checkpoint_fullbody.webp');if(img.complete&&img.naturalWidth){const w=checkpointOfficer.w,h=checkpointOfficer.h;ctx.drawImage(img,Math.round(checkpointOfficer.x-w/2),Math.round(ground-h),w,h);if(Math.abs(player.x-checkpointOfficer.x)<260){ctx.font='bold 20px system-ui';ctx.fillStyle='#fff6db';ctx.textAlign='center';ctx.fillText('เจ้าหน้าที่ด่านขนอน',checkpointOfficer.x,ground-h-9);}}
  }
  if(id==='royalPalace'){
-  const kingImg=image('king_narai_idle.png');
+  const kingImg=image('king_narai_idle.webp');
   if(kingImg.complete&&kingImg.naturalWidth){const w=kingNarai.w,h=kingNarai.h;ctx.drawImage(kingImg,Math.round(kingNarai.x-w/2),Math.round(ground-h),w,h);}
   if(Math.abs(player.x-kingNarai.x)<260){ctx.font='bold 20px system-ui';ctx.fillStyle='#fff6db';ctx.textAlign='center';ctx.fillText('ชายปริศนา',kingNarai.x,ground-kingNarai.h-9);}
  }
  if(id==='treasury'){
-  const img=image('npc_treasury_full.png');
+  const img=image('npc_treasury_full.webp');
   if(img.complete&&img.naturalWidth){
    const w=treasuryOfficer.w,h=treasuryOfficer.h;
    ctx.drawImage(img,Math.round(treasuryOfficer.x-w/2),Math.round(ground-h),w,h);
@@ -1158,10 +1158,10 @@ function draw(){
   }
  }
  if(id==='internationalPort'){
-  const img=image('foreign_explorer_full.png');if(img.complete&&img.naturalWidth){const w=foreignExplorer.w,h=foreignExplorer.h;ctx.drawImage(img,Math.round(foreignExplorer.x-w/2),Math.round(ground-h),w,h);if(Math.abs(player.x-foreignExplorer.x)<260){ctx.font='bold 20px system-ui';ctx.fillStyle='#fff6db';ctx.textAlign='center';ctx.fillText('กัปตันฌอง',foreignExplorer.x,ground-h-9);}}
+  const img=image('foreign_explorer_full.webp');if(img.complete&&img.naturalWidth){const w=foreignExplorer.w,h=foreignExplorer.h;ctx.drawImage(img,Math.round(foreignExplorer.x-w/2),Math.round(ground-h),w,h);if(Math.abs(player.x-foreignExplorer.x)<260){ctx.font='bold 20px system-ui';ctx.fillStyle='#fff6db';ctx.textAlign='center';ctx.fillText('กัปตันฌอง',foreignExplorer.x,ground-h-9);}}
  }
  if(id==='foreignTrade'){
-  const img=image('chinese_merchant_full.png');if(img.complete&&img.naturalWidth){const w=chineseMerchant.w,h=chineseMerchant.h;ctx.drawImage(img,Math.round(chineseMerchant.x-w/2),Math.round(ground-h),w,h);if(Math.abs(player.x-chineseMerchant.x)<260){ctx.font='bold 20px system-ui';ctx.fillStyle='#fff6db';ctx.textAlign='center';ctx.fillText('พ่อค้าชาวจีน',chineseMerchant.x,ground-h-9);}}
+  const img=image('chinese_merchant_full.webp');if(img.complete&&img.naturalWidth){const w=chineseMerchant.w,h=chineseMerchant.h;ctx.drawImage(img,Math.round(chineseMerchant.x-w/2),Math.round(ground-h),w,h);if(Math.abs(player.x-chineseMerchant.x)<260){ctx.font='bold 20px system-ui';ctx.fillStyle='#fff6db';ctx.textAlign='center';ctx.fillText('พ่อค้าชาวจีน',chineseMerchant.x,ground-h-9);}}
  }
  if(id==='market'){
   const merchantImg=image('merchant-idle.webp');

@@ -32,7 +32,7 @@
   if(transitioning)return;
   transitioning=true;stop();dialogue=null;dialogueDone=null;dialogueBox.classList.add('hidden');coinFound=true;
   const token=++transitionToken;
-  const mapArt=new Image();mapArt.decoding='async';mapArt.src='ayutthaya-map.png';
+  const mapArt=new Image();mapArt.decoding='async';mapArt.src='ayutthaya-map.webp';
   portal.classList.remove('hidden','intro-portal-reveal');
   portal.style.display='grid';portal.style.position='fixed';portal.style.inset='0';portal.style.zIndex='10001';
   let revealed=false;
