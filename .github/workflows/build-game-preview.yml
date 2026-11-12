@@ -1,0 +1,35 @@
+name: Build isolated game preview
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - performance-asset-loading-20261112
+    paths:
+      - '.github/workflows/build-game-preview.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify game entry and JavaScript
+        run: |
+          test -f index.html
+          for file in js/*.js; do node --check "$file"; done
+      - name: Package self-contained test version
+        run: |
+          mkdir -p preview
+          cp -a index.html preview/
+          for path in js css assets; do
+            if [ -d "$path" ]; then cp -a "$path" preview/; fi
+          done
+          find . -maxdepth 1 -type f \\( -iname '*.png' -o -iname '*.webp' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.mp3' -o -iname '*.wav' -o -iname '*.svg' -o -iname '*.ico' \\) -exec cp {} preview/ \\;
+      - name: Upload isolated preview package (no Pages deployment)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ayutthaya-game-test-preview
+          path: preview/
+          retention-days: 14
