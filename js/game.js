@@ -930,14 +930,22 @@ function interact(){
  }
 }
 $('interact-btn').addEventListener('click',interact);
+// Keyboard shortcuts must never intercept Thai typing, IME composition, or editable fields.
+// Physical KeyE is used for the Thai vowel ำ on some keyboard layouts.
+function isEditingText(target){
+ const node=target instanceof Element?target:document.activeElement;
+ return !!(node&&node.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="textbox"]'));
+}
 window.addEventListener('keydown',e=>{
- if(document.activeElement===$('player-name'))return;
+ if(e.isComposing||e.key==='Process'||isEditingText(e.target))return;
+ if($('game-screen').classList.contains('hidden'))return;
  if(['ArrowLeft','ArrowRight','Space','Enter','KeyE','KeyA','KeyD'].includes(e.code))e.preventDefault();
  if(e.code==='ArrowLeft'||e.code==='KeyA')keys.left=true;
  if(e.code==='ArrowRight'||e.code==='KeyD')keys.right=true;
- if((e.code==='KeyE'||e.code==='Space'||e.code==='Enter')&&!e.repeat&&!$('game-screen').classList.contains('hidden'))interact();
+ if((e.code==='KeyE'||e.code==='Space'||e.code==='Enter')&&!e.repeat)interact();
 });
 window.addEventListener('keyup',e=>{
+ if(e.isComposing||isEditingText(e.target)){keys.left=keys.right=false;return;}
  if(e.code==='ArrowLeft'||e.code==='KeyA')keys.left=false;
  if(e.code==='ArrowRight'||e.code==='KeyD')keys.right=false;
 });
