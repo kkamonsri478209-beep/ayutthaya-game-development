@@ -1197,7 +1197,7 @@ async function syncWrittenAnswers(){
    try{
     // text/plain avoids cross-origin preflight; Apps Script can receive e.postData.contents.
     await fetch(CLASSROOM_ANSWERS_WEBAPP_URL,{method:'POST',mode:'no-cors',
-      body:new URLSearchParams({answerId:record.answerId,playerId:record.playerId,displayName:record.displayName,gender:record.gender,stage:String(record.stage),questionId:record.questionId,question:record.question,answer:record.answer,sessionId:record.sessionId})});
+      body:new URLSearchParams({answerId:record.answerId,playerId:record.playerId,displayName:record.displayName,gender:record.gender,stage:String(record.stage),questionId:(/^S[13579]-Q[45]$/.test(record.questionId)?'S'+record.stage+'-T1':record.questionId),question:record.question,answer:record.answer,sessionId:record.sessionId})});
     // no-cors does not expose server confirmation, so do NOT delete a record:
     // deduplication by answerId is handled on the receiving Apps Script side.
     const queue=getAnswerQueue(), item=queue.find(x=>x.answerId===record.answerId);
