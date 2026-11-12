@@ -83,19 +83,23 @@ function royalPortraitSrc(img){
 // เตรียมภาพฉากถัดไปล่วงหน้า เพื่อลดเวลารอเมื่อผู้เล่นเดินทางเปลี่ยนด่าน
 function preloadScene(index){const scene=scenes[index];if(scene&&scene.bg)image(scene.bg,'low');}
 // โหลดภาพใบหน้าตัวละครทุกอารมณ์ไว้ก่อนเริ่มบทสนทนา ลดอาการสะดุดตอนกด “ถัดไป”
-function preloadDialoguePortraits(){
- const emotions=['normal','curious','surprised','worried','explain','smile','point'];
- const files=[];
- for(const gender of ['boy','girl'])for(const emotion of emotions)files.push(`student-${gender}-${emotion}.webp`);
- for(const emotion of ['normal','explain','smile','point'])files.push(`farmer-${emotion}.webp`);
- for(const emotion of ['normal','explain','point','greeting'])files.push(`boatman-${emotion}.webp`);
- for(const emotion of ['smile','explain','point'])files.push(`merchant-${emotion}.webp`);
- files.push('chinese_merchant_happy.png','chinese_merchant_explain.png','chinese_merchant_point_left.png','chinese_merchant_surprised.png','chinese_merchant_present_gold.png');
- files.push('foreign_explorer_friendly.png','foreign_explorer_explaining.png','foreign_explorer_pointing.png','foreign_explorer_surprised.png','foreign_explorer_laughing..png','foreign_explorer_welcoming.png');
- files.push('npc_checkpoint_inspect_document.png','npc_checkpoint_point_left.png','npc_checkpoint_celebrate.png','npc_checkpoint_show_emblem.png','npc_checkpoint_fullbody.png','npc_checkpoint_stop.png','npc_checkpoint_neutral.png');
- files.push('npc_treasury_idle.png','npc_treasury_wave.png','npc_treasury_present.png','npc_treasury_show_records.png','npc_treasury_point.png','npc_treasury_thinking.png','npc_treasury_full.png');
- files.push('king_narai_welcome.png','king_narai_thinking.png','king_narai_determined.png','king_narai_idle.png','king_narai_stop.png','king_narai_teaching.png','king_narai_respect.png','king_narai_pointing.png');
- files.forEach(path=>{const img=image(path);if(typeof img.decode==='function')img.decode().catch(()=>{});});
+function preloadDialoguePortraits(stage=sceneIndex){
+ // Only warm portraits for the current stage; do not download all nine stages.
+ const students=['normal','curious','surprised','worried'];
+ const files=students.map(emotion=>`student-${selectedGender||'boy'}-${emotion}.webp`);
+ const groups={
+  3:['farmer-normal.webp','farmer-explain.webp','farmer-smile.webp','farmer-point.webp'],
+  4:['boatman-normal.webp','boatman-explain.webp','boatman-point.webp','boatman-greeting.webp'],
+  5:['merchant-smile.webp','merchant-explain.webp','merchant-point.webp'],
+  6:['port-officer-normal.webp','port-officer-explain.webp','port-officer-point.webp'],
+  7:['chinese_merchant_happy.png','chinese_merchant_explain.png','chinese_merchant_point_left.png','chinese_merchant_surprised.png'],
+  8:['foreign_explorer_friendly.png','foreign_explorer_explaining.png','foreign_explorer_pointing.png'],
+  9:['npc_checkpoint_neutral.png','npc_checkpoint_inspect_document.png','npc_checkpoint_point_left.png'],
+  10:['npc_treasury_idle.png','npc_treasury_wave.png','npc_treasury_show_records.png'],
+  11:['king_narai_idle.png','king_narai_welcome.png','king_narai_thinking.png']
+ };
+ files.push(...(groups[stage]||[]));
+ files.forEach(path=>image(path,'low'));
 }
 // ภาพตัวละครและฉากอื่น ๆ จะถูกโหลดเมื่อจำเป็น
 const scenes=[
@@ -320,6 +324,8 @@ function goToScene(n,direction='forward'){
  player.moving=false;
  if(n===4)scenes[n].bg=selectedGender==='girl'?'boat-ride-girl.webp':'boat-ride-boy.webp';
  waitForVisual(scenes[n].bg);
+ // Warm only this scene's dialogue assets after its background has priority.
+ setTimeout(()=>{if(sceneIndex===n)preloadDialoguePortraits(n);},900);
  objective.textContent=scenes[n].objective;
  prompt.classList.add('hidden');
  if(n===3&&!farmIntroSeen){
