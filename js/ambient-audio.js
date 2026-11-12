@@ -4,7 +4,7 @@
 'use strict';
 const audio=new Audio('./ayutthaya_thai_traditional_loop_96s.mp3');
 audio.loop=true;
-audio.preload='auto';
+audio.preload='none';
 let enabled=true,volume=.55,unlocked=false;
 const $=id=>document.getElementById(id);
 const visible=id=>{const el=$(id);return !!el&&!el.classList.contains('hidden');};
