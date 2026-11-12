@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ดูตัวอย่างฉากจบ — เงินพดด้วง</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#120b21;color:#6a2c0c;font-family:system-ui,"Noto Sans Thai",sans-serif;min-height:100dvh;display:grid;place-items:center;padding:12px}
+.stage{position:relative;width:min(100%,1400px);aspect-ratio:16/9;background:url('stage9_result_background.webp') center/100% 100% no-repeat}
+.subtitle,.name,.label,.score,.message{position:absolute;left:24%;width:52%;text-align:center;line-height:1.22;text-shadow:0 1px 2px #fff4c9;overflow-wrap:anywhere}
+.subtitle{top:27%;font-size:clamp(10px,1.7vw,27px);font-weight:800}.name{top:34%;font-size:clamp(12px,2.2vw,34px);font-weight:900}.label{top:42%;font-size:clamp(10px,1.5vw,24px);font-weight:800}.score{top:48%;font-size:clamp(25px,4.5vw,70px);font-weight:900;color:#a22c17}.message{top:60%;font-size:clamp(9px,1.25vw,19px);font-weight:750}
+.medal{position:absolute;left:44%;top:66%;width:12%;height:19%;object-fit:contain}
+.buttons{position:absolute;left:21%;width:58%;bottom:6.5%;height:9%;display:grid;grid-template-columns:1fr 1fr;gap:7%}.buttons button{background:none;border:0;color:#fff3cf;text-shadow:0 2px 3px #361614;font-size:clamp(11px,1.7vw,25px);font-weight:900;cursor:pointer}
+.note{position:fixed;bottom:5px;left:0;right:0;text-align:center;color:#f4d89d;font-size:12px;background:#120b21c9;padding:4px}
+</style></head><body>
+<main class="stage" aria-label="ตัวอย่างหน้าภารกิจสำเร็จ">
+<div class="subtitle">นักเดินทางข้ามกาลเวลา</div><div class="name">ผู้เล่นทดสอบ</div><div class="label">คะแนนบททดสอบสุดท้าย</div><div class="score">2 / 4</div><div class="message">ขอบใจที่ร่วมเดินทาง ทุกคำตอบช่วยให้เราเรียนรู้และพัฒนาต่อไปได้</div>
+<img class="medal" src="time_traveler_medal.webp" alt="เหรียญรางวัล">
+<div class="buttons"><button onclick="location.href='./'">เล่นเกมจริง</button><button disabled title="ตัวอย่างไม่มีคะแนนจริง">บันทึกผล</button></div>
+</main><div class="note">โหมดดูฉากจบโดยตรง · ไม่ต้องเล่นเกม · คะแนนเป็นตัวอย่าง</div>
+</body></html>
