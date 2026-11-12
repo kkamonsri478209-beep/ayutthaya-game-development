@@ -1245,8 +1245,12 @@ function renderClassroomQuestion(stageIndex){
    quizFeedback.textContent=CLASSROOM_ANSWERS_WEBAPP_URL?
     'รับคำตอบแล้ว ✓ ไม่มีถูกหรือผิด ระบบเก็บสำรองไว้และกำลังส่งไปยังฐานข้อมูลของครู':
     'รับคำตอบแล้ว ✓ ไม่มีถูกหรือผิด บันทึกสำรองไว้ในเครื่อง (รอเชื่อม Google Sheets)';
+   // คำถามพิมพ์ตอบผ่านทันที ไม่ต้องกดปุ่ม "ถัดไป" ซ้ำอีกครั้ง
    quizNextBtn.textContent=quizIndex===items.length-1?'ดูผลการเรียนรู้ ▶':'ข้อต่อไป ▶';
    quizNextBtn.classList.remove('hidden');
+   // Move to the result/next question synchronously after the local backup is saved.
+   // Background Apps Script submission never gates classroom progression.
+   quizNextBtn.click();
   });
   quizAnswers.append(textarea,submit);
   quizFeedback.textContent='ข้อนี้ไม่มีถูกหรือผิด นักเรียนสามารถตอบด้วยความคิดของตนเองได้';
