@@ -1,16 +1,18 @@
-name: Optimize game image assets
+name: Optimize game image assets (test branch)
 on:
-  workflow_dispatch:
   push:
+    branches:
+      - performance-asset-loading-20261112
     paths:
       - ".github/workflows/optimize-game-images.yml"
+  workflow_dispatch:
 
 permissions:
   contents: write
 
 jobs:
   optimize:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/performance-asset-loading-20261112'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,71 +23,46 @@ jobs:
           python-version: "3.12"
       - name: Install Pillow
         run: python -m pip install --disable-pip-version-check Pillow
-      - name: Optimize all PNG game assets and update references
+      - name: Convert remaining large PNG images without resizing
         run: |
           python - <<'PY'
           from pathlib import Path
           from PIL import Image
-          import re
-          
-          root = Path(".")
-          pngs = sorted(root.glob("*.png"))
-          before = sum(p.stat().st_size for p in pngs)
-          for src in pngs:
-              target = src.with_suffix(".webp")
-              with Image.open(src) as opened:
-                  im = opened.copy()
-              if im.mode not in ("RGB", "RGBA"):
-                  im = im.convert("RGBA" if "A" in im.getbands() else "RGB")
-              is_walk = "-walk" in src.name
-              if not is_walk:
-                  limit = (1600, 900) if im.width / im.height > 1.35 else (1000, 1000)
-                  im.thumbnail(limit, Image.Resampling.LANCZOS)
-              # Alpha transparency is supported by WebP, including on character portraits.
-              im.save(target, "WEBP", quality=86 if im.mode == "RGBA" else 82, method=6)
-              if target.stat().st_size >= src.stat().st_size:
-                  # Retain original dimensions and visually lossless output but skip larger variants.
-                  target.unlink()
-                  print("SKIP", src.name, "WebP not smaller")
-              else:
-                  print("OPT", src.name, src.stat().st_size, "->", target.stat().st_size)
-          
-          # Rewrite only references whose optimized image exists, keeping originals as backup.
-          for name in ("js/game.js", "index.html"):
-              p = root / name
-              content = p.read_text(encoding="utf-8")
-              for png in pngs:
-                  if png.with_suffix(".webp").exists():
-                      content = content.replace(png.name, png.with_suffix(".webp").name)
-              # Also catch dynamic filenames assembled from JS pieces e.g. student-boy-walk.png.
-              dynamic_groups = ("student-", "farmer-", "boatman-", "merchant-", "port-officer-")
-              if name.endswith(".js"):
-                  content = re.sub(r"(\\+\\.png)", r"\\.webp", content) if False else content
-                  # For dynamic filenames ensure all needed source images have WebP versions.
-                  if all((root / x).with_suffix(".webp").exists() for x in [
-                      "student-boy-normal.png", "student-girl-normal.png",
-                      "student-boy-walk.png", "student-girl-walk.png",
-                      "farmer-normal.png", "boatman-normal.png",
-                      "merchant-smile.png", "port-officer-normal.png"
-                  ]):
-                      content = content.replace("+'.png'", "+'.webp'").replace("+'.png`", "+'.webp`")
-                      content = content.replace("}.png`", "}.webp`").replace("-.png", "-.webp")
-                      content = content.replace(".png`", ".webp`")
-              else:
-                  content = content.replace("load-on-demand-20261105", "webp-optimized-20261105")
-              p.write_text(content, encoding="utf-8")
-          after = sum(p.stat().st_size for p in root.glob("*.webp"))
-          print("TOTAL_PNG_MB", round(before/1048576,2))
-          print("TOTAL_WEBP_MB", round(after/1048576,2))
+          root = Path('.')
+          # Keep original PNG files as backups. Existing WebP assets are not overwritten.
+          new_assets = {}
+          for src in sorted(root.glob('*.png')):
+              dst = src.with_suffix('.webp')
+              if dst.exists() or src.stat().st_size < 400_000:
+                  continue
+              with Image.open(src) as original:
+                  image = original.convert('RGBA' if 'A' in original.getbands() else 'RGB')
+                  image.save(dst, 'WEBP', quality=88, method=6)
+              if dst.stat().st_size >= src.stat().st_size:
+                  dst.unlink()
+                  continue
+              new_assets[src.name] = dst.name
+              print('OPT', src.name, src.stat().st_size, '->', dst.stat().st_size)
+          # Only replace explicit filename references; avoid changing educational text.
+          for path in [Path('index.html'), *Path('js').glob('*.js'), *Path('css').glob('*.css')]:
+              before = path.read_text(encoding='utf-8')
+              after = before
+              for old, new in new_assets.items():
+                  after = after.replace(old, new)
+              if after != before:
+                  path.write_text(after, encoding='utf-8')
+                  print('UPDATED REFERENCES', path)
+          print('NEW_WEBP_COUNT', len(new_assets))
           PY
       - name: Validate JavaScript
-        run: node --check js/game.js
-      - name: Commit optimized assets
+        run: |
+          for file in js/*.js; do node --check "$file"; done
+      - name: Commit optimized assets to test branch only
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add '*.webp' js/game.js index.html
+          git add '*.webp' js index.html css
           if ! git diff --cached --quiet; then
-            git commit -m "Optimize all game images to WebP while preserving PNG backups"
-            git push
+            git commit -m "perf: optimize remaining large PNG assets on test branch"
+            git push origin HEAD:performance-asset-loading-20261112
           fi
