@@ -1411,6 +1411,30 @@ kingNaraiDialogueLines=()=>createTeacherDialogue(8,'before');
 royalEndingDialogue=()=>createTeacherDialogue(8,'after');
 const classroomDepartureLines=teacherReviewedDialogue.map((_,i)=>()=>createTeacherDialogue(i,'after'));
 
+// Teacher-only stage navigation on the separate preview website (never on main).
+if(location.pathname.startsWith('/ayutthaya-game-preview/') && new URLSearchParams(location.search).get('teacher')==='1'){
+ const names=['ทุ่งนา','แม่น้ำ','ตลาดข้างคุก','ท่ารับสินค้าจากหัวเมือง','ย่านการค้าต่างชาติ','ท่าเรือการค้าต่างประเทศ','ด่านขนอน','พระคลังสินค้า','พระราชวังหลวง'];
+ const panel=document.createElement('aside');panel.setAttribute('aria-label','เมนูทดสอบสำหรับครู');
+ panel.style.cssText='position:fixed;right:10px;top:10px;z-index:220;background:#251c3df2;color:white;padding:10px;border:2px solid #dbb85e;border-radius:12px;max-width:min(330px,90vw);font:14px system-ui';
+ const toggle=document.createElement('button');toggle.textContent='🎓 เมนูครู · เลือกด่าน';toggle.style.cssText='padding:10px;background:#65468a;color:white;border-radius:8px;border:1px solid gold;cursor:pointer;width:100%';
+ const list=document.createElement('div');list.style.cssText='display:none;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;max-height:65vh;overflow:auto';
+ toggle.onclick=()=>list.style.display=list.style.display==='none'?'grid':'none';
+ function jump(n){
+  dialogue=null;dialogueDone=null;dialogueIndex=0;quizActive=false;quizShowingResult=false;quizRetrying=false;
+  dialogueBox.classList.add('hidden');quizPanel.classList.add('hidden');keys.left=keys.right=false;
+  selectedGender=selectedGender||'girl';playerName=($('player-name').value||'คุณครูทดสอบ').trim();coinFound=true;
+  stage1Passed=n>1;stage2Passed=n>2;stage3Passed=n>3;stage4Passed=n>4;
+  stage5Passed=n>5;stage6Passed=n>6;stage7Passed=n>7;stage8Passed=n>8;stage9Passed=false;
+  farmIntroSeen=n!==1;portIntroSeen=false;stage9IntroSeen=false;
+  showScreen('game-screen');if(!started){started=true;last=performance.now();requestAnimationFrame(frame);}
+  goToScene(n+2);list.style.display='none';
+ }
+ names.forEach((name,i)=>{const b=document.createElement('button');b.type='button';b.textContent=(i+1)+'. '+name;b.style.cssText='padding:9px 5px;background:#493260;color:white;border:1px solid #bba06b;border-radius:7px;cursor:pointer;font:12px system-ui';b.onclick=()=>jump(i+1);list.appendChild(b);});
+ const end=document.createElement('button');end.textContent='🏆 ดูหน้าสรุป (คะแนนสมมติ)';end.style.cssText='grid-column:1/-1;padding:10px;background:#735391;color:white;border:1px solid gold;border-radius:8px;cursor:pointer';
+ end.onclick=()=>{playerName='คุณครูทดสอบ';quizScore=2;showRoyalResult();$('result-download-btn').disabled=true;$('result-save-status').textContent='โหมดครู: คะแนนสมมติ ไม่ใช่ผลนักเรียน';list.style.display='none';};
+ list.appendChild(end);panel.append(toggle,list);document.body.appendChild(panel);
+}
+
 // Preview-only shortcut for the separate test site. Never activate on the production game.
 // Example: /ayutthaya-game-preview/?preview=ending
 const endingPreviewMode=location.hostname==='kkamonsri478209-beep.github.io' &&
