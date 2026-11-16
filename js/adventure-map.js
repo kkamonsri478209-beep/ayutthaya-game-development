@@ -10,7 +10,7 @@
  ];
  const passed=()=>[stage1Passed,stage2Passed,stage3Passed,stage4Passed,stage5Passed,stage6Passed,stage7Passed,stage8Passed,stage9Passed];
  const available=(stage)=>stage===1||Boolean(passed()[stage-2]);
- let discovered=false, selectedArea=0, mapOpen=false;
+ let discovered=false, selectedArea=0, mapOpen=false, newlyUnlockedArea=-1;
  const map=document.createElement('section');map.id='adventure-map-screen';map.className='screen hidden';map.setAttribute('aria-label','แผนที่การผจญภัยกรุงศรีอยุธยา');
  map.innerHTML='<div class="adventure-map-frame"><img class="adventure-map-art" src="ayutthaya-map.png" alt="แผนที่แฟนตาซีกรุงศรีอยุธยา"><div class="adventure-map-pins"></div></div><div class="adventure-map-top"><strong>แผนที่การผจญภัยกรุงศรีอยุธยา</strong><span>เลือกหมุดเพื่อสำรวจสถานที่</span></div><button type="button" class="adventure-map-back">กลับไปยังฉากเดิม</button><div class="adventure-map-modal hidden" role="dialog" aria-modal="true" aria-label="เลือกด่าน"><div class="adventure-map-panel"><button type="button" class="adventure-map-close" aria-label="ปิด">×</button><h2 class="adventure-map-area-title"></h2><div class="adventure-map-stage-list"></div></div></div>';
  document.querySelector('#app').append(map);
@@ -20,11 +20,11 @@
   pinLayer.replaceChildren();
   areas.forEach((area,index)=>{
    const unlocked=available(area.stages[0]);
-   const b=document.createElement('button');b.type='button';b.className='adventure-map-pin'+(unlocked?'':' locked');
+   const b=document.createElement('button');b.type='button';b.className='adventure-map-pin'+(unlocked?'':' locked')+(index===newlyUnlockedArea?' just-unlocked':'');
    b.style.left=area.left+'%';b.style.top=area.top+'%';
    b.setAttribute('aria-label',area.title+(unlocked?'':' (ยังไม่ปลดล็อก)'));
    b.innerHTML='<img src="'+area.file+'" alt=""><span>'+area.title+'</span>'+(unlocked?'':'<span class="adventure-map-lock">🔒</span>');
-   b.addEventListener('click',()=>{document.dispatchEvent(new CustomEvent('ayutthaya-map-select'));if(unlocked)openArea(index);else showLocked(area);});pinLayer.append(b);
+   b.addEventListener('click',()=>{document.dispatchEvent(new CustomEvent('ayutthaya-map-select'));if(unlocked){const next=area.stages.find(stage=>!passed()[stage-1]&&available(stage));if(next)launch(next);else openArea(index);}else showLocked(area);});pinLayer.append(b);
   });
  }
  function showLocked(area){
@@ -47,7 +47,8 @@
   });
   modal.classList.remove('hidden');
  }
- function openMap(){
+ function openMap(unlockedArea=-1){
+  newlyUnlockedArea=unlockedArea;
   if(!discovered)return;
   mapOpen=true;refresh();modal.classList.add('hidden');
   // Load the farm image while the player explores the map, before stage selection.
@@ -65,6 +66,7 @@
  }
  const originalGoToScene=goToScene;
  goToScene=function(n,direction='forward'){
+  if(n===5&&discovered&&stage2Passed&&sceneIndex===4){openMap(1);return;}
   if(n===3&&!discovered){
    discovered=true;
    // Preserve the original farm intro: it will run when the first pin is selected.
@@ -76,6 +78,15 @@
   closeMap();
   originalGoToScene(stage+2);
  }
+ // After the last quiz in areas 2 and 3, return to the map rather than advancing in-scene.
+ $('quiz-next-btn').addEventListener('click',()=>{
+  if(!discovered||!quizShowingResult)return;
+  if(sceneIndex===6&&stage4Passed)openMap(2);
+  else if(sceneIndex===8&&stage6Passed)openMap(3);
+ });
+ const glow=document.createElement('style');
+ glow.textContent='.adventure-map-pin.just-unlocked{filter:drop-shadow(0 0 13px #ffe18b) drop-shadow(0 0 24px #f5b943);z-index:5}.adventure-map-pin.just-unlocked img{animation:areaUnlockGlow 1.35s ease-in-out infinite alternate}@keyframes areaUnlockGlow{from{filter:brightness(1)}to{filter:brightness(1.3) saturate(1.3)}}@media(prefers-reduced-motion:reduce){.adventure-map-pin.just-unlocked img{animation:none}}';
+ document.head.append(glow);
  map.querySelector('.adventure-map-back').addEventListener('click',closeMap);
  map.querySelector('.adventure-map-close').addEventListener('click',()=>modal.classList.add('hidden'));
  modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden');});
