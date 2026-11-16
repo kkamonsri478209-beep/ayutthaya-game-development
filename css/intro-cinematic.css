@@ -29,3 +29,10 @@
 @media(prefers-reduced-motion:reduce){.intro-time-portal *{animation-duration:.01ms!important}.intro-time-portal{animation:none}.intro-time-portal.intro-portal-reveal{animation:introPortalReveal 1.7s ease-in-out forwards}}
 
 .intro-portal-play{position:absolute;z-index:2;left:50%;bottom:12%;transform:translateX(-50%);max-width:90vw;padding:12px 20px;border-radius:14px;border:2px solid #ffe39b;background:#352051;color:#fff3c9;font:700 clamp(14px,2vw,20px) system-ui;box-shadow:0 0 24px #e5c17a66;cursor:pointer}
+
+/* Narration text over the existing time-portal animation; artwork and voice stay unchanged. */
+.intro-time-portal-caption{position:absolute;z-index:3;left:7%;right:7%;top:50%;transform:translateY(-50%);text-align:center;color:#fff7d5;font-family:'Noto Serif Thai','TH Sarabun New',Georgia,serif;font-size:clamp(25px,3.6vw,57px);font-weight:700;line-height:1.5;text-shadow:0 3px 7px #301744,0 0 20px #6b367d,0 0 35px #fff0b0;animation:introCaptionAppear 1.4s ease-out both;pointer-events:none}
+.intro-time-portal-caption span{display:block;margin:12px auto 0;max-width:950px;font-size:clamp(16px,2.05vw,31px);font-weight:600;line-height:1.7}
+@keyframes introCaptionAppear{from{opacity:0;translate:0 16px}to{opacity:1;translate:0 0}}
+@media(max-width:650px){.intro-time-portal-caption{left:5%;right:5%;font-size:clamp(22px,5vw,34px)}.intro-time-portal-caption span{font-size:clamp(15px,3.5vw,22px)}}
+@media(prefers-reduced-motion:reduce){.intro-time-portal-caption{animation:none}}
