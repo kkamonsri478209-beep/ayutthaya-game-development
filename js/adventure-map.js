@@ -16,6 +16,7 @@
  document.querySelector('#app').append(map);
  const pinLayer=map.querySelector('.adventure-map-pins'),modal=map.querySelector('.adventure-map-modal');
  const curtain=document.createElement('div');curtain.className='adventure-cutscene-curtain';curtain.setAttribute('aria-hidden','true');document.querySelector('#app').append(curtain);
+ const basePortal=document.createElement('div');basePortal.className='intro-time-portal adventure-base-portal hidden';basePortal.setAttribute('aria-label','คัตซีนปลดล็อกฐานถัดไป');basePortal.innerHTML='<div class="intro-time-portal-aura"></div><div class="intro-time-portal-ring"></div><div class="intro-time-portal-core"></div><div class="intro-time-portal-stars"></div><div class="intro-time-portal-caption"></div>';document.querySelector('#app').append(basePortal);
  const mapButton=document.createElement('button');mapButton.type='button';mapButton.className='adventure-map-launch hidden';mapButton.textContent='🗺 แผนที่อยุธยา';document.querySelector('#app').append(mapButton);
  function refresh(){
   pinLayer.replaceChildren();
@@ -98,11 +99,26 @@
   ]}
  };
  function cinematicReturn(area){
-  curtain.classList.add('visible');
+  const messages=[
+   '',
+   'เส้นทางแห่งการค้ากำลังเปิดออก...|จงก้าวสู่ตลาดแห่งกรุงศรีอยุธยา',
+   'ประตูสู่การค้าต่างแดนได้เปิดแล้ว...|จงออกสำรวจผู้คนและสินค้าจากแดนไกล',
+   'ความลับแห่งเศรษฐกิจอยุธยารออยู่...|จงค้นพบการจัดเก็บรายได้และพระคลังของแผ่นดิน'
+  ];
+  const [headline,detail]=(messages[area]||'การเดินทางครั้งใหม่กำลังเริ่มขึ้น...|จงก้าวต่อไป').split('|');
+  const caption=basePortal.querySelector('.intro-time-portal-caption');
+  caption.replaceChildren();
+  caption.append(document.createTextNode(headline));
+  const subtitle=document.createElement('span');subtitle.textContent=detail;caption.append(subtitle);
+  basePortal.classList.remove('hidden','intro-portal-reveal');
+  // Prepare the new map behind the time portal, then reveal the newly unlocked pin.
+  window.setTimeout(()=>openMap(area),950);
+  window.setTimeout(()=>basePortal.classList.add('intro-portal-reveal'),2400);
   window.setTimeout(()=>{
-   openMap(area);
-   window.setTimeout(()=>curtain.classList.remove('visible'),120);
-  },600);
+   basePortal.classList.add('hidden');
+   basePortal.classList.remove('intro-portal-reveal');
+   transitionBusy=false;
+  },4100);
  }
  // Capture the result button before the original handler advances into the next stage.
  $('quiz-next-btn').addEventListener('click',e=>{
@@ -113,7 +129,7 @@
   e.preventDefault();e.stopImmediatePropagation();
   transitionBusy=true;
   quizPanel.classList.add('hidden');quizActive=false;quizShowingResult=false;
-  openDialogue(config.lines,()=>{cinematicReturn(config.area);transitionBusy=false;});
+  openDialogue(config.lines,()=>cinematicReturn(config.area));
  },true);
  const glow=document.createElement('style');
  glow.textContent='.adventure-map-pin.just-unlocked{filter:drop-shadow(0 0 13px #ffe18b) drop-shadow(0 0 24px #f5b943);z-index:5}.adventure-map-pin.just-unlocked img{animation:areaUnlockGlow 1.35s ease-in-out infinite alternate}@keyframes areaUnlockGlow{from{filter:brightness(1)}to{filter:brightness(1.3) saturate(1.3)}}.adventure-cutscene-curtain{position:absolute;inset:0;background:#100d25;opacity:0;pointer-events:none;z-index:110;transition:opacity .6s ease}.adventure-cutscene-curtain.visible{opacity:1;pointer-events:auto}@media(prefers-reduced-motion:reduce){.adventure-map-pin.just-unlocked img{animation:none}.adventure-cutscene-curtain{transition:none}}';
@@ -123,7 +139,7 @@
  modal.addEventListener('click',e=>{if(e.target===modal)modal.classList.add('hidden');});
  mapButton.addEventListener('click',openMap);
  const originalStartGame=startGame;
- startGame=function(){discovered=false;mapOpen=false;map.classList.add('hidden');mapButton.classList.add('hidden');originalStartGame();};
+ startGame=function(){discovered=false;mapOpen=false;transitionBusy=false;newlyUnlockedArea=-1;basePortal.classList.add('hidden');basePortal.classList.remove('intro-portal-reveal');map.classList.add('hidden');mapButton.classList.add('hidden');originalStartGame();};
  const originalShowScreen=showScreen;
  showScreen=function(id){originalShowScreen(id);if(id!=='game-screen'){map.classList.add('hidden');mapButton.classList.add('hidden');}else if(discovered&&!mapOpen){mapButton.classList.remove('hidden');}};
  window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.classList.contains('hidden'))modal.classList.add('hidden');});
