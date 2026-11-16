@@ -10,11 +10,12 @@
  ];
  const passed=()=>[stage1Passed,stage2Passed,stage3Passed,stage4Passed,stage5Passed,stage6Passed,stage7Passed,stage8Passed,stage9Passed];
  const available=(stage)=>stage===1||Boolean(passed()[stage-2]);
- let discovered=false, selectedArea=0, mapOpen=false, newlyUnlockedArea=-1;
+ let discovered=false, selectedArea=0, mapOpen=false, newlyUnlockedArea=-1, transitionBusy=false;
  const map=document.createElement('section');map.id='adventure-map-screen';map.className='screen hidden';map.setAttribute('aria-label','แผนที่การผจญภัยกรุงศรีอยุธยา');
  map.innerHTML='<div class="adventure-map-frame"><img class="adventure-map-art" src="ayutthaya-map.png" alt="แผนที่แฟนตาซีกรุงศรีอยุธยา"><div class="adventure-map-pins"></div></div><div class="adventure-map-top"><strong>แผนที่การผจญภัยกรุงศรีอยุธยา</strong><span>เลือกหมุดเพื่อสำรวจสถานที่</span></div><button type="button" class="adventure-map-back">กลับไปยังฉากเดิม</button><div class="adventure-map-modal hidden" role="dialog" aria-modal="true" aria-label="เลือกด่าน"><div class="adventure-map-panel"><button type="button" class="adventure-map-close" aria-label="ปิด">×</button><h2 class="adventure-map-area-title"></h2><div class="adventure-map-stage-list"></div></div></div>';
  document.querySelector('#app').append(map);
  const pinLayer=map.querySelector('.adventure-map-pins'),modal=map.querySelector('.adventure-map-modal');
+ const curtain=document.createElement('div');curtain.className='adventure-cutscene-curtain';curtain.setAttribute('aria-hidden','true');document.querySelector('#app').append(curtain);
  const mapButton=document.createElement('button');mapButton.type='button';mapButton.className='adventure-map-launch hidden';mapButton.textContent='🗺 แผนที่อยุธยา';document.querySelector('#app').append(mapButton);
  function refresh(){
   pinLayer.replaceChildren();
@@ -78,14 +79,44 @@
   closeMap();
   originalGoToScene(stage+2);
  }
- // After the last quiz in areas 2 and 3, return to the map rather than advancing in-scene.
- $('quiz-next-btn').addEventListener('click',()=>{
-  if(!discovered||!quizShowingResult)return;
-  if(sceneIndex===6&&stage4Passed)openMap(2);
-  else if(sceneIndex===8&&stage6Passed)openMap(3);
- });
+ // Complete a base with a short dialogue, then a cinematic fade to the unlocked map.
+ const transitions={
+  4:{area:1,lines:[
+   {who:'student',emotion:'curious',text:()=>selectedGender==='girl'?'ดูเหมือนเราจะใกล้ถึงพระนครแล้วนะคะ!':'ดูเหมือนเราจะใกล้ถึงพระนครแล้วนะครับ!'},
+   {who:'boatman',emotion:'greeting',text:'ถูกแล้วเจ้าหนู! อีกไม่นานเราจะถึงตลาดอันคึกคักของกรุงศรีอยุธยา เตรียมตัวให้พร้อมเถิด!'},
+   {who:'student',emotion:'smile',text:()=>selectedGender==='girl'?'ตลาดสมัยอยุธยาจะเป็นอย่างไรกันนะ อยากเห็นแล้วค่ะ!':'ตลาดสมัยอยุธยาจะเป็นอย่างไรกันนะ อยากเห็นแล้วครับ!'}
+  ]},
+  6:{area:2,lines:[
+   {who:'student',emotion:'curious',text:()=>selectedGender==='girl'?'เราได้เห็นการค้าภายในเมืองแล้ว ต่อไปจะไปที่ไหนกันคะ?':'เราได้เห็นการค้าภายในเมืองแล้ว ต่อไปจะไปที่ไหนกันครับ?'},
+   {who:'portOfficer',emotion:'explain',text:'ต่อไปเจ้าจะได้พบย่านการค้าต่างชาติ มีพ่อค้าจากหลายดินแดนนำสินค้ามาแลกเปลี่ยนกัน!'},
+   {who:'student',emotion:'smile',text:()=>selectedGender==='girl'?'น่าสนใจจังค่ะ! หนูพร้อมออกเดินทางแล้ว':'น่าสนใจจังครับ! ผมพร้อมออกเดินทางแล้ว'}
+  ]},
+  8:{area:3,lines:[
+   {who:'student',emotion:'curious',text:()=>selectedGender==='girl'?'ได้เห็นเรือสินค้าจากหลายประเทศแล้ว ต่อไปเราจะเรียนรู้อะไรอีกคะ?':'ได้เห็นเรือสินค้าจากหลายประเทศแล้ว ต่อไปเราจะเรียนรู้อะไรอีกครับ?'},
+   {who:'foreignExplorer',emotion:'explain',text:'การค้าต้องเกี่ยวข้องกับรายได้ของบ้านเมืองด้วย จงไปเรียนรู้ที่ด่านขนอน แล้วเดินทางต่อไปยังพระคลังสินค้าและพระราชวังเถิด!'},
+   {who:'student',emotion:'smile',text:()=>selectedGender==='girl'?'เข้าใจแล้วค่ะ ไปเรียนรู้เรื่องรายได้ของบ้านเมืองกันต่อเลย!':'เข้าใจแล้วครับ ไปเรียนรู้เรื่องรายได้ของบ้านเมืองกันต่อเลย!'}
+  ]}
+ };
+ function cinematicReturn(area){
+  curtain.classList.add('visible');
+  window.setTimeout(()=>{
+   openMap(area);
+   window.setTimeout(()=>curtain.classList.remove('visible'),120);
+  },600);
+ }
+ // Capture the result button before the original handler advances into the next stage.
+ $('quiz-next-btn').addEventListener('click',e=>{
+  const config=transitions[sceneIndex];
+  if(!discovered||!config||!quizShowingResult||transitionBusy)return;
+  const finished=config.area===1?stage2Passed:config.area===2?stage4Passed:stage6Passed;
+  if(!finished)return;
+  e.preventDefault();e.stopImmediatePropagation();
+  transitionBusy=true;
+  quizPanel.classList.add('hidden');quizActive=false;quizShowingResult=false;
+  openDialogue(config.lines,()=>{cinematicReturn(config.area);transitionBusy=false;});
+ },true);
  const glow=document.createElement('style');
- glow.textContent='.adventure-map-pin.just-unlocked{filter:drop-shadow(0 0 13px #ffe18b) drop-shadow(0 0 24px #f5b943);z-index:5}.adventure-map-pin.just-unlocked img{animation:areaUnlockGlow 1.35s ease-in-out infinite alternate}@keyframes areaUnlockGlow{from{filter:brightness(1)}to{filter:brightness(1.3) saturate(1.3)}}@media(prefers-reduced-motion:reduce){.adventure-map-pin.just-unlocked img{animation:none}}';
+ glow.textContent='.adventure-map-pin.just-unlocked{filter:drop-shadow(0 0 13px #ffe18b) drop-shadow(0 0 24px #f5b943);z-index:5}.adventure-map-pin.just-unlocked img{animation:areaUnlockGlow 1.35s ease-in-out infinite alternate}@keyframes areaUnlockGlow{from{filter:brightness(1)}to{filter:brightness(1.3) saturate(1.3)}}.adventure-cutscene-curtain{position:absolute;inset:0;background:#100d25;opacity:0;pointer-events:none;z-index:110;transition:opacity .6s ease}.adventure-cutscene-curtain.visible{opacity:1;pointer-events:auto}@media(prefers-reduced-motion:reduce){.adventure-map-pin.just-unlocked img{animation:none}.adventure-cutscene-curtain{transition:none}}';
  document.head.append(glow);
  map.querySelector('.adventure-map-back').addEventListener('click',closeMap);
  map.querySelector('.adventure-map-close').addEventListener('click',()=>modal.classList.add('hidden'));
