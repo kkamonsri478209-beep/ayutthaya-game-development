@@ -8,7 +8,7 @@
  document.querySelector('#game-screen').append(overlay);
  const portal=document.createElement('div');
  portal.className='intro-time-portal hidden';portal.setAttribute('aria-hidden','true');
- portal.innerHTML='<div class="intro-time-portal-aura"></div><div class="intro-time-portal-ring"></div><div class="intro-time-portal-core"></div><div class="intro-time-portal-stars"></div>';
+ portal.innerHTML='<div class="intro-time-portal-aura"></div><div class="intro-time-portal-ring"></div><div class="intro-time-portal-core"></div><div class="intro-time-portal-stars"></div><div class="intro-time-portal-caption" aria-live="off">กาลเวลาได้เปิดประตูแล้ว...<span>จงก้าวเดินสู่ดินแดนแห่งอดีต และค้นพบเรื่องราวของกรุงศรีอยุธยา</span></div>';
  document.querySelector('#app').append(portal);
  let portalTimer=null,transitioning=false;
  // Capture the map's scene handler so coin-dialogue callbacks cannot bypass the portal.
