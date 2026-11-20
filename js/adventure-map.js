@@ -55,8 +55,9 @@
   newlyUnlockedArea=unlockedArea;
   if(!discovered)return;
   mapOpen=true;refresh();modal.classList.add('hidden');
-  // Load the farm image while the player explores the map, before stage selection.
-  image('stage1-farm.webp');
+  // Warm only the next unlocked destination, not the farm on every map visit.
+  const next=areas.flatMap(area=>area.stages).find(stage=>available(stage)&&!passed()[stage-1]);
+  if(next){const index=sceneForStage[next-1];const path=next===2?(selectedGender==='girl'?'boat-ride-girl.webp':'boat-ride-boy.webp'):scenes[index]?.bg;if(path)image(path,'low');}
   document.querySelector('#game-screen').classList.add('hidden');
   document.querySelector('#controls').classList.add('hidden');
   map.classList.remove('hidden');mapButton.classList.add('hidden');
@@ -80,7 +81,8 @@
  };
  function launch(stage){
   closeMap();
-  originalGoToScene(sceneForStage[stage-1]);
+  const target=sceneForStage[stage-1];
+  originalGoToScene(target);
  }
  // Complete a base with a short dialogue, then a cinematic fade to the unlocked map.
  const transitions={
