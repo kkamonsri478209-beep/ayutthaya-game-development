@@ -306,18 +306,22 @@ nextBtn.addEventListener('click',advanceDialogue);
 
 // Scores for all nine stages are retained for the current playthrough.
 const stageScoreRecords=Array(9).fill(null);
+// Preserve the first response to each question for the entire playthrough, including revisits.
+const firstAttemptAnswers=new Map();
+const firstAttemptKey=item=>item.questionId||item.q;
+const firstAttemptScore=questions=>questions.filter(item=>item.type!=='text'&&item.type!=='typed'&&firstAttemptAnswers.get(firstAttemptKey(item))===true).length;
 function recordStageScore(stage,questions){
  const scored=questions.filter(q=>q.type!=='text'&&q.type!=='typed').length;
  const activities=questions.length-scored;
- stageScoreRecords[stage-1]={stage,name:["ทุ่งนา","การเดินทางทางเรือ","ตลาดในกรุงศรีอยุธยา","ท่ารับสินค้าจากหัวเมือง","ย่านการค้าต่างชาติ","ท่าเรือการค้าต่างประเทศ","ด่านขนอน","พระคลังสินค้า","พระราชวังหลวง"][stage-1],correct:quizScore,total:scored,answered:questions.length,activities};
+ stageScoreRecords[stage-1]={stage,name:["ทุ่งนา","การเดินทางทางเรือ","ตลาดในกรุงศรีอยุธยา","ท่ารับสินค้าจากหัวเมือง","ย่านการค้าต่างชาติ","ท่าเรือการค้าต่างประเทศ","ด่านขนอน","พระคลังสินค้า","พระราชวังหลวง"][stage-1],correct:firstAttemptScore(questions),total:scored,answered:questions.length,activities};
 }
 function renderStageScoreSummary(){
  const container=$('stage-score-summary');if(!container)return;
  container.replaceChildren();
- const title=document.createElement('strong');title.textContent='คะแนนสะสมทั้ง 5 ด่าน';container.append(title);
+ const title=document.createElement('strong');title.textContent='คะแนนจากการตอบครั้งแรก (5 ด่าน)';container.append(title);
  const table=document.createElement('table');
  table.style.cssText='width:100%;border-collapse:collapse;font-size:clamp(12px,1.5vw,17px);text-align:left';
- const head=document.createElement('tr');['ด่าน','คะแนนถูก/เต็ม','ตอบแล้ว'].forEach(t=>{const c=document.createElement('th');c.textContent=t;c.style.padding='5px 8px';head.append(c);});table.append(head);
+ const head=document.createElement('tr');['ด่าน','ถูกครั้งแรก/เต็ม','ตอบแล้ว'].forEach(t=>{const c=document.createElement('th');c.textContent=t;c.style.padding='5px 8px';head.append(c);});table.append(head);
  let earned=0,possible=0,done=0;
  stageScoreRecords.forEach((entry,i)=>{if(![0,1,2,4,7].includes(i))return;
   const tr=document.createElement('tr');
@@ -330,6 +334,7 @@ function renderStageScoreSummary(){
 }
 function startGame(){
  stageScoreRecords.fill(null);
+ firstAttemptAnswers.clear();
  royalFirstAnswerLocked=false;royalResultSaved=false;
  sceneIndex=0;showScreen('game-screen');coinFound=false;farmerTalked=false;quizActive=false;quizShowingResult=false;quizRetrying=false;stage1Passed=false;stage2Passed=false;stage3Passed=false;stage4Passed=false;portIntroSeen=false;stage5Passed=false;stage6Passed=false;stage7Passed=false;stage8Passed=false;stage9Passed=false;stage9IntroSeen=false;farmIntroSeen=false;player.x=150;
  objective.textContent=scenes[0].objective;prompt.classList.add('hidden');
@@ -467,6 +472,9 @@ function merchantLines(){
 
 function handleStageQuizAnswer(selected,items,letters,hint){
  const item=items[quizIndex];
+ const firstKey=firstAttemptKey(item);
+ const isFirstAnswer=!firstAttemptAnswers.has(firstKey);
+ if(isFirstAnswer)firstAttemptAnswers.set(firstKey,selected===item.answer);
  const buttons=[...quizAnswers.querySelectorAll('button')];
  if(selected!==item.answer){
   buttons[selected].disabled=true;
@@ -479,7 +487,7 @@ function handleStageQuizAnswer(selected,items,letters,hint){
   button.disabled=true;
   if(index===selected)button.classList.add('correct');
  });
- quizScore++;
+ if(isFirstAnswer)quizScore++;
  quizFeedback.textContent='ถูกต้อง! '+item.explain;
  quizNextBtn.textContent=quizIndex===items.length-1?'ดูผลการเรียนรู้ ▶':'ข้อต่อไป ▶';
  quizNextBtn.classList.remove('hidden');
@@ -578,7 +586,7 @@ const foreignTradeQuiz=[
  {q:'พ่อค้าชาวจีนใช้พาหนะใดขนส่งสินค้าข้ามทะเลมายังกรุงศรีอยุธยา?',options:['เกวียน','เรือสำเภา','ช้าง','รถม้า'],answer:1,explain:'พ่อค้าขนสินค้าลงเรือสำเภาเพื่อเดินทางค้าขายทางทะเล',hint:'พ่อค้าเล่าว่าตนขนสินค้าลงพาหนะที่เดินทางข้ามทะเลได้'},
  {q:'การค้ากับชาวต่างชาติส่งผลดีต่อกรุงศรีอยุธยาอย่างไร?',options:['ทำให้ผู้คนเลิกค้าขาย','ทำให้ไม่มีการแลกเปลี่ยนสินค้า','ช่วยสร้างรายได้และเกิดการแลกเปลี่ยนวัฒนธรรม','ทำให้การค้าภายในเมืองหยุดลง'],answer:2,explain:'การค้าช่วยให้เกิดรายได้และการแลกเปลี่ยนวัฒนธรรมระหว่างผู้คนต่างถิ่น',hint:'ลองนึกถึงสิ่งที่พ่อค้าอธิบายเกี่ยวกับประโยชน์ของการค้ากับต่างชาติ'}
 ];
-function openForeignTradeQuiz(){quizIndex=0;quizScore=0;quizShowingResult=false;quizRetrying=false;quizActive=true;quizPanel.classList.remove('hidden');renderForeignTradeQuizQuestion();}
+function openForeignTradeQuiz(){quizIndex=0;quizScore=firstAttemptScore(foreignTradeQuiz);quizShowingResult=false;quizRetrying=false;quizActive=true;quizPanel.classList.remove('hidden');renderForeignTradeQuizQuestion();}
 function renderForeignTradeQuizQuestion(){const item=foreignTradeQuiz[quizIndex];quizHeading.textContent='ด่านที่ ๔ : สำเภาการค้าแห่งอยุธยา';quizProgress.textContent='ข้อ '+(quizIndex+1)+' / '+foreignTradeQuiz.length;quizQuestion.textContent=item.q;quizAnswers.replaceChildren();quizFeedback.textContent='';quizNextBtn.classList.add('hidden');item.options.forEach((option,index)=>{const button=document.createElement('button');button.type='button';button.className='quiz-answer';button.textContent=['ก','ข','ค','ง'][index]+'. '+option;button.addEventListener('click',()=>handleStageQuizAnswer(index,foreignTradeQuiz,['ก','ข','ค','ง'],'คำตอบยังไม่ถูกต้องนะ คำใบ้: '+item.hint+' ลองเลือกอีกครั้ง'));quizAnswers.append(button);});}
 function finishForeignTradeQuiz(){recordStageScore(5,foreignTradeQuiz);quizShowingResult=true;stage5Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๔';quizProgress.textContent='คะแนน '+quizScore+' / '+foreignTradeQuiz.filter(item=>item.type!=='typed').length;quizQuestion.textContent='ทำแบบทดสอบครบทั้ง ๔ ข้อแล้ว! ผ่านด่านย่านการค้าต่างชาติ';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้เรื่องสินค้านำเข้าจากจีน การขนส่งทางเรือสำเภา และความสำคัญของการค้ากับชาวต่างชาติแล้ว';quizNextBtn.textContent='จบด่านที่ ๔ ✓';quizNextBtn.classList.remove('hidden');}
 
@@ -661,7 +669,7 @@ const treasuryQuiz=[
  {q:'ข้อใดเป็นสินค้าส่งออกของกรุงศรีอยุธยา?',options:['ดีบุก พริกไทย ครั่ง และขี้ผึ้ง','รถยนต์และเครื่องใช้ไฟฟ้า','โทรศัพท์และคอมพิวเตอร์','น้ำมันเชื้อเพลิงและพลาสติก'],answer:0,explain:'อยุธยาส่งออกสินค้าหลายชนิด เช่น ดีบุก พริกไทย ครั่ง ขี้ผึ้ง และหนังสัตว์',hint:'นึกถึงสินค้าจากธรรมชาติที่พ่อค้าอยุธยานำลงเรือไปขาย'},
  {q:'คำว่า “จิ้มก้อง” เกี่ยวข้องกับการค้าระหว่างอยุธยากับจีนอย่างไร?',options:['การแลกเปลี่ยนสินค้าในตลาดท้องถิ่น','การส่งคณะทูตพร้อมเครื่องราชบรรณาการไปถวายจักรพรรดิจีน','การเก็บจังกอบจากเรือที่ผ่านด่าน','การขายอาวุธให้พ่อค้าต่างชาติ'],answer:1,explain:'จิ้มก้องคือการส่งคณะทูตพร้อมเครื่องราชบรรณาการไปถวายจักรพรรดิจีน เป็นความสัมพันธ์แบบบรรณาการที่เกี่ยวข้องกับการค้าด้วย',hint:'เกี่ยวข้องกับคณะทูตและเครื่องราชบรรณาการที่ส่งไปจีน'}
 ];
-function openTreasuryQuiz(){quizIndex=0;quizScore=0;quizShowingResult=false;quizRetrying=false;quizActive=true;quizPanel.classList.remove('hidden');renderTreasuryQuizQuestion();}
+function openTreasuryQuiz(){quizIndex=0;quizScore=firstAttemptScore(treasuryQuiz);quizShowingResult=false;quizRetrying=false;quizActive=true;quizPanel.classList.remove('hidden');renderTreasuryQuizQuestion();}
 function renderTreasuryQuizQuestion(){const item=treasuryQuiz[quizIndex];quizHeading.textContent='ด่านที่ ๕ : ความลับแห่งพระคลังสินค้า';quizProgress.textContent='ข้อ '+(quizIndex+1)+' / '+treasuryQuiz.length;quizQuestion.textContent=item.q;quizAnswers.replaceChildren();quizFeedback.textContent='';quizNextBtn.classList.add('hidden');item.options.forEach((option,index)=>{const button=document.createElement('button');button.type='button';button.className='quiz-answer';button.textContent=['ก','ข','ค','ง'][index]+'. '+option;button.addEventListener('click',()=>handleStageQuizAnswer(index,treasuryQuiz,['ก','ข','ค','ง'],'ยังไม่ถูกต้องนะ! คำใบ้: '+item.hint+' ลองเลือกคำตอบใหม่อีกครั้ง'));quizAnswers.append(button);});}
 function finishTreasuryQuiz(){recordStageScore(8,treasuryQuiz);quizShowingResult=true;stage8Passed=true;quizHeading.textContent='สรุปผลด่านที่ ๕';quizProgress.textContent='คะแนน '+quizScore+' / '+treasuryQuiz.filter(item=>item.type!=='typed').length;quizQuestion.textContent='ยอดเยี่ยม! ผ่านด่านพระคลังสินค้าแล้ว';quizAnswers.replaceChildren();quizFeedback.textContent='เจ้าได้เรียนรู้หน้าที่ของพระคลังสินค้า การตรวจนับและเก็บรักษาสินค้า รวมถึงความสำคัญต่อกิจการค้าของกรุงศรีอยุธยาแล้ว';quizNextBtn.textContent='จบด่านที่ ๕ ✓';quizNextBtn.classList.remove('hidden');}
 
@@ -769,7 +777,7 @@ const marketQuiz=[
 ];
 
 function openMarketQuiz(){
- quizIndex=0;quizScore=0;quizShowingResult=false;quizRetrying=false;quizActive=true;
+ quizIndex=0;quizScore=firstAttemptScore(marketQuiz);quizShowingResult=false;quizRetrying=false;quizActive=true;
  quizPanel.classList.remove('hidden');renderMarketQuizQuestion();
 }
 function renderMarketQuizQuestion(){
@@ -809,7 +817,7 @@ const boatQuiz=[
 ];
 let stage2Passed=false;
 function openBoatQuiz(){
- quizIndex=0;quizScore=0;quizShowingResult=false;quizRetrying=false;quizActive=true;
+ quizIndex=0;quizScore=firstAttemptScore(boatQuiz);quizShowingResult=false;quizRetrying=false;quizActive=true;
  quizPanel.classList.remove('hidden');renderBoatQuizQuestion();
 }
 function renderBoatQuizQuestion(){
@@ -869,7 +877,7 @@ function selectQuizAnswer(selected){
 }
 
 function openFarmerQuiz(){
- quizIndex=0;quizScore=0;quizShowingResult=false;quizRetrying=false;quizActive=true;
+ quizIndex=0;quizScore=firstAttemptScore(farmerQuiz);quizShowingResult=false;quizRetrying=false;quizActive=true;
  quizPanel.classList.remove('hidden');renderQuizQuestion();
 }
 function finishFarmerQuiz(){recordStageScore(1,farmerQuiz);
@@ -1378,7 +1386,7 @@ const originalFinishFunctions=[finishFarmerQuiz,finishBoatQuiz,finishMarketQuiz,
 const wrapClassroomFinish=(index)=>{
  originalFinishFunctions[index]();
  const points=classroomQuestions[index].filter(x=>x.type!=='text').length;
- quizProgress.textContent='คะแนนเลือกตอบ '+quizScore+' / '+points+' • ตอบคำถามพิมพ์ตอบแล้ว '+classroomQuestions[index].filter(x=>x.type==='text').length+' ข้อ';
+ quizProgress.textContent='คะแนนตอบถูกครั้งแรก '+firstAttemptScore(classroomQuestions[index])+' / '+points+' • ตอบคำถามพิมพ์ตอบแล้ว '+classroomQuestions[index].filter(x=>x.type==='text').length+' ข้อ';
  if(index===8)quizQuestion.textContent='ทำแบบทดสอบสุดท้ายครบทั้ง 5 ข้อแล้ว!';
 };
 finishFarmerQuiz = ()=>wrapClassroomFinish(0);
@@ -1396,6 +1404,7 @@ showRoyalResult=function(){
  const selected=[0,1,2,4,7].map(i=>stageScoreRecords[i]).filter(Boolean);
  const earned=selected.reduce((sum,x)=>sum+x.correct,0),max=16;
  $('result-score').textContent=String(earned)+' / '+String(max);
+ $('result-score').setAttribute('aria-label','คะแนนจากการตอบครั้งแรก '+earned+' จาก '+max+' คะแนน');
  $('result-message').textContent=earned===max?'ยอดเยี่ยม! เจ้าเรียนรู้เรื่องเศรษฐกิจอยุธยาได้ดีมาก':
   'ขอบใจที่ร่วมเดินทาง ทุกคำตอบช่วยให้เราเรียนรู้และพัฒนาต่อไปได้';
 };
@@ -1403,7 +1412,7 @@ const originalDownloadRoyalResult=downloadRoyalResult;
 downloadRoyalResult=function(){
  // The original result CSV uses old denominators; create an updated CSV.
  const quote=v=>'"'+String(v).replaceAll('"','""')+'"';
- const rows=[['ชื่อที่ใช้ในเกม','คะแนนเลือกตอบ','คะแนนเต็มเลือกตอบ','คำถามพิมพ์ตอบ','วันที่บันทึก'],
+ const rows=[['ชื่อที่ใช้ในเกม','คะแนนตอบถูกครั้งแรก','คะแนนเต็มเลือกตอบ','คำถามพิมพ์ตอบ','วันที่บันทึก'],
   [playerName,[0,1,2,4,7].reduce((sum,i)=>sum+(stageScoreRecords[i]?.correct||0),0),16,4,new Date().toLocaleString('th-TH')]];
  const csv='\uFEFF'+rows.map(r=>r.map(quote).join(',')).join('\r\n');
  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
