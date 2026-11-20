@@ -29,6 +29,7 @@ function save(){try{localStorage.setItem('ayutthaya-approved-five-v1',JSON.strin
 function screen(html,bg){app.innerHTML='<div class="scene" style="background-image:linear-gradient(#160c2b55,#160c2b99),url(&quot;'+bg+'&quot;)"><div class="panel">'+html+'</div></div>'}
 function button(label,fn,disabled){const b=document.createElement('button');b.textContent=label;b.disabled=!!disabled;b.onclick=fn;app.querySelector('.panel').append(b);return b}
 function map(){
+ if(typeof window.approvedOriginalMapOpen==='function'){app?.remove();app=null;window.approvedOriginalMapOpen();return}
  const areas=[
   {title:'แหล่งผลิตและทรัพยากร',file:'pin-farming.png',left:16,top:81,stages:[0,1]},
   {title:'การค้าภายใน',file:'pin-market.png',left:47,top:63,stages:[2]},
@@ -56,6 +57,13 @@ function endingQuestion(){const q=qs.find(x=>x.number===20);screen('<h2>บท�
 function result(){screen('<h2>ภารกิจสำเร็จ! กลับสู่ปัจจุบัน</h2><p>ผู้เล่น '+safe(name)+'</p><h2>คะแนนรวม '+points()+' / 16</h2><p>คำถามเขียนตอบ 4 ข้อไม่คิดคะแนน</p>','stage9_result_background_v2.png');button('บันทึกผล CSV',download);button('เล่นใหม่',()=>{a={};save();map()});button('กลับหน้าแรก',exit)}
 function download(){const rows=[['ชื่อ','ข้อ','ด่าน','ประเภท','คำตอบ','เฉลย','คะแนน']];qs.forEach(q=>rows.push([name,q.number,q.stage,q.type,typeof a[q.number]==='number'?'กขคง'[a[q.number]]:a[q.number]||'',q.type==='multiple-choice'?'กขคง'[q.answerIndex]:'',q.type==='multiple-choice'?Number(a[q.number]===q.answerIndex):'ไม่คิดคะแนน']));rows.push([name,'รวม','','','', '',points()+'/16']);const csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));const link=document.createElement('a');link.href=url;link.download='ayutthaya-five-stage-results.csv';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 function exit(){app?.remove();app=null;launch.hidden=false}
-window.startApprovedFiveStageFromOriginal=function(gender,player){if(app)return;approvedGender=gender==='boy'?'boy':'girl';name=player||'นักเดินทาง';a={};save();fetch('data/approved-questions-20.json').then(r=>{if(!r.ok)throw Error('โหลดคำถามไม่ได้');return r.json()}).then(data=>{qs=data.questions;app=document.createElement('div');app.id='approved5';document.body.append(app);launch.hidden=true;stage=0;idx=0;dialoguePosition=0;dialogueStep()}).catch(err=>{alert('ไม่สามารถเปิดเนื้อหา 5 ด่าน: '+err.message)})};
+window.approvedFiveStagePassed=function(stageNumber){return qs.filter(q=>q.stage===stageNumber).length>0&&qs.filter(q=>q.stage===stageNumber).every(q=>a[q.number]!==undefined)};
+window.startApprovedFiveStageFromOriginal=function(gender,player,stageNumber=1){
+ approvedGender=gender==='boy'?'boy':'girl';name=player||'นักเดินทาง';
+ if(stageNumber===1&&!qs.length){a={};save()}
+ const start=()=>{if(app)app.remove();app=document.createElement('div');app.id='approved5';document.body.append(app);launch.hidden=true;stage=Math.max(0,Math.min(4,stageNumber-1));idx=0;dialoguePosition=0;dialogueStep()};
+ if(qs.length){start();return}
+ fetch('data/approved-questions-20.json').then(r=>{if(!r.ok)throw Error('โหลดคำถามไม่ได้');return r.json()}).then(data=>{qs=data.questions;start()}).catch(err=>{alert('ไม่สามารถเปิดเนื้อหา 5 ด่าน: '+err.message)})
+};
 launch.onclick=async()=>{launch.disabled=true;try{const r=await fetch('data/approved-questions-20.json');if(!r.ok)throw Error('โหลดคำถามไม่ได้');qs=(await r.json()).questions;if(qs.length!==20||qs.filter(q=>q.type==='multiple-choice').length!==16)throw Error('จำนวนข้อไม่ถูกต้อง');app=document.createElement('div');app.id='approved5';document.body.append(app);launch.hidden=true;screen('<h2>ปริศนาเงินพดด้วง · ทดลอง 5 ด่าน</h2><p>พบเงินพดด้วงลึกลับในโรงเรียน ก่อนย้อนเวลาสู่อยุธยา</p><label>ชื่อผู้เล่น <input id="five-name" value="นักเดินทาง" maxlength="40"></label><p>เลือกตัวละคร <label><input type="radio" name="five-gender" value="girl" checked> นักเรียนหญิง</label> <label><input type="radio" name="five-gender" value="boy"> นักเรียนชาย</label></p>','intro-school.webp');button('เริ่มการผจญภัย ▶',()=>{name=app.querySelector('#five-name').value.trim()||'นักเดินทาง';approvedGender=app.querySelector('input[name="five-gender"]:checked').value;a={};save();map()});button('ยกเลิก',exit)}catch(e){alert(e.message)}finally{launch.disabled=false}};
 })();
