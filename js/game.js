@@ -1322,7 +1322,8 @@ function renderClassroomQuestion(stageIndex){
  if(isRoyal)royalFirstAnswerLocked=false;
  quizHeading.textContent=isRoyal?'บททดสอบสุดท้ายแห่งกรุงศรีอยุธยา':'ด่านที่ '+({4:'๔',7:'๕'}[stageIndex]||['๑','๒','๓','๔','๕','๖','๗','๘'][stageIndex])+' : '+({4:'สำเภาการค้าแห่งอยุธยา',7:'ความลับแห่งพระคลังสินค้า'}[stageIndex]||stage.name);
  quizProgress.textContent='ข้อ '+(quizIndex+1)+' / '+items.length;
- quizQuestion.textContent=item.q;
+ quizQuestion.textContent=item.questionId==='APPROVED-Q14'?item.q.replace(' ผลกระทบ','\nผลกระทบ'):item.q;
+ quizQuestion.style.whiteSpace='pre-line';
  quizAnswers.replaceChildren();
  quizFeedback.textContent='';
  quizNextBtn.classList.add('hidden');
