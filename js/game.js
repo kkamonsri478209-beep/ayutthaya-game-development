@@ -895,7 +895,7 @@ function finishFarmerQuiz(){recordStageScore(1,farmerQuiz);
 
 quizNextBtn.addEventListener('click',()=>{
  const isRoyalQuiz=quizHeading.textContent.includes('บททดสอบสุดท้าย')||quizHeading.textContent.includes('สรุปผลบททดสอบสุดท้าย');if(isRoyalQuiz){if(quizShowingResult){quizPanel.classList.add('hidden');quizActive=false;openDialogue(royalEndingDialogue(),()=>{showRoyalResult();});return;}if(quizIndex<finalRoyalQuiz.length-1){quizIndex++;renderRoyalQuizQuestion();}else finishRoyalQuiz();return;}
- const isTreasuryQuiz=sceneIndex===10&&(quizHeading.textContent.includes('ด่านที่ ๕')||quizHeading.textContent.includes('สรุปผลด่านที่ ๕'));if(isTreasuryQuiz){if(quizShowingResult){quizPanel.classList.add('hidden');quizActive=false;openDialogue([{who:'timeNarrator',emotion:'normal',text:'การเดินทางของเจ้าสิ้นสุดลงแล้ว จงนำสิ่งที่ได้เรียนรู้กลับไปยังโลกของเจ้า'},student(()=>genderWord('ขอบคุณครับ! ผมจะไม่ลืมเรื่องราวของอยุธยาเลย','ขอบคุณค่ะ! ฉันจะไม่ลืมเรื่องราวของอยุธยาเลย'))],()=>showRoyalResult());return;}if(quizIndex<treasuryQuiz.length-1){if(quizIndex===treasuryQuiz.length-2){quizPanel.classList.add('hidden');openDialogue([{who:'timeNarrator',emotion:'normal',text:'เจ้าได้เรียนรู้แล้วว่าเศรษฐกิจอยุธยาเชื่อมโยงการผลิตข้าว การขนส่ง การค้าภายใน การค้าต่างประเทศ และรายได้ของรัฐ'},student(()=>genderWord('ตอนแรกผมคิดว่าเศรษฐกิจเป็นแค่การซื้อขาย แต่จริง ๆ ทุกอย่างเกี่ยวข้องกันเลยครับ','ตอนแรกฉันคิดว่าเศรษฐกิจเป็นแค่การซื้อขาย แต่จริง ๆ ทุกอย่างเกี่ยวข้องกันเลยค่ะ')),{who:'timeNarrator',emotion:'normal',text:'บัดนี้จงใช้ความรู้จากการเดินทางทั้งหมดตอบคำถามสุดท้าย'}],()=>{quizPanel.classList.remove('hidden');quizIndex++;renderTreasuryQuizQuestion();});}else{quizIndex++;renderTreasuryQuizQuestion();}}else finishTreasuryQuiz();return;}
+ const isTreasuryQuiz=sceneIndex===10&&(quizHeading.textContent.includes('ด่านที่ ๕')||quizHeading.textContent.includes('สรุปผลด่านที่ ๕'));if(isTreasuryQuiz){if(quizShowingResult){quizPanel.classList.add('hidden');quizActive=false;openDialogue([{who:'timeNarrator',emotion:'normal',text:'การเดินทางของเจ้าสิ้นสุดลงแล้ว จงนำสิ่งที่ได้เรียนรู้กลับไปยังโลกของเจ้า'},student(()=>genderWord('ขอบคุณครับ! ผมจะไม่ลืมเรื่องราวของอยุธยาเลย','ขอบคุณค่ะ! ฉันจะไม่ลืมเรื่องราวของอยุธยาเลย'))],()=>playApprovedEndingReturn());return;}if(quizIndex<treasuryQuiz.length-1){if(quizIndex===treasuryQuiz.length-2){quizPanel.classList.add('hidden');openDialogue([{who:'timeNarrator',emotion:'normal',text:'เจ้าได้เรียนรู้แล้วว่าเศรษฐกิจอยุธยาเชื่อมโยงการผลิตข้าว การขนส่ง การค้าภายใน การค้าต่างประเทศ และรายได้ของรัฐ'},student(()=>genderWord('ตอนแรกผมคิดว่าเศรษฐกิจเป็นแค่การซื้อขาย แต่จริง ๆ ทุกอย่างเกี่ยวข้องกันเลยครับ','ตอนแรกฉันคิดว่าเศรษฐกิจเป็นแค่การซื้อขาย แต่จริง ๆ ทุกอย่างเกี่ยวข้องกันเลยค่ะ')),{who:'timeNarrator',emotion:'normal',text:'บัดนี้จงใช้ความรู้จากการเดินทางทั้งหมดตอบคำถามสุดท้าย'}],()=>{quizPanel.classList.remove('hidden');quizIndex++;renderTreasuryQuizQuestion();});}else{quizIndex++;renderTreasuryQuizQuestion();}}else finishTreasuryQuiz();return;}
  const isCheckpointQuiz=quizHeading.textContent.includes('ด่านที่ ๗')||quizHeading.textContent.includes('สรุปผลด่านที่ ๗');if(isCheckpointQuiz){if(quizShowingResult){quizPanel.classList.add('hidden');quizActive=false;objective.textContent='ผ่านด่านที่ ๗ แล้ว! เดินทางต่อไปยังลานเรียนรู้รายได้แผ่นดิน';return;}if(quizIndex<checkpointQuiz.length-1){quizIndex++;renderCheckpointQuizQuestion();}else finishCheckpointQuiz();return;}
  const isInternationalPortQuiz=quizHeading.textContent.includes('ด่านที่ ๖')||quizHeading.textContent.includes('สรุปผลด่านที่ ๖');if(isInternationalPortQuiz){if(quizShowingResult){quizPanel.classList.add('hidden');quizActive=false;objective.textContent='ผ่านด่านที่ ๖ แล้ว! เดินทางต่อไปยังด่านขนอนได้';return;}if(quizIndex<internationalPortQuiz.length-1){quizIndex++;renderInternationalPortQuizQuestion();}else finishInternationalPortQuiz();return;}
  const isForeignTradeQuiz=sceneIndex===7&&(quizHeading.textContent.includes('ด่านที่ ๔')||quizHeading.textContent.includes('สรุปผลด่านที่ ๔'));if(isForeignTradeQuiz){if(quizShowingResult){quizPanel.classList.add('hidden');quizActive=false;objective.textContent='ผ่านด่านที่ ๔ แล้ว! เตรียมเดินทางสู่พระคลังสินค้า';return;}if(quizIndex<foreignTradeQuiz.length-1){quizIndex++;renderForeignTradeQuizQuestion();}else finishForeignTradeQuiz();return;}
@@ -1398,6 +1398,53 @@ finishInternationalPortQuiz = ()=>wrapClassroomFinish(5);
 finishCheckpointQuiz = ()=>wrapClassroomFinish(6);
 finishTreasuryQuiz = ()=>wrapClassroomFinish(7);
 finishRoyalQuiz = ()=>wrapClassroomFinish(8);
+// Closing cutscene for the approved five-stage route. Reuse existing art and portal styling.
+let endingReturnActive=false;
+function playApprovedEndingReturn(){
+ if(endingReturnActive)return;
+ endingReturnActive=true;
+ quizActive=false;
+ quizPanel.classList.add('hidden');
+ dialogueBox.classList.add('hidden');
+ keys.left=keys.right=false;
+ const app=$('app');
+ const overlay=document.createElement('div');
+ overlay.className='approved-ending-return';
+ overlay.setAttribute('role','status');
+ overlay.setAttribute('aria-label','เงินพดด้วงเปล่งแสงและนักเรียนเดินทางกลับโรงเรียน');
+ overlay.style.cssText='position:fixed;inset:0;z-index:12000;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;text-align:center;padding:24px;box-sizing:border-box;background:radial-gradient(circle at center,#b18a3b 0%,#47336b 36%,#0c0a22 85%);color:#fff6d9;font-size:clamp(20px,3vw,32px);font-weight:700;transition:opacity .5s ease';
+ const art=document.createElement('img');
+ art.src='pod-duang.webp';
+ art.alt='เงินพดด้วงเปล่งแสง';
+ art.style.cssText='width:min(55vw,320px);height:min(45vh,260px);object-fit:contain;filter:drop-shadow(0 0 25px #fff2ad) drop-shadow(0 0 55px #ffd36d);animation:approvedEndingGlow 1.6s ease-in-out infinite alternate';
+ const message=document.createElement('div');
+ message.textContent='เงินพดด้วงเปล่งแสง... กาลเวลากำลังพาเจ้ากลับบ้าน';
+ const skip=document.createElement('button');
+ skip.type='button';skip.textContent='ข้ามฉากจบ ▶';
+ skip.style.cssText='padding:10px 20px;border-radius:14px;border:1px solid #e8c87b;background:#271b48;color:#fff6d9;cursor:pointer;font:inherit;font-size:16px';
+ overlay.append(art,message,skip);
+ const style=document.createElement('style');
+ style.textContent='@keyframes approvedEndingGlow{from{transform:scale(.95);filter:drop-shadow(0 0 15px #fff2ad)}to{transform:scale(1.06);filter:drop-shadow(0 0 65px #ffe18b)}}@media(prefers-reduced-motion:reduce){.approved-ending-return img{animation:none!important}.approved-ending-return{transition:none!important}}';
+ document.head.append(style);app.append(overlay);
+ let completed=false;
+ let schoolTimer=null,finishTimer=null;
+ const finish=()=>{
+  if(completed)return;
+  completed=true;
+  clearTimeout(schoolTimer);clearTimeout(finishTimer);
+  overlay.remove();style.remove();
+  endingReturnActive=false;
+  showRoyalResult();
+ };
+ skip.addEventListener('click',finish);
+ schoolTimer=setTimeout(()=>{
+  if(completed)return;
+  overlay.style.background='linear-gradient(rgba(11,15,31,.32),rgba(11,15,31,.66)),url("intro-school.webp") center / cover no-repeat';
+  art.remove();
+  message.textContent='กลับสู่โรงเรียนแล้ว — การเดินทางในกรุงศรีอยุธยาสิ้นสุดลง';
+ },2400);
+ finishTimer=setTimeout(finish,4800);
+}
 const originalRoyalResult=showRoyalResult;
 showRoyalResult=function(){
  originalRoyalResult();
