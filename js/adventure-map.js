@@ -2,14 +2,14 @@
 /* Ayutthaya adventure map: additive layer, keeps original scenes, dialogues and quizzes intact. */
 (() => {
  const stageNames=['ทุ่งนาแห่งความอุดมสมบูรณ์','สายน้ำแห่งการค้า','ตลาดหลากหลาย สินค้ามากมาย','สำเภาการค้าแห่งอยุธยา','ความลับแห่งพระคลังสินค้า'];
- const sceneForStage=[3,4,5,8,10];
+ const sceneForStage=[3,4,5,7,10];
  const areas=[
   {title:'แหล่งผลิตและทรัพยากร',file:'pin-farming.png',left:16,top:81,stages:[1,2]},
   {title:'การค้าภายใน',file:'pin-market.png',left:47,top:63,stages:[3]},
   {title:'การค้าต่างประเทศ',file:'pin-trade.png',left:77,top:60,stages:[4]},
   {title:'เศรษฐกิจของรัฐ',file:'pin-palace.png',left:52,top:27,stages:[5]}
  ];
- const passed=()=>[stage1Passed,stage2Passed,stage3Passed,stage6Passed,stage8Passed];
+ const passed=()=>[stage1Passed,stage2Passed,stage3Passed,stage5Passed,stage8Passed];
  const available=(stage)=>stage===1||Boolean(passed()[stage-2]);
  let discovered=false, selectedArea=0, mapOpen=false, newlyUnlockedArea=-1, transitionBusy=false;
  const map=document.createElement('section');map.id='adventure-map-screen';map.className='screen hidden';map.setAttribute('aria-label','แผนที่การผจญภัยกรุงศรีอยุธยา');
@@ -84,21 +84,9 @@
  }
  // Complete a base with a short dialogue, then a cinematic fade to the unlocked map.
  const transitions={
-  4:{area:1,lines:[
-   {who:'student',emotion:'curious',text:()=>selectedGender==='girl'?'ดูเหมือนเราจะใกล้ถึงพระนครแล้วนะคะ!':'ดูเหมือนเราจะใกล้ถึงพระนครแล้วนะครับ!'},
-   {who:'boatman',emotion:'greeting',text:'ถูกแล้วเจ้าหนู! อีกไม่นานเราจะถึงตลาดอันคึกคักของกรุงศรีอยุธยา เตรียมตัวให้พร้อมเถิด!'},
-   {who:'student',emotion:'smile',text:()=>selectedGender==='girl'?'ตลาดสมัยอยุธยาจะเป็นอย่างไรกันนะ อยากเห็นแล้วค่ะ!':'ตลาดสมัยอยุธยาจะเป็นอย่างไรกันนะ อยากเห็นแล้วครับ!'}
-  ]},
-  5:{area:2,lines:[
-   {who:'student',emotion:'curious',text:()=>selectedGender==='girl'?'เราได้เห็นการค้าภายในเมืองแล้ว ต่อไปจะไปที่ไหนกันคะ?':'เราได้เห็นการค้าภายในเมืองแล้ว ต่อไปจะไปที่ไหนกันครับ?'},
-   {who:'merchant',emotion:'explain',text:'เจ้าคงเห็นแล้วว่าตลาดแห่งนี้มีสินค้าหลากหลาย ทั้งสินค้าที่ชาวบ้านนำมาขายและสินค้าที่ขนส่งมาทางน้ำ ต่อไปลองไปดูการค้ากับชาวต่างชาติที่นำสินค้ามาจากแดนไกลเถิด'},
-   {who:'student',emotion:'smile',text:()=>selectedGender==='girl'?'น่าสนใจจังค่ะ! หนูพร้อมออกเดินทางแล้ว':'น่าสนใจจังครับ! ผมพร้อมออกเดินทางแล้ว'}
-  ]},
-  8:{area:3,lines:[
-   {who:'student',emotion:'curious',text:()=>selectedGender==='girl'?'ได้เห็นเรือสินค้าจากหลายประเทศแล้ว ต่อไปเราจะเรียนรู้อะไรอีกคะ?':'ได้เห็นเรือสินค้าจากหลายประเทศแล้ว ต่อไปเราจะเรียนรู้อะไรอีกครับ?'},
-   {who:'foreignExplorer',emotion:'explain',text:'การค้าต้องเกี่ยวข้องกับรายได้ของบ้านเมืองด้วย จงไปเรียนรู้ที่ด่านขนอน แล้วเดินทางต่อไปยังพระคลังสินค้าและพระราชวังเถิด!'},
-   {who:'student',emotion:'smile',text:()=>selectedGender==='girl'?'เข้าใจแล้วค่ะ ไปเรียนรู้เรื่องรายได้ของบ้านเมืองกันต่อเลย!':'เข้าใจแล้วครับ ไปเรียนรู้เรื่องรายได้ของบ้านเมืองกันต่อเลย!'}
-  ]}
+  4:{area:1,dialogueStage:1},
+  5:{area:2,dialogueStage:2},
+  7:{area:3,dialogueStage:4}
  };
  function cinematicReturn(area){
   const messages=[
@@ -126,12 +114,12 @@
  $('quiz-next-btn').addEventListener('click',e=>{
   const config=transitions[sceneIndex];
   if(!discovered||!config||!quizShowingResult||transitionBusy)return;
-  const finished=config.area===1?stage2Passed:config.area===2?stage3Passed:stage6Passed;
+  const finished=config.area===1?stage2Passed:config.area===2?stage3Passed:stage5Passed;
   if(!finished)return;
   e.preventDefault();e.stopImmediatePropagation();
   transitionBusy=true;
   quizPanel.classList.add('hidden');quizActive=false;quizShowingResult=false;
-  openDialogue(config.lines,()=>cinematicReturn(config.area));
+  openDialogue(createTeacherDialogue(config.dialogueStage,'after'),()=>cinematicReturn(config.area));
  },true);
  const glow=document.createElement('style');
  glow.textContent='.adventure-map-pin.just-unlocked{filter:drop-shadow(0 0 13px #ffe18b) drop-shadow(0 0 24px #f5b943);z-index:5}.adventure-map-pin.just-unlocked img{animation:areaUnlockGlow 1.35s ease-in-out infinite alternate}@keyframes areaUnlockGlow{from{filter:brightness(1)}to{filter:brightness(1.3) saturate(1.3)}}.adventure-cutscene-curtain{position:absolute;inset:0;background:#100d25;opacity:0;pointer-events:none;z-index:110;transition:opacity .6s ease}.adventure-cutscene-curtain.visible{opacity:1;pointer-events:auto}@media(prefers-reduced-motion:reduce){.adventure-map-pin.just-unlocked img{animation:none}.adventure-cutscene-curtain{transition:none}}';
