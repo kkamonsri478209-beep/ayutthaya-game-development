@@ -883,13 +883,10 @@ function finishFarmerQuiz(){recordStageScore(1,farmerQuiz);
  quizNextBtn.textContent='ไปต่อ ▶';
  quizNextBtn.classList.remove('hidden');
 }
-const approvedNativeEndingLines=[
- {who:'student',emotion:'smile',text:()=>genderWord('ผมได้เรียนรู้ว่าเศรษฐกิจอยุธยาเชื่อมโยงทั้งการเกษตร การขนส่ง การค้า และรายได้ของรัฐครับ','หนูได้เรียนรู้ว่าเศรษฐกิจอยุธยาเชื่อมโยงทั้งการเกษตร การขนส่ง การค้า และรายได้ของรัฐค่ะ')},
- {who:'treasuryOfficer',emotion:'smile',text:'เจ้าทำภารกิจสำเร็จแล้ว จงนำความรู้ที่ได้กลับไปใช้ให้เกิดประโยชน์เถิด'}
-];
+
 quizNextBtn.addEventListener('click',()=>{
  const isRoyalQuiz=quizHeading.textContent.includes('บททดสอบสุดท้าย')||quizHeading.textContent.includes('สรุปผลบททดสอบสุดท้าย');if(isRoyalQuiz){if(quizShowingResult){quizPanel.classList.add('hidden');quizActive=false;openDialogue(royalEndingDialogue(),()=>{showRoyalResult();});return;}if(quizIndex<finalRoyalQuiz.length-1){quizIndex++;renderRoyalQuizQuestion();}else finishRoyalQuiz();return;}
- const isTreasuryQuiz=sceneIndex===10&&(quizHeading.textContent.includes('ด่านที่ ๕')||quizHeading.textContent.includes('สรุปผลด่านที่ ๕'));if(isTreasuryQuiz){if(quizShowingResult){quizPanel.classList.add('hidden');quizActive=false;openDialogue(approvedNativeEndingLines,()=>showRoyalResult());return;}if(quizIndex<treasuryQuiz.length-1){quizIndex++;renderTreasuryQuizQuestion();}else finishTreasuryQuiz();return;}
+ const isTreasuryQuiz=sceneIndex===10&&(quizHeading.textContent.includes('ด่านที่ ๕')||quizHeading.textContent.includes('สรุปผลด่านที่ ๕'));if(isTreasuryQuiz){if(quizShowingResult){quizPanel.classList.add('hidden');quizActive=false;openDialogue(createTeacherDialogue(7,'after'),()=>showRoyalResult());return;}if(quizIndex<treasuryQuiz.length-1){quizIndex++;renderTreasuryQuizQuestion();}else finishTreasuryQuiz();return;}
  const isCheckpointQuiz=quizHeading.textContent.includes('ด่านที่ ๗')||quizHeading.textContent.includes('สรุปผลด่านที่ ๗');if(isCheckpointQuiz){if(quizShowingResult){quizPanel.classList.add('hidden');quizActive=false;objective.textContent='ผ่านด่านที่ ๗ แล้ว! เดินทางต่อไปยังลานเรียนรู้รายได้แผ่นดิน';return;}if(quizIndex<checkpointQuiz.length-1){quizIndex++;renderCheckpointQuizQuestion();}else finishCheckpointQuiz();return;}
  const isInternationalPortQuiz=quizHeading.textContent.includes('ด่านที่ ๖')||quizHeading.textContent.includes('สรุปผลด่านที่ ๖');if(isInternationalPortQuiz){if(quizShowingResult){quizPanel.classList.add('hidden');quizActive=false;objective.textContent='ผ่านด่านที่ ๖ แล้ว! เดินทางต่อไปยังด่านขนอนได้';return;}if(quizIndex<internationalPortQuiz.length-1){quizIndex++;renderInternationalPortQuizQuestion();}else finishInternationalPortQuiz();return;}
  const isForeignTradeQuiz=sceneIndex===7&&(quizHeading.textContent.includes('ด่านที่ ๔')||quizHeading.textContent.includes('สรุปผลด่านที่ ๔'));if(isForeignTradeQuiz){if(quizShowingResult){quizPanel.classList.add('hidden');quizActive=false;objective.textContent='ผ่านด่านที่ ๕ แล้ว! สำรวจย่านการค้าต่างชาติได้ตามสบาย';return;}if(quizIndex<foreignTradeQuiz.length-1){quizIndex++;renderForeignTradeQuizQuestion();}else finishForeignTradeQuiz();return;}
