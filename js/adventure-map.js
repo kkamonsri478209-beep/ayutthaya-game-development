@@ -2,13 +2,14 @@
 /* Ayutthaya adventure map: additive layer, keeps original scenes, dialogues and quizzes intact. */
 (() => {
  const stageNames=['ทุ่งนาแห่งความอุดมสมบูรณ์','สายน้ำแห่งการค้า','ตลาดหลากหลาย สินค้ามากมาย','สำเภาการค้าแห่งอยุธยา','ความลับแห่งพระคลังสินค้า'];
+ const sceneForStage=[3,4,5,8,10];
  const areas=[
   {title:'แหล่งผลิตและทรัพยากร',file:'pin-farming.png',left:16,top:81,stages:[1,2]},
   {title:'การค้าภายใน',file:'pin-market.png',left:47,top:63,stages:[3]},
   {title:'การค้าต่างประเทศ',file:'pin-trade.png',left:77,top:60,stages:[4]},
   {title:'เศรษฐกิจของรัฐ',file:'pin-palace.png',left:52,top:27,stages:[5]}
  ];
- const passed=()=>[1,2,3,4,5].map(n=>Boolean(window.approvedFiveStagePassed?.(n)));
+ const passed=()=>[stage1Passed,stage2Passed,stage3Passed,stage6Passed,stage8Passed];
  const available=(stage)=>stage===1||Boolean(passed()[stage-2]);
  let discovered=false, selectedArea=0, mapOpen=false, newlyUnlockedArea=-1, transitionBusy=false;
  const map=document.createElement('section');map.id='adventure-map-screen';map.className='screen hidden';map.setAttribute('aria-label','แผนที่การผจญภัยกรุงศรีอยุธยา');
@@ -38,7 +39,7 @@
   selectedArea=index;const area=areas[index];
   // Warm the first unlocked destination while the player reads the stage list.
   const first=area.stages.find(available);
-  if(first){const approvedBg=['stage1-farm.webp','boat-ride-girl.webp','marketplace-bg.jpg','international_trade_port.png','scene_treasury.png'][first-1];if(approvedBg)image(approvedBg);}
+  if(first){const scene=scenes[sceneForStage[first-1]];if(scene){const path=first===2?(selectedGender==='girl'?'boat-ride-girl.webp':'boat-ride-boy.webp'):scene.bg;if(path)image(path);}}
   map.querySelector('.adventure-map-area-title').textContent=area.title;
   const list=map.querySelector('.adventure-map-stage-list');list.replaceChildren();
   area.stages.forEach(stage=>{
@@ -78,11 +79,8 @@
  };
  function launch(stage){
   closeMap();
-  if(stage===1){originalGoToScene(3);return;}
-  if(typeof window.startApprovedFiveStageFromOriginal==='function'){window.startApprovedFiveStageFromOriginal(selectedGender,playerName,stage);return;}
-  console.warn('Approved five-stage dialogue is not loaded');
+  originalGoToScene(sceneForStage[stage-1]);
  }
- window.approvedOriginalMapOpen=()=>openMap();
  // Complete a base with a short dialogue, then a cinematic fade to the unlocked map.
  const transitions={
   4:{area:1,lines:[
@@ -90,7 +88,7 @@
    {who:'boatman',emotion:'greeting',text:'ถูกแล้วเจ้าหนู! อีกไม่นานเราจะถึงตลาดอันคึกคักของกรุงศรีอยุธยา เตรียมตัวให้พร้อมเถิด!'},
    {who:'student',emotion:'smile',text:()=>selectedGender==='girl'?'ตลาดสมัยอยุธยาจะเป็นอย่างไรกันนะ อยากเห็นแล้วค่ะ!':'ตลาดสมัยอยุธยาจะเป็นอย่างไรกันนะ อยากเห็นแล้วครับ!'}
   ]},
-  6:{area:2,lines:[
+  5:{area:2,lines:[
    {who:'student',emotion:'curious',text:()=>selectedGender==='girl'?'เราได้เห็นการค้าภายในเมืองแล้ว ต่อไปจะไปที่ไหนกันคะ?':'เราได้เห็นการค้าภายในเมืองแล้ว ต่อไปจะไปที่ไหนกันครับ?'},
    {who:'portOfficer',emotion:'explain',text:'ต่อไปเจ้าจะได้พบย่านการค้าต่างชาติ มีพ่อค้าจากหลายดินแดนนำสินค้ามาแลกเปลี่ยนกัน!'},
    {who:'student',emotion:'smile',text:()=>selectedGender==='girl'?'น่าสนใจจังค่ะ! หนูพร้อมออกเดินทางแล้ว':'น่าสนใจจังครับ! ผมพร้อมออกเดินทางแล้ว'}
@@ -127,7 +125,7 @@
  $('quiz-next-btn').addEventListener('click',e=>{
   const config=transitions[sceneIndex];
   if(!discovered||!config||!quizShowingResult||transitionBusy)return;
-  const finished=config.area===1?stage2Passed:config.area===2?stage4Passed:stage6Passed;
+  const finished=config.area===1?stage2Passed:config.area===2?stage3Passed:stage6Passed;
   if(!finished)return;
   e.preventDefault();e.stopImmediatePropagation();
   transitionBusy=true;
