@@ -989,6 +989,12 @@ function isEditingText(target){
 window.addEventListener('keydown',e=>{
  if(e.isComposing||e.key==='Process'||isEditingText(e.target))return;
  if($('game-screen').classList.contains('hidden'))return;
+ // While dialogue is visible, Tab and E advance the current line; Shift+Tab goes back.
+ // Outside dialogue, Tab keeps its native keyboard-accessibility focus behavior.
+ if(dialogue&&!dialogueBox.classList.contains('hidden')){
+  if(e.code==='Tab'){e.preventDefault();if(!e.repeat){if(e.shiftKey)goBackDialogue();else advanceDialogue();}return;}
+  if(['KeyE','Space','Enter'].includes(e.code)){e.preventDefault();if(!e.repeat)advanceDialogue();return;}
+ }
  if(['ArrowLeft','ArrowRight','Space','Enter','KeyE','KeyA','KeyD'].includes(e.code))e.preventDefault();
  if(e.code==='ArrowLeft'||e.code==='KeyA')keys.left=true;
  if(e.code==='ArrowRight'||e.code==='KeyD')keys.right=true;
