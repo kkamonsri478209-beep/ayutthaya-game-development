@@ -81,7 +81,10 @@ function royalPortraitSrc(img){
  royalPortraitCache.set(img,img.src);return img.src;
 }
 // เตรียมภาพฉากถัดไปล่วงหน้า เพื่อลดเวลารอเมื่อผู้เล่นเดินทางเปลี่ยนด่าน
-function preloadScene(index){const scene=scenes[index];if(scene&&scene.bg)image(scene.bg,'low');}
+function preloadScene(index){const scene=scenes[index];if(!scene)return;const path=index===4?(selectedGender==='girl'?'boat-ride-girl.webp':'boat-ride-boy.webp'):scene.bg;if(path)image(path,'low');}
+// The shortened classroom route skips legacy scenes 6, 8 and 9.
+function nextClassroomScene(index){const route=[3,4,5,7,10];const at=route.indexOf(index);return at>=0&&at<route.length-1?route[at+1]:(index<3?index+1:-1);}
+function preloadClassroomDestination(index){if(index>=0)preloadScene(index);}
 // โหลดภาพใบหน้าตัวละครทุกอารมณ์ไว้ก่อนเริ่มบทสนทนา ลดอาการสะดุดตอนกด “ถัดไป”
 function preloadDialoguePortraits(){
  const emotions=['normal','curious','surprised','worried','explain','smile','point'];
@@ -154,8 +157,9 @@ function waitForVisual(path){
   visualLoading=false;overlay.classList.add('hidden');
   // Load the next scene only after the current one is ready; avoid competing downloads.
   if($('game-screen')&&!$('game-screen').classList.contains('hidden')){
-   const nextIndex=sceneIndex+1;
-   setTimeout(()=>{if(!visualLoading&&nextIndex===sceneIndex+1)preloadScene(nextIndex);},1800);
+   const currentScene=sceneIndex;
+   const nextIndex=nextClassroomScene(currentScene);
+   setTimeout(()=>{if(!visualLoading&&sceneIndex===currentScene)preloadClassroomDestination(nextIndex);},500);
   }
  }
  retry.onclick=()=>{
