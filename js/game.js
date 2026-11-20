@@ -851,7 +851,8 @@ function renderQuizQuestion(){
  const item=farmerQuiz[quizIndex];
  quizHeading.textContent='ด่านที่ ๑ : วิถีชีวิตชาวนา';
  quizProgress.textContent='ข้อ '+(quizIndex+1)+' / '+farmerQuiz.length;
- quizQuestion.textContent=item.q;
+ quizQuestion.textContent=item.questionId==='APPROVED-Q14'?item.q.replace(' ผลกระทบ','\nผลกระทบ'):item.q;
+ quizQuestion.style.whiteSpace='pre-line';
  quizAnswers.replaceChildren();
  quizFeedback.textContent='';
  quizNextBtn.classList.add('hidden');
