@@ -27,7 +27,7 @@
    b.style.left=area.left+'%';b.style.top=area.top+'%';
    b.setAttribute('aria-label',area.title+(unlocked?'':' (ยังไม่ปลดล็อก)'));
    b.innerHTML='<img src="'+area.file+'" alt=""><span>'+area.title+'</span>'+(unlocked?'':'<span class="adventure-map-lock">🔒</span>');
-   b.addEventListener('click',()=>{document.dispatchEvent(new CustomEvent('ayutthaya-map-select'));if(unlocked){const next=area.stages.find(stage=>!passed()[stage-1]&&available(stage));if(next)launch(next);else openArea(index);}else showLocked(area);});pinLayer.append(b);
+   b.addEventListener('click',()=>{document.dispatchEvent(new CustomEvent('ayutthaya-map-select'));openArea(index);});pinLayer.append(b);
   });
  }
  function showLocked(area){
@@ -40,12 +40,13 @@
   // Warm the first unlocked destination while the player reads the stage list.
   const first=area.stages.find(available);
   if(first){const scene=scenes[sceneForStage[first-1]];if(scene){const path=first===2?(selectedGender==='girl'?'boat-ride-girl.webp':'boat-ride-boy.webp'):scene.bg;if(path)image(path);}}
-  map.querySelector('.adventure-map-area-title').textContent=area.title;
+  map.querySelector('.adventure-map-area-title').textContent=area.title+' ('+area.stages.length+' ด่าน)';
   const list=map.querySelector('.adventure-map-stage-list');list.replaceChildren();
   area.stages.forEach(stage=>{
    const b=document.createElement('button');b.type='button';b.className='adventure-map-stage';
    const done=passed()[stage-1],ready=available(stage);
-   b.textContent='ด่านที่ '+stage+' — '+stageNames[stage-1]+(done?' ✓ ผ่านแล้ว':ready?' ▶':' 🔒');
+   b.textContent='ด่านที่ '+stage+' — '+stageNames[stage-1]+(done?' ✓ ผ่านแล้ว':ready?' ▶ เล่นด่านนี้':' 🔒 ยังไม่ปลดล็อก');
+   b.setAttribute('aria-label','ด่านที่ '+stage+' '+stageNames[stage-1]+(done?' ผ่านแล้ว':ready?' เล่นได้':' ยังไม่ปลดล็อก'));
    b.disabled=!ready;b.addEventListener('click',()=>{document.dispatchEvent(new CustomEvent('ayutthaya-map-select'));launch(stage);});list.append(b);
   });
   modal.classList.remove('hidden');
