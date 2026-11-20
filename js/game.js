@@ -348,6 +348,12 @@ function goToScene(n,direction='forward'){
  waitForVisual(scenes[n].bg);
  objective.textContent=scenes[n].objective;
  prompt.classList.add('hidden');
+ if(n===3&&typeof window.startApprovedFiveStageFromOriginal==='function'){
+  // Preserve the original school/coin opening, then use the teacher-approved five-stage dialogue.
+  farmIntroSeen=true;
+  window.startApprovedFiveStageFromOriginal(selectedGender,playerName);
+  return;
+ }
  if(n===3&&!farmIntroSeen){
   farmIntroSeen=true;
   openDialogue([
