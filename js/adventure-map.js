@@ -1,14 +1,14 @@
 "use strict";
 /* Ayutthaya adventure map: additive layer, keeps original scenes, dialogues and quizzes intact. */
 (() => {
- const stageNames=['ทุ่งนา','การเดินทางทางเรือ','ตลาดในกรุงศรีอยุธยา','ท่ารับสินค้าจากหัวเมือง','ย่านการค้าต่างชาติ','ท่าเรือการค้าต่างประเทศ','ด่านขนอน','พระคลังสินค้า','พระราชวังหลวง'];
+ const stageNames=['ทุ่งนาแห่งความอุดมสมบูรณ์','สายน้ำแห่งการค้า','ตลาดหลากหลาย สินค้ามากมาย','สำเภาการค้าแห่งอยุธยา','ความลับแห่งพระคลังสินค้า'];
  const areas=[
   {title:'แหล่งผลิตและทรัพยากร',file:'pin-farming.png',left:16,top:81,stages:[1,2]},
-  {title:'การค้าภายใน',file:'pin-market.png',left:47,top:63,stages:[3,4]},
-  {title:'การค้าต่างประเทศ',file:'pin-trade.png',left:77,top:60,stages:[5,6]},
-  {title:'เศรษฐกิจของรัฐ',file:'pin-palace.png',left:52,top:27,stages:[7,8,9]}
+  {title:'การค้าภายใน',file:'pin-market.png',left:47,top:63,stages:[3]},
+  {title:'การค้าต่างประเทศ',file:'pin-trade.png',left:77,top:60,stages:[4]},
+  {title:'เศรษฐกิจของรัฐ',file:'pin-palace.png',left:52,top:27,stages:[5]}
  ];
- const passed=()=>[stage1Passed,stage2Passed,stage3Passed,stage4Passed,stage5Passed,stage6Passed,stage7Passed,stage8Passed,stage9Passed];
+ const passed=()=>[1,2,3,4,5].map(n=>Boolean(window.approvedFiveStagePassed?.(n)));
  const available=(stage)=>stage===1||Boolean(passed()[stage-2]);
  let discovered=false, selectedArea=0, mapOpen=false, newlyUnlockedArea=-1, transitionBusy=false;
  const map=document.createElement('section');map.id='adventure-map-screen';map.className='screen hidden';map.setAttribute('aria-label','แผนที่การผจญภัยกรุงศรีอยุธยา');
@@ -38,7 +38,7 @@
   selectedArea=index;const area=areas[index];
   // Warm the first unlocked destination while the player reads the stage list.
   const first=area.stages.find(available);
-  if(first){const scene=scenes[first+2];if(scene){const path=first===2?(selectedGender==='girl'?'boat-ride-girl.webp':'boat-ride-boy.webp'):scene.bg;if(path)image(path);}}
+  if(first){const approvedBg=['stage1-farm.webp','boat-ride-girl.webp','marketplace-bg.jpg','international_trade_port.png','scene_treasury.png'][first-1];if(approvedBg)image(approvedBg);}
   map.querySelector('.adventure-map-area-title').textContent=area.title;
   const list=map.querySelector('.adventure-map-stage-list');list.replaceChildren();
   area.stages.forEach(stage=>{
@@ -78,8 +78,11 @@
  };
  function launch(stage){
   closeMap();
-  originalGoToScene(stage+2);
+  if(stage===1){originalGoToScene(3);return;}
+  if(typeof window.startApprovedFiveStageFromOriginal==='function'){window.startApprovedFiveStageFromOriginal(selectedGender,playerName,stage);return;}
+  console.warn('Approved five-stage dialogue is not loaded');
  }
+ window.approvedOriginalMapOpen=()=>openMap();
  // Complete a base with a short dialogue, then a cinematic fade to the unlocked map.
  const transitions={
   4:{area:1,lines:[
