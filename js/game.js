@@ -211,6 +211,30 @@ const dialogueContent=nextBtn.parentNode;
 dialogueContent.insertBefore(dialogueNav,nextBtn);
 dialogueNav.append(previousBtn,nextBtn);
 
+
+const voicePlayer=new Audio();let voiceGeneration=0,voiceDone=false,typingDone=false,voiceTimer;
+function voicePath(d){
+ if(!d.voiceStage)return null;
+ const st=d.voiceStage,n=d.voiceOrdinal,g=selectedGender==='girl'?'f':'m',p=x=>String(x).padStart(2,'0');
+ let name;
+ if(d.who==='student')name='student_'+g+'_'+p(n);
+ else if(st===1){const k=n===1?(g==='f'?1:2):n===6?(g==='f'?7:8):n<6?n+1:n+2;name='farmer_'+p(k)+(n===1||n===6?'_to_'+g:'');}
+ else if(st===3)name='vendor_'+(n===6?g+'_':'')+p(n);
+ else if(st===5){const k=n===1?(g==='f'?1:2):n===8?(g==='f'?9:10):n<8?n+1:n+2;name='treasury_'+p(k)+(n===1||n===8?'_to_'+g:'');}
+ else name=({2:'boatman',4:'merchant_cn'})[st]+'_'+p(n);
+ return './assets/audio/voice/stage'+st+'/stage'+st+'_'+name+'.mp3';
+}
+function voiceGate(){nextBtn.disabled=!(voiceDone&&typingDone);previousBtn.disabled=dialogueIndex===0||nextBtn.disabled;}
+function stopVoice(){voiceGeneration++;clearTimeout(voiceTimer);voicePlayer.pause();voicePlayer.removeAttribute('src');}
+function startVoice(d){
+ stopVoice();const gen=voiceGeneration;voiceDone=false;typingDone=false;voiceGate();
+ const finish=()=>{if(gen!==voiceGeneration)return;voiceDone=true;voiceGate();};
+ const path=voicePath(d);
+ if(path){voicePlayer.src=path;voicePlayer.onended=finish;voicePlayer.onerror=finish;voicePlayer.play().catch(finish);voiceTimer=setTimeout(finish,45000);}
+ else {const t=typeof d.text==='function'?d.text():d.text;voiceTimer=setTimeout(finish,Math.max(1300,Math.min(9500,String(t).length*65)));}
+}
+document.addEventListener('ayutthaya-dialogue-typing-complete',()=>{if(dialogue){typingDone=true;voiceGate();}});
+
 let portraitRequestId=0;
 function showDialogueLine(){
  const d=dialogue[dialogueIndex];
@@ -272,9 +296,10 @@ function showDialogueLine(){
  previousBtn.disabled=dialogueIndex===0;
  previousBtn.classList.toggle('hidden',dialogueIndex===0);
  nextBtn.textContent=dialogueIndex===dialogue.length-1?'ปิดบทสนทนา ▶':'ถัดไป ▶';
+ startVoice(d);
 }
 function goBackDialogue(){
- if(!dialogue||dialogueIndex===0)return;
+ if(!dialogue||dialogueIndex===0||!voiceDone||!typingDone)return;
  dialogueIndex--;
  showDialogueLine();
 }
@@ -284,9 +309,9 @@ function openDialogue(lines,done){
  dialogueBox.classList.remove('hidden');prompt.classList.add('hidden');
 }
 function advanceDialogue(){
- if(!dialogue)return;
+ if(!dialogue||!voiceDone||!typingDone)return;
  if(dialogueIndex<dialogue.length-1){dialogueIndex++;showDialogueLine();return;}
- dialogue=null;dialogueBox.classList.add('hidden');
+ stopVoice();dialogue=null;dialogueBox.classList.add('hidden');
  const done=dialogueDone;dialogueDone=null;
  if(done)done();
  else if(sceneIndex===4&&!stage2Passed)openBoatQuiz();
@@ -1472,13 +1497,17 @@ const teacherDialogueNPC=['farmer','boatman','merchant','portOfficer','chineseMe
  'foreignExplorer','checkpointOfficer','treasuryOfficer','kingNarai'];
 function createTeacherDialogue(stageIndex,phase){
  const whoNPC=teacherDialogueNPC[stageIndex];
+ const voiceStage={0:1,1:2,2:3,4:4,7:5}[stageIndex];
  return teacherReviewedDialogue[stageIndex][phase].map(([who,boy,girl],index)=>{
   const npc=who==='npc';
   const expand=s=>String(s||'').replaceAll('{playerName}',playerName);
   const text=girl!==undefined?()=>genderWord(expand(boy),expand(girl)):()=>expand(boy);
   const emotions=npc?['normal','explain','normal','explain','normal','explain','normal','point','smile']:
     ['normal','curious','normal','curious','normal','explain','normal','smile'];
-  return {who:npc?whoNPC:'student',emotion:emotions[index%emotions.length],text};
+  const before=teacherReviewedDialogue[stageIndex].before;
+   const prior=(phase==='after'?before.concat(teacherReviewedDialogue[stageIndex].after.slice(0,index+1)):before.slice(0,index+1));
+   const voiceOrdinal=prior.filter(line=>line[0]===who).length;
+   return {who:npc?whoNPC:'student',emotion:emotions[index%emotions.length],text,voiceStage,voiceOrdinal};
  });
 }
 farmerLines=()=>createTeacherDialogue(0,'before');
