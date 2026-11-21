@@ -57,7 +57,7 @@ function attachThaiDialogueChime(){
  function visible(){return !box.classList.contains('hidden');}
  function finish(){stop();if(full&&target.textContent!==full){shown=full;target.textContent=full;}}
  function chime(){
-  if(!enabled||volume<=0||document.hidden)return;
+  if(!enabled||volume<=0||document.hidden||document.getElementById('dialogue-next-btn')?.disabled)return;
   const now=performance.now();
   if(now-lastChimeAt<95)return;
   lastChimeAt=now;
@@ -96,11 +96,11 @@ function attachThaiDialogueChime(){
   target.textContent='';
   function tick(){
    if(own!==token||!visible())return;
-   const piece=parts[i++];if(piece===undefined){timer=null;return;}
+   const piece=parts[i++];if(piece===undefined){timer=null;document.dispatchEvent(new Event('ayutthaya-dialogue-typing-complete'));return;}
    shown+=piece;target.textContent=shown;
    if(piece.trim()&&++step%3===0)chime();
    if(i<parts.length)timer=setTimeout(tick,33);
-   else timer=null;
+   else {timer=null;document.dispatchEvent(new Event('ayutthaya-dialogue-typing-complete'));}
   }
   tick();
  }
@@ -114,9 +114,7 @@ function attachThaiDialogueChime(){
   if(!visible())stop();
   else if(target.textContent&&!timer&&target.textContent!==full)animate(target.textContent);
  }).observe(box,{attributes:true,attributeFilter:['class']});
- next.addEventListener('click',e=>{
-  if(timer!==null){e.preventDefault();e.stopImmediatePropagation();finish();}
- },true);
+
 }
 
 })();
