@@ -195,7 +195,7 @@ $('name-form').addEventListener('submit',e=>{
  startGame();
 });
 function genderWord(boy,girl){return selectedGender==='girl'?girl:boy;}
-function student(text,emotion='normal'){return{who:'student',emotion,text};}
+function student(text,emotion='normal',voiceStage,voiceOrdinal){return{who:'student',emotion,text,voiceStage,voiceOrdinal};}
 function npc(text,emotion='normal'){return{who:'farmer',emotion,text};}
 // แถบปุ่มสนทนา: ย้อนกลับชิดซ้าย และถัดไปชิดขวา
 const dialogueNav=document.createElement('div');
@@ -216,6 +216,7 @@ const voicePlayer=new Audio();let voiceGeneration=0,voiceDone=false,typingDone=f
 function voicePath(d){
  if(!d.voiceStage)return null;
  const st=d.voiceStage,n=d.voiceOrdinal,g=selectedGender==='girl'?'f':'m',p=x=>String(x).padStart(2,'0');
+ if(st==='school'||st==='intro')return './assets/audio/voice/'+st+'/'+st+'_student_'+g+'_'+p(n)+'.mp3';
  let name;
  if(d.who==='student')name='student_'+g+'_'+p(n);
  else if(st===1){const k=n===1?(g==='f'?1:2):n===6?(g==='f'?7:8):n<6?n+1:n+2;name='farmer_'+p(k)+(n===1||n===6?'_to_'+g:'');}
@@ -355,8 +356,8 @@ function startGame(){
  objective.textContent=scenes[0].objective;prompt.classList.add('hidden');
  if(!started){started=true;last=performance.now();requestAnimationFrame(frame);}
  openDialogue([
-  student(()=>genderWord('วันนี้เลิกเรียนแล้ว รีบกลับบ้านดีกว่า','วันนี้เลิกเรียนแล้ว รีบกลับบ้านดีกว่า'),'normal'),
-  student('วันนี้มีอะไรน่าสนใจระหว่างทางบ้างนะ?','curious')
+  student(()=>genderWord('วันนี้เลิกเรียนแล้ว รีบกลับบ้านดีกว่า','วันนี้เลิกเรียนแล้ว รีบกลับบ้านดีกว่า'),'normal','school',1),
+  student('วันนี้มีอะไรน่าสนใจระหว่างทางบ้างนะ?','curious','school',2)
  ]);
 }
 function goToScene(n,direction='forward'){
@@ -371,9 +372,9 @@ function goToScene(n,direction='forward'){
  if(n===3&&!farmIntroSeen){
   farmIntroSeen=true;
   openDialogue([
-   student('โอ๊ย... เกิดอะไรขึ้นกับฉันเนี่ย!?','surprised'),
-   student('ที่นี่... ที่ไหนกัน? ทุกอย่างดูเหมือนสมัยก่อนเลย','worried'),
-   student('ตรงนั้นมีชาวนาอยู่ ลองเดินไปถามดีกว่า','curious')
+   student('โอ๊ย... เกิดอะไรขึ้นกับฉันเนี่ย!?','surprised','intro',6),
+   student('ที่นี่... ที่ไหนกัน? ทุกอย่างดูเหมือนสมัยก่อนเลย','worried','intro',7),
+   student('ตรงนั้นมีชาวนาอยู่ ลองเดินไปถามดีกว่า','curious','intro',8)
   ]);
  }
  if(n===4&&direction==='forward'){
@@ -381,11 +382,11 @@ function goToScene(n,direction='forward'){
  }
 }
 const coinLines=[
- student('เอ๊ะ... นั่นอะไรน่ะ?','curious'),
- student('เหมือนเหรียญ... แต่ทำไมรูปร่างแปลกจัง?','curious'),
- student('นี่มันเงินพดด้วงหรือเปล่านะ?','normal'),
- student('เดี๋ยวนะ... ทำไมมันมีแสง!?','surprised'),
- student('เกิดอะไรขึ้นเนี่ย!?','worried')
+ student('เอ๊ะ... นั่นอะไรน่ะ?','curious','intro',1),
+ student('เหมือนเหรียญ... แต่ทำไมรูปร่างแปลกจัง?','curious','intro',2),
+ student('นี่มันเงินพดด้วงหรือเปล่านะ?','normal','intro',3),
+ student('เดี๋ยวนะ... ทำไมมันมีแสง!?','surprised','intro',4),
+ student('เกิดอะไรขึ้นเนี่ย!?','worried','intro',5)
 ];
 // ===== ส่วนแก้ไขบทสนทนาชาวนา: ปรับข้อความใน npc(...) และ student(...) ได้ตรงนี้ =====
 function farmerLines(){
