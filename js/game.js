@@ -226,12 +226,18 @@ function voicePath(d){
  return './assets/audio/voice/stage'+st+'/stage'+st+'_'+name+'.mp3';
 }
 function voiceGate(){nextBtn.disabled=!(voiceDone&&typingDone);previousBtn.disabled=dialogueIndex===0||nextBtn.disabled;}
-function stopVoice(){voiceGeneration++;clearTimeout(voiceTimer);voicePlayer.pause();voicePlayer.removeAttribute('src');}
+function stopVoice(){voiceGeneration++;document.getElementById('intro-voice-retry')?.remove();clearTimeout(voiceTimer);voicePlayer.pause();voicePlayer.removeAttribute('src');}
 function startVoice(d){
  stopVoice();const gen=voiceGeneration;voiceDone=false;typingDone=false;voiceGate();
  const finish=()=>{if(gen!==voiceGeneration)return;voiceDone=true;voiceGate();};
  const path=voicePath(d);
- if(path){voicePlayer.src=path;voicePlayer.onended=finish;voicePlayer.onerror=finish;voicePlayer.play().catch(finish);voiceTimer=setTimeout(finish,45000);}
+ if(path){voicePlayer.src=path;voicePlayer.onended=finish;voicePlayer.onerror=finish;voicePlayer.play().catch(error=>{
+  if(gen!==voiceGeneration)return;
+  if((d.voiceStage==='school'||d.voiceStage==='intro')&&sceneIndex<=2&&error.name==='NotAllowedError'){
+   const retry=document.createElement('button');retry.type='button';retry.id='intro-voice-retry';retry.textContent='▶ เปิดเสียงพากย์';dialogueBox.append(retry);
+   retry.addEventListener('click',()=>{if(gen!==voiceGeneration){retry.remove();return;}voicePlayer.play().then(()=>retry.remove()).catch(()=>{retry.remove();finish();});},{once:true});
+  }else finish();
+ });voiceTimer=setTimeout(()=>{document.getElementById('intro-voice-retry')?.remove();finish();},45000);}
  else {const t=typeof d.text==='function'?d.text():d.text;voiceTimer=setTimeout(finish,Math.max(1300,Math.min(9500,String(t).length*65)));}
 }
 document.addEventListener('ayutthaya-dialogue-typing-complete',()=>{if(dialogue){typingDone=true;voiceGate();}});
