@@ -30,7 +30,7 @@
  let transitionToken=0;
  function showMap(){
   if(transitioning)return;
-  transitioning=true;stop();dialogue=null;dialogueDone=null;dialogueBox.classList.add('hidden');coinFound=true;
+  transitioning=true;stop();stopVoice();dialogue=null;dialogueDone=null;dialogueBox.classList.add('hidden');coinFound=true;
   const token=++transitionToken;
   const mapArt=new Image();mapArt.decoding='async';mapArt.src='ayutthaya-map.png';
   portal.classList.remove('hidden','intro-portal-reveal');
@@ -97,8 +97,10 @@
   if(quizActive){stop();return;}
   if(dialogue){
    keys.right=false;player.moving=false;
-   if(dialogueIndex!==dialoguePosition){dialoguePosition=dialogueIndex;dialogueAt=time;}
-   if(time-dialogueAt>2350){advanceDialogue();dialogueAt=time;dialoguePosition=dialogueIndex;}
+   if(dialogueIndex!==dialoguePosition){dialoguePosition=dialogueIndex;dialogueAt=0;}
+   if(!voiceDone||!typingDone){dialogueAt=0;return;}
+   if(!dialogueAt)dialogueAt=time;
+   if(time-dialogueAt>=650){advanceDialogue();dialogueAt=0;dialoguePosition=-1;}
    return;
   }
   dialoguePosition=-1;
