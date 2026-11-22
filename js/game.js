@@ -1573,14 +1573,18 @@ const classroomDepartureLines=teacherReviewedDialogue.map((_,i)=>()=>createTeach
  const portal=document.createElement('div');portal.id='ending-time-portal';portal.className='hidden';portal.setAttribute('aria-hidden','true');game.append(portal);
  const originalOpen=openDialogue;
  openDialogue=function(lines,done){
-  const isEnding=Array.isArray(lines)&&lines.some(d=>d&&d.who==='timeNarrator'&&d.voiceStage==='ending');
+  const isEnding=Array.isArray(lines)&&lines.some(d=>d&&d.who==='timeNarrator'&&d.voiceStage==='ending'&&d.voiceOrdinal===3);
   if(!isEnding)return originalOpen(lines,done);
   portal.classList.remove('hidden');game.classList.add('ending-portal-active');
+  // Explicitly cover all final-stage artwork and retain the original dialogue above it.
+  portal.style.cssText='display:block!important;position:absolute!important;inset:0!important;z-index:900!important;visibility:visible!important;opacity:1!important;pointer-events:none!important';
+  dialogueBox.style.setProperty('z-index','1000','important');
+  dialogueBox.style.setProperty('position','absolute','important');
   return originalOpen(lines,()=>{
    const flash=document.createElement('div');flash.id='ending-portal-flash';document.body.append(flash);
    requestAnimationFrame(()=>flash.classList.add('ending-flash-on'));
    setTimeout(()=>{
-    portal.classList.add('hidden');game.classList.remove('ending-portal-active');
+    portal.classList.add('hidden');portal.style.cssText='';game.classList.remove('ending-portal-active');dialogueBox.style.removeProperty('z-index');dialogueBox.style.removeProperty('position');
     // The last narrator line now leads straight to the approved score screen.
     showRoyalResult();
     setTimeout(()=>{flash.classList.remove('ending-flash-on');setTimeout(()=>flash.remove(),500);},100);
