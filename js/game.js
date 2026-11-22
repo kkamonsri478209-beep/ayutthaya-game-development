@@ -201,8 +201,8 @@ function startEndingPreview(){
  showScreen('game-screen');objective.textContent='ทดลองฉากจบ (ไม่ใช่ผลการเรียนจริง)';
  prompt.classList.add('hidden');
  if(!started){started=true;last=performance.now();requestAnimationFrame(frame);}
- openTreasuryQuiz();quizIndex=treasuryQuiz.length-2;renderTreasuryQuizQuestion();
- quizNextBtn.click();
+ quizActive=false;quizPanel.classList.add('hidden');
+ openDialogue([{who:'timeNarrator',emotion:'normal',voiceStage:'ending',voiceOrdinal:3,text:'การเดินทางของเจ้าสิ้นสุดลงแล้ว จงนำสิ่งที่ได้เรียนรู้กลับไปยังโลกของเจ้า'},student(()=>genderWord('ขอบคุณครับ! ผมจะไม่ลืมเรื่องราวของอยุธยาเลย','ขอบคุณค่ะ! ฉันจะไม่ลืมเรื่องราวของอยุธยาเลย'),'normal','ending',2)],()=>playApprovedEndingReturn());
 }
 function genderWord(boy,girl){return selectedGender==='girl'?girl:boy;}
 function student(text,emotion='normal',voiceStage,voiceOrdinal){return{who:'student',emotion,text,voiceStage,voiceOrdinal};}
