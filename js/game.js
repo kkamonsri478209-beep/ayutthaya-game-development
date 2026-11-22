@@ -1582,5 +1582,20 @@ kingNaraiDialogueLines=()=>createTeacherDialogue(8,'before');
 royalEndingDialogue=()=>createTeacherDialogue(8,'after');
 const classroomDepartureLines=teacherReviewedDialogue.map((_,i)=>()=>createTeacherDialogue(i,'after'));
 
+// Animated time vortex for the ending narrator; preserves original dialogue UI.
+(()=>{
+ const style=document.createElement('style');
+ style.textContent='#ending-time-vortex{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden;background:radial-gradient(circle,#c69d6555 0%,#513080dd 42%,#090620f5 100%)}#ending-time-vortex::before{content:"";position:absolute;inset:-65%;border-radius:50%;background:repeating-conic-gradient(#ffdb8055 0deg 12deg,#6436ac55 14deg 27deg,#0b092955 29deg 45deg);animation:endingSpin 24s linear infinite;mask-image:radial-gradient(circle,transparent 0 9%,black 25% 75%,transparent 90%)}#ending-time-vortex::after{content:"";position:absolute;inset:20%;border-radius:50%;background:radial-gradient(circle,#fff1b7aa,#b978ed66 20%,transparent 68%)}#game-screen.ending-vortex-active #dialogue-box{position:relative;z-index:8}@keyframes endingSpin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){#ending-time-vortex::before{animation:none}}';
+ document.head.append(style);
+ const game=$('game-screen');if(getComputedStyle(game).position==='static')game.style.position='relative';
+ const vortex=document.createElement('div');vortex.id='ending-time-vortex';vortex.classList.add('hidden');vortex.setAttribute('aria-hidden','true');game.append(vortex);
+ const oldOpen=openDialogue;
+ openDialogue=function(lines,done){
+  const ending=Array.isArray(lines)&&lines.some(line=>line&&line.who==='timeNarrator'&&line.voiceStage==='ending');
+  if(ending){vortex.classList.remove('hidden');game.classList.add('ending-vortex-active');}
+  return oldOpen(lines,ending?()=>{vortex.classList.add('hidden');game.classList.remove('ending-vortex-active');if(done)done();}:done);
+ };
+})();
+
 // Start the cover only after question and dialogue configuration is ready.
 showScreen('cover-screen');
