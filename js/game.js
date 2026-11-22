@@ -1557,20 +1557,37 @@ const classroomDepartureLines=teacherReviewedDialogue.map((_,i)=>()=>createTeach
 (()=>{
  const style=document.createElement('style');
  style.textContent=`
- #ending-time-portal{position:absolute;inset:0;z-index:30;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse at center,#fbe3a8 0%,#d5a6ed 12%,#62449f 34%,#1b123d 67%,#08071b 100%)}
- #ending-time-portal::before{content:"";position:absolute;inset:-65%;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,236,177,.65) 0deg 9deg,rgba(114,69,179,.2) 14deg 27deg,rgba(15,10,51,.45) 31deg 46deg);mask-image:radial-gradient(circle,transparent 0 8%,black 25% 74%,transparent 88%);animation:endingPortalSpin 13s linear infinite}
- #ending-time-portal::after{content:"";position:absolute;inset:8%;background:radial-gradient(circle,rgba(255,250,223,.92) 0%,rgba(255,212,126,.48) 9%,rgba(171,113,227,.28) 28%,transparent 61%);animation:endingPortalPulse 2.8s ease-in-out infinite alternate}
+ #ending-time-portal{position:absolute;inset:0;z-index:30;overflow:hidden;pointer-events:none;isolation:isolate;background:radial-gradient(ellipse at 50% 48%,#ffe8b5 0%,#e2b7ef 13%,#6e4caa 37%,#21143f 72%,#08071b 100%);transition:filter .7s ease}
+ #ending-time-portal::before{content:"";position:absolute;inset:-65%;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,234,163,.66) 0deg 8deg,rgba(121,69,191,.14) 12deg 27deg,rgba(12,8,51,.52) 31deg 46deg);mask-image:radial-gradient(circle,transparent 0 8%,black 24% 75%,transparent 89%);animation:endingPortalSpin 18s linear infinite}
+ #ending-time-portal::after{content:"";position:absolute;inset:-30%;border-radius:50%;background:repeating-conic-gradient(from 30deg,rgba(244,189,255,.16) 0deg 8deg,rgba(255,218,122,.26) 12deg 19deg,transparent 24deg 38deg);mask-image:radial-gradient(circle,transparent 0 12%,black 27% 66%,transparent 81%);animation:endingPortalReverse 29s linear infinite}
+ #ending-portal-heart{position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle,rgba(255,253,223,.92),rgba(255,214,122,.48) 11%,rgba(173,104,236,.2) 32%,transparent 66%);filter:blur(4px);animation:endingPortalPulse 3.4s ease-in-out infinite alternate}
+ #ending-portal-particle{position:absolute;width:var(--particle-size);height:var(--particle-size);left:var(--particle-x);top:var(--particle-y);border-radius:50%;background:#ffe8a0;box-shadow:0 0 10px 3px rgba(255,221,140,.7);opacity:0;animation:endingParticleDrift var(--particle-duration) ease-in-out var(--particle-delay) infinite}
+ #ending-time-portal.ending-portal-charging{filter:brightness(1.38) saturate(1.14)}
  #game-screen.ending-portal-active #dialogue-box{z-index:40!important;position:absolute!important}
- #ending-portal-flash{position:fixed;inset:0;z-index:20000;pointer-events:none;background:#fff9dc;opacity:0;transition:opacity .45s ease}
+ #ending-portal-flash{position:fixed;inset:0;z-index:20000;pointer-events:none;background:#fff9dc;opacity:0;transition:opacity .65s ease}
  #ending-portal-flash.ending-flash-on{opacity:1}
  @keyframes endingPortalSpin{to{transform:rotate(360deg)}}
- @keyframes endingPortalPulse{to{transform:scale(1.18);opacity:.7}}
- @media(prefers-reduced-motion:reduce){#ending-time-portal::before,#ending-time-portal::after{animation:none}#ending-portal-flash{transition:none}}
+ @keyframes endingPortalReverse{to{transform:rotate(-360deg)}}
+ @keyframes endingPortalPulse{to{transform:scale(1.2);opacity:.64}}
+ @keyframes endingParticleDrift{0%{opacity:0;transform:translate3d(-12px,20px,0) scale(.5)}35%{opacity:.88}75%{opacity:.65}100%{opacity:0;transform:translate3d(18px,-44px,0) scale(1.2)}}
+ @media(prefers-reduced-motion:reduce){#ending-time-portal::before,#ending-time-portal::after,#ending-portal-heart,#ending-portal-particle{animation:none!important}#ending-portal-flash{transition:none}}
+
  `;
  document.head.append(style);
  const game=$('game-screen');
  if(getComputedStyle(game).position==='static')game.style.position='relative';
  const portal=document.createElement('div');portal.id='ending-time-portal';portal.className='hidden';portal.setAttribute('aria-hidden','true');game.append(portal);
+ const heart=document.createElement('div');heart.id='ending-portal-heart';portal.append(heart);
+ // Fixed particle positions prevent visual jumps across repeated previews.
+ for(let i=0;i<24;i++){
+  const dot=document.createElement('i');dot.id='ending-portal-particle';
+  dot.style.setProperty('--particle-size',(2+(i%4)*1.5)+'px');
+  dot.style.setProperty('--particle-x',((i*37+13)%96+2)+'%');
+  dot.style.setProperty('--particle-y',((i*29+19)%86+7)+'%');
+  dot.style.setProperty('--particle-duration',(4+(i%6)*.65)+'s');
+  dot.style.setProperty('--particle-delay',(-i*.37)+'s');
+  portal.append(dot);
+ }
  const originalOpen=openDialogue;
  openDialogue=function(lines,done){
   const isEnding=Array.isArray(lines)&&lines.some(d=>d&&d.who==='timeNarrator'&&d.voiceStage==='ending'&&d.voiceOrdinal===3);
@@ -1581,10 +1598,11 @@ const classroomDepartureLines=teacherReviewedDialogue.map((_,i)=>()=>createTeach
   dialogueBox.style.setProperty('z-index','1000','important');
   dialogueBox.style.setProperty('position','absolute','important');
   return originalOpen(lines,()=>{
+   portal.classList.add('ending-portal-charging');
    const flash=document.createElement('div');flash.id='ending-portal-flash';document.body.append(flash);
    requestAnimationFrame(()=>flash.classList.add('ending-flash-on'));
    setTimeout(()=>{
-    portal.classList.add('hidden');portal.style.cssText='';game.classList.remove('ending-portal-active');dialogueBox.style.removeProperty('z-index');dialogueBox.style.removeProperty('position');
+    portal.classList.add('hidden');portal.classList.remove('ending-portal-charging');portal.style.cssText='';game.classList.remove('ending-portal-active');dialogueBox.style.removeProperty('z-index');dialogueBox.style.removeProperty('position');
     // The last narrator line now leads straight to the approved score screen.
     showRoyalResult();
     setTimeout(()=>{flash.classList.remove('ending-flash-on');setTimeout(()=>flash.remove(),500);},100);
