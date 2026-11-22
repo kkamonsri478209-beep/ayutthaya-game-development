@@ -99,7 +99,19 @@ function attachThaiDialogueChime(){
    const piece=parts[i++];if(piece===undefined){timer=null;document.dispatchEvent(new Event('ayutthaya-dialogue-typing-complete'));return;}
    shown+=piece;target.textContent=shown;
    if(piece.trim()&&++step%3===0)chime();
-   if(i<parts.length)timer=setTimeout(tick,65);
+   if(i<parts.length){
+    const cinematic=typeof dialogue!=='undefined'&&dialogue&&['school','intro'].includes(dialogue[dialogueIndex]?.voiceStage)&&sceneIndex<=2;
+    if(cinematic&&typeof voicePlayer!=='undefined'&&!voiceDone){
+     const duration=voicePlayer.duration;
+     if(Number.isFinite(duration)&&duration>0){
+      const desired=Math.max(i,Math.min(parts.length,Math.floor(voicePlayer.currentTime/duration*parts.length)));
+      if(desired>i){shown+=parts.slice(i,desired).join('');i=desired;target.textContent=shown;}
+      if(i>=parts.length){timer=null;document.dispatchEvent(new Event('ayutthaya-dialogue-typing-complete'));return;}
+      const nextAt=i/parts.length*duration;
+      timer=setTimeout(tick,Math.max(20,Math.min(250,(nextAt-voicePlayer.currentTime)*1000)));
+     }else timer=setTimeout(tick,100);
+    }else timer=setTimeout(tick,65);
+   }
    else {timer=null;document.dispatchEvent(new Event('ayutthaya-dialogue-typing-complete'));}
   }
   tick();
