@@ -99,7 +99,7 @@ function attachThaiDialogueChime(){
    const piece=parts[i++];if(piece===undefined){timer=null;document.dispatchEvent(new Event('ayutthaya-dialogue-typing-complete'));return;}
    shown+=piece;target.textContent=shown;
    if(piece.trim()&&++step%3===0)chime();
-   if(i<parts.length)timer=setTimeout(tick,33);
+   if(i<parts.length)timer=setTimeout(tick,65);
    else {timer=null;document.dispatchEvent(new Event('ayutthaya-dialogue-typing-complete'));}
   }
   tick();
