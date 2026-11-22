@@ -1498,6 +1498,36 @@ showRoyalResult=function(){
  $('result-score').setAttribute('aria-label','คะแนนจากการตอบครั้งแรก '+earned+' จาก '+max+' คะแนน');
  $('result-message').textContent=earned===max?'ยอดเยี่ยม! เจ้าเรียนรู้เรื่องเศรษฐกิจอยุธยาได้ดีมาก':
   'ขอบใจที่ร่วมเดินทาง ทุกคำตอบช่วยให้เราเรียนรู้และพัฒนาต่อไปได้';
+ // A provisional local-only personal best; no classroom ranking is claimed
+ // until the teacher's verified score endpoint is available.
+ const resultArea=$('result-score')?.parentElement;
+ if(resultArea){
+  let panel=document.getElementById('classroom-ranking-summary');
+  if(!panel){
+   panel=document.createElement('div');
+   panel.id='classroom-ranking-summary';
+   panel.style.cssText='margin:12px auto;padding:12px;border:1px solid rgba(180,143,66,.55);border-radius:12px;max-width:440px;text-align:center;line-height:1.7;background:rgba(255,248,226,.9);color:#49351e';
+   $('result-score').insertAdjacentElement('afterend',panel);
+  }
+  const identity=String(playerName||'').trim();
+  const key='ayutthaya-personal-best-v1:'+identity;
+  let best=earned;
+  try{
+   const previous=Number(localStorage.getItem(key));
+   if(Number.isFinite(previous)&&previous>=0&&previous<=max)best=Math.max(earned,previous);
+   localStorage.setItem(key,String(best));
+  }catch(e){console.warn('Personal best could not be saved',e);}
+  panel.replaceChildren();
+  const score=document.createElement('div');
+  score.textContent='ตอบถูกครั้งแรก '+earned+' จาก '+max+' ข้อ';
+  const bestLine=document.createElement('strong');
+  bestLine.textContent='คะแนนดีที่สุดบนอุปกรณ์นี้: '+best+' / '+max;
+  const rank=document.createElement('div');
+  rank.textContent='อันดับห้องเรียน: รอเปิดใช้ระบบบันทึกคะแนนออนไลน์';
+  const hint=document.createElement('small');
+  hint.textContent='คะแนนดีที่สุดนี้เก็บเฉพาะในเบราว์เซอร์นี้ ยังไม่ใช่คะแนนที่ยืนยันใน Google Sheets';
+  panel.append(score,bestLine,rank,hint);
+ }
 };
 const originalDownloadRoyalResult=downloadRoyalResult;
 downloadRoyalResult=function(){
