@@ -1552,18 +1552,40 @@ kingNaraiDialogueLines=()=>createTeacherDialogue(8,'before');
 royalEndingDialogue=()=>createTeacherDialogue(8,'after');
 const classroomDepartureLines=teacherReviewedDialogue.map((_,i)=>()=>createTeacherDialogue(i,'after'));
 
-// Ending-only animated time vortex. No changes to scoring or classroom submissions.
+// Final narrator: full-screen opening-style time portal with original dialogue UI.
+// Deliberately does not modify quiz answers, score calculations or Apps Script.
 (()=>{
  const style=document.createElement('style');
- style.textContent='#ending-time-vortex{position:absolute;inset:0;z-index:5;pointer-events:none;overflow:hidden;background:radial-gradient(circle,#c69d6555 0%,#513080dd 42%,#090620f5 100%)}#ending-time-vortex::before{content:"";position:absolute;inset:-65%;border-radius:50%;background:repeating-conic-gradient(#ffdb8055 0deg 12deg,#6436ac55 14deg 27deg,#0b092955 29deg 45deg);animation:endingSpin 24s linear infinite;mask-image:radial-gradient(circle,transparent 0 9%,black 25% 75%,transparent 90%)}#ending-time-vortex::after{content:"";position:absolute;inset:20%;border-radius:50%;background:radial-gradient(circle,#fff1b7aa,#b978ed66 20%,transparent 68%)}#game-screen.ending-vortex-active #dialogue-box{position:relative;z-index:8}@keyframes endingSpin{to{transform:rotate(360deg)}}@media(prefers-reduced-motion:reduce){#ending-time-vortex::before{animation:none}}';
+ style.textContent=`
+ #ending-time-portal{position:absolute;inset:0;z-index:30;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse at center,#fbe3a8 0%,#d5a6ed 12%,#62449f 34%,#1b123d 67%,#08071b 100%)}
+ #ending-time-portal::before{content:"";position:absolute;inset:-65%;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,236,177,.65) 0deg 9deg,rgba(114,69,179,.2) 14deg 27deg,rgba(15,10,51,.45) 31deg 46deg);mask-image:radial-gradient(circle,transparent 0 8%,black 25% 74%,transparent 88%);animation:endingPortalSpin 13s linear infinite}
+ #ending-time-portal::after{content:"";position:absolute;inset:8%;background:radial-gradient(circle,rgba(255,250,223,.92) 0%,rgba(255,212,126,.48) 9%,rgba(171,113,227,.28) 28%,transparent 61%);animation:endingPortalPulse 2.8s ease-in-out infinite alternate}
+ #game-screen.ending-portal-active #dialogue-box{z-index:40!important;position:absolute!important}
+ #ending-portal-flash{position:fixed;inset:0;z-index:20000;pointer-events:none;background:#fff9dc;opacity:0;transition:opacity .45s ease}
+ #ending-portal-flash.ending-flash-on{opacity:1}
+ @keyframes endingPortalSpin{to{transform:rotate(360deg)}}
+ @keyframes endingPortalPulse{to{transform:scale(1.18);opacity:.7}}
+ @media(prefers-reduced-motion:reduce){#ending-time-portal::before,#ending-time-portal::after{animation:none}#ending-portal-flash{transition:none}}
+ `;
  document.head.append(style);
- const game=$('game-screen');if(getComputedStyle(game).position==='static')game.style.position='relative';
- const vortex=document.createElement('div');vortex.id='ending-time-vortex';vortex.classList.add('hidden');vortex.setAttribute('aria-hidden','true');game.append(vortex);
- const oldOpen=openDialogue;
+ const game=$('game-screen');
+ if(getComputedStyle(game).position==='static')game.style.position='relative';
+ const portal=document.createElement('div');portal.id='ending-time-portal';portal.className='hidden';portal.setAttribute('aria-hidden','true');game.append(portal);
+ const originalOpen=openDialogue;
  openDialogue=function(lines,done){
-  const ending=Array.isArray(lines)&&lines.some(line=>line&&line.who==='timeNarrator'&&line.voiceStage==='ending');
-  if(ending){vortex.classList.remove('hidden');game.classList.add('ending-vortex-active');}
-  return oldOpen(lines,ending?()=>{vortex.classList.add('hidden');game.classList.remove('ending-vortex-active');if(done)done();}:done);
+  const isEnding=Array.isArray(lines)&&lines.some(d=>d&&d.who==='timeNarrator'&&d.voiceStage==='ending');
+  if(!isEnding)return originalOpen(lines,done);
+  portal.classList.remove('hidden');game.classList.add('ending-portal-active');
+  return originalOpen(lines,()=>{
+   const flash=document.createElement('div');flash.id='ending-portal-flash';document.body.append(flash);
+   requestAnimationFrame(()=>flash.classList.add('ending-flash-on'));
+   setTimeout(()=>{
+    portal.classList.add('hidden');game.classList.remove('ending-portal-active');
+    // The last narrator line now leads straight to the approved score screen.
+    showRoyalResult();
+    setTimeout(()=>{flash.classList.remove('ending-flash-on');setTimeout(()=>flash.remove(),500);},100);
+   },650);
+  });
  };
 })();
 
