@@ -192,8 +192,18 @@ $('name-form').addEventListener('submit',e=>{
  playerName=name;
  // แยกรอบการเล่นเมื่อนักเรียนคนใหม่เริ่มเกมบนเครื่องเดียวกัน
  try{sessionStorage.removeItem(PLAYER_SESSION_KEY);}catch(error){console.warn('Session storage unavailable',error);}
+ if(new URLSearchParams(location.search).get('preview')==='ending'){startEndingPreview();return;}
  startGame();
 });
+function startEndingPreview(){
+ stageScoreRecords.fill(null);firstAttemptAnswers.clear();
+ sceneIndex=10;player.x=150;player.moving=false;keys.left=keys.right=false;
+ showScreen('game-screen');objective.textContent='ทดลองฉากจบ (ไม่ใช่ผลการเรียนจริง)';
+ prompt.classList.add('hidden');
+ if(!started){started=true;last=performance.now();requestAnimationFrame(frame);}
+ openTreasuryQuiz();quizIndex=treasuryQuiz.length-2;renderTreasuryQuizQuestion();
+ quizNextBtn.click();
+}
 function genderWord(boy,girl){return selectedGender==='girl'?girl:boy;}
 function student(text,emotion='normal',voiceStage,voiceOrdinal){return{who:'student',emotion,text,voiceStage,voiceOrdinal};}
 function npc(text,emotion='normal'){return{who:'farmer',emotion,text};}
