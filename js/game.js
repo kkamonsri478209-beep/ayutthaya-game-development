@@ -195,7 +195,9 @@ $('name-form').addEventListener('submit',e=>{
  if(new URLSearchParams(location.search).get('preview')==='ending'){startEndingPreview();return;}
  startGame();
 });
+let endingPreviewMode=false;
 function startEndingPreview(){
+ endingPreviewMode=true;
  stageScoreRecords.fill(null);firstAttemptAnswers.clear();
  sceneIndex=10;player.x=150;player.moving=false;keys.left=keys.right=false;
  showScreen('game-screen');objective.textContent='ทดลองฉากจบ (ไม่ใช่ผลการเรียนจริง)';
@@ -1481,6 +1483,15 @@ function playApprovedEndingReturn(){
 const originalRoyalResult=showRoyalResult;
 showRoyalResult=function(){
  originalRoyalResult();
+ if(endingPreviewMode){
+  $('result-score').textContent='—';
+  $('result-score').setAttribute('aria-label','โหมดทดลองฉากจบ ไม่มีคะแนน');
+  $('result-message').textContent='ทดลองฉากจบเท่านั้น • ไม่มีการบันทึกคะแนนหรือผลการเรียน';
+  $('result-download-btn').disabled=true;
+  $('result-download-btn').classList.add('hidden');
+  $('result-save-status').textContent='โหมดทดลอง: ไม่สร้างไฟล์คะแนน';
+  return;
+ }
  const selected=[0,1,2,4,7].map(i=>stageScoreRecords[i]).filter(Boolean);
  const earned=selected.reduce((sum,x)=>sum+x.correct,0),max=16;
  $('result-score').textContent=String(earned)+' / '+String(max);
