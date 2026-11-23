@@ -1325,7 +1325,8 @@ async function syncWrittenAnswers(){
   const next=[...queue].reverse().find(record=>[1,3,5,7,9].includes(Number(record.stage)) && (!record.lastAttemptAt ||
    now-record.lastAttemptAt>(record.status==='delivery-attempted-not-verified'?900000:60000)));
   if(!next)return;
-  // The currently deployed Apps Script accepts written answers only for stages 1, 3, 5, 7, 9.\n  // Keep other stages safely queued until the teacher updates the server; never mislabel a stage.\n  if(![1,3,5,7,9].includes(Number(next.stage)))return;\n  const answerId=next.answerId;\n  const stored=queue.find(record=>record.answerId===answerId);
+  const answerId=next.answerId;
+  const stored=queue.find(record=>record.answerId===answerId);
   if(stored){stored.lastAttemptAt=now;stored.status='sending';putAnswerQueue(queue);}
   try{
    await fetch(CLASSROOM_ANSWERS_WEBAPP_URL,{method:'POST',mode:'no-cors',
