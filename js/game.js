@@ -1483,6 +1483,8 @@ function playApprovedEndingReturn(){
 const originalRoyalResult=showRoyalResult;
 showRoyalResult=function(){
  originalRoyalResult();
+ $('result-rank').textContent='—';
+ $('result-rank-note').textContent=endingPreviewMode?'โหมดทดลอง ไม่มีอันดับ':'รอเปิดระบบจัดอันดับออนไลน์';
  if(endingPreviewMode){
   $('result-score').textContent='—';
   $('result-score').setAttribute('aria-label','โหมดทดลองฉากจบ ไม่มีคะแนน');
