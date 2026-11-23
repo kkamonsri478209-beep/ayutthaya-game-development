@@ -1322,8 +1322,8 @@ async function syncWrittenAnswers(){
   const queue=getAnswerQueue();
   const now=Date.now();
   // Send newly written answers first so previous retry history cannot delay classwork.
-  const next=[...queue].reverse().find(record=>!record.lastAttemptAt ||
-   now-record.lastAttemptAt>(record.status==='delivery-attempted-not-verified'?900000:60000));
+  const next=[...queue].reverse().find(record=>[1,3,5,7,9].includes(Number(record.stage)) && (!record.lastAttemptAt ||
+   now-record.lastAttemptAt>(record.status==='delivery-attempted-not-verified'?900000:60000)));
   if(!next)return;
   // The currently deployed Apps Script accepts written answers only for stages 1, 3, 5, 7, 9.\n  // Keep other stages safely queued until the teacher updates the server; never mislabel a stage.\n  if(![1,3,5,7,9].includes(Number(next.stage)))return;\n  const answerId=next.answerId;\n  const stored=queue.find(record=>record.answerId===answerId);
   if(stored){stored.lastAttemptAt=now;stored.status='sending';putAnswerQueue(queue);}
@@ -1343,7 +1343,7 @@ async function syncWrittenAnswers(){
  }finally{
   answerSyncRunning=false;
   // Continue only for never-attempted answers; keep network work bounded.
-  if(getAnswerQueue().some(record=>!record.lastAttemptAt))
+  if(getAnswerQueue().some(record=>[1,3,5,7,9].includes(Number(record.stage))&&!record.lastAttemptAt))
    setTimeout(syncWrittenAnswers,3000);
  }
 }
