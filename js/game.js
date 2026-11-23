@@ -1325,14 +1325,13 @@ async function syncWrittenAnswers(){
   const next=[...queue].reverse().find(record=>!record.lastAttemptAt ||
    now-record.lastAttemptAt>(record.status==='delivery-attempted-not-verified'?900000:60000));
   if(!next)return;
-  const answerId=next.answerId;
-  const stored=queue.find(record=>record.answerId===answerId);
+  // The currently deployed Apps Script accepts written answers only for stages 1, 3, 5, 7, 9.\n  // Keep other stages safely queued until the teacher updates the server; never mislabel a stage.\n  if(![1,3,5,7,9].includes(Number(next.stage)))return;\n  const answerId=next.answerId;\n  const stored=queue.find(record=>record.answerId===answerId);
   if(stored){stored.lastAttemptAt=now;stored.status='sending';putAnswerQueue(queue);}
   try{
    await fetch(CLASSROOM_ANSWERS_WEBAPP_URL,{method:'POST',mode:'no-cors',
     body:new URLSearchParams({answerId:next.answerId,playerId:next.playerId,displayName:next.displayName,
      gender:next.gender,stage:String(next.stage),
-     questionId:(/^S[13579]-Q[45]$/.test(next.questionId)?'S'+next.stage+'-T1':next.questionId),
+     questionId:({1:'S1-T1',3:'S3-T1',5:'S5-T1',7:'S7-T1',9:'S9-T1'}[next.stage] || next.questionId),
      question:next.question,answer:next.answer,sessionId:next.sessionId})});
    const current=getAnswerQueue(),item=current.find(record=>record.answerId===answerId);
    if(item){item.status='delivery-attempted-not-verified';item.lastAttemptAt=Date.now();putAnswerQueue(current);}
@@ -1386,7 +1385,7 @@ function renderClassroomQuestion(stageIndex){
    if(!saved){quizFeedback.textContent='ไม่สามารถบันทึกคำตอบในเครื่องได้ กรุณาตรวจสอบพื้นที่เก็บข้อมูลแล้วลองใหม่';return;}
    textarea.disabled=true;submit.disabled=true;
    quizFeedback.textContent=CLASSROOM_ANSWERS_WEBAPP_URL?
-    'รับคำตอบแล้ว ✓ ไม่มีถูกหรือผิด ระบบเก็บสำรองไว้และกำลังส่งไปยังฐานข้อมูลของครู':
+    (stageIndex===7?'รับคำตอบแล้ว ✓ เก็บสำรองในเครื่อง รอครูเปิดรับข้อมูลด่านนี้ใน Google Sheets':'รับคำตอบแล้ว ✓ เก็บสำรองในเครื่องและกำลังส่งไปยังฐานข้อมูลครู (ยังไม่ยืนยันการบันทึก)'):
     'รับคำตอบแล้ว ✓ ไม่มีถูกหรือผิด บันทึกสำรองไว้ในเครื่อง (รอเชื่อม Google Sheets)';
    // คำถามพิมพ์ตอบผ่านทันที ไม่ต้องกดปุ่ม "ถัดไป" ซ้ำอีกครั้ง
    quizNextBtn.textContent=quizIndex===items.length-1?'ดูผลการเรียนรู้ ▶':'ข้อต่อไป ▶';
