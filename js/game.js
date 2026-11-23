@@ -1482,6 +1482,7 @@ function playApprovedEndingReturn(){
 const originalRoyalResult=showRoyalResult;
 showRoyalResult=function(){
  originalRoyalResult();
+ scoreSubmissionId=undefined;
  $('result-rank').textContent='—';
  $('result-rank-note').textContent=endingPreviewMode?'โหมดทดลอง ไม่มีอันดับ':'รอเปิดระบบจัดอันดับออนไลน์';
  if(endingPreviewMode){
@@ -1500,17 +1501,48 @@ showRoyalResult=function(){
  $('result-message').textContent=earned===max?'ยอดเยี่ยม! เจ้าเรียนรู้เรื่องเศรษฐกิจอยุธยาได้ดีมาก':
   'ขอบใจที่ร่วมเดินทาง ทุกคำตอบช่วยให้เราเรียนรู้และพัฒนาต่อไปได้';
 };
+let scoreSubmissionId;
+let scoreSubmissionRunning=false;
+async function submitRoyalScore(stageScores, score, submittedAt){
+ if(scoreSubmissionRunning)return;
+ const status=$('result-save-status');
+ if(!navigator.onLine||!CLASSROOM_ANSWERS_WEBAPP_URL){
+  status.textContent='ดาวน์โหลด CSV แล้ว • ยังส่งคะแนนออนไลน์ไม่ได้';
+  return;
+ }
+ scoreSubmissionRunning=true;
+ status.textContent='ดาวน์โหลด CSV แล้ว • กำลังส่งคะแนนออนไลน์';
+ try{
+  scoreSubmissionId ||= crypto.randomUUID();
+  await fetch(CLASSROOM_ANSWERS_WEBAPP_URL,{method:'POST',mode:'no-cors',
+   body:new URLSearchParams({action:'saveScore',scoreId:scoreSubmissionId,
+    playerId:getClassroomSession(),displayName:playerName,gender:selectedGender||'unknown',
+    submittedAt,stage1:stageScores[0],stage2:stageScores[1],stage3:stageScores[2],
+    stage4:stageScores[3],stage5:stageScores[4],score,maxScore:16,writtenQuestionCount:4})});
+  status.textContent='ดาวน์โหลด CSV แล้ว • ส่งคำขอแล้ว รอตรวจสอบคะแนนในชีต';
+ }catch(error){
+  status.textContent='ดาวน์โหลด CSV แล้ว • ส่งคะแนนออนไลน์ไม่ได้ กดบันทึกผลเพื่อลองอีกครั้ง';
+ }finally{
+  scoreSubmissionRunning=false;
+ }
+}
 const originalDownloadRoyalResult=downloadRoyalResult;
 downloadRoyalResult=function(){
+ if(endingPreviewMode)return;
+ const records=[0,1,2,4,7].map(i=>stageScoreRecords[i]);
+ const stageScores=records.map(record=>record?.correct??0);
+ const score=stageScores.reduce((sum,value)=>sum+value,0);
+ const recordedAt=new Date();
  // The original result CSV uses old denominators; create an updated CSV.
  const quote=v=>'"'+String(v).replaceAll('"','""')+'"';
  const rows=[['ชื่อที่ใช้ในเกม','คะแนนตอบถูกครั้งแรก','คะแนนเต็มเลือกตอบ','คำถามพิมพ์ตอบ','วันที่บันทึก'],
-  [playerName,[0,1,2,4,7].reduce((sum,i)=>sum+(stageScoreRecords[i]?.correct||0),0),16,4,new Date().toLocaleString('th-TH')]];
+  [playerName,score,16,4,recordedAt.toLocaleString('th-TH')]];
  const csv='\uFEFF'+rows.map(r=>r.map(quote).join(',')).join('\r\n');
  const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'}));
  const link=document.createElement('a');
  link.href=url;link.download='ayutthaya-five-stages-result.csv';document.body.appendChild(link);link.click();link.remove();URL.revokeObjectURL(url);
- $('result-save-status').textContent='บันทึกผลเป็นไฟล์ CSV แล้ว';
+ $('result-save-status').textContent='ดาวน์โหลด CSV แล้ว';
+ if(records.every(Boolean))submitRoyalScore(stageScores,score,recordedAt.toISOString());
 };
 const classroomDownloadBtn=$('result-download-btn');
 classroomDownloadBtn.removeEventListener('click',originalDownloadRoyalResult);
