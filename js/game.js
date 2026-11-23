@@ -1294,7 +1294,7 @@ classroomStages.forEach((stage,index)=>stage.items.splice(0,stage.items.length,.
 treasuryQuiz.push({type:'text',q:"หากนักเรียนได้รับหน้าที่เป็นที่ปรึกษาของสมเด็จพระนารายณ์มหาราช และสามารถเสนอแนวทางพัฒนาเศรษฐกิจอยุธยาได้ 1 วิธี นักเรียนจะเสนอวิธีใด และเพราะเหตุใดวิธีนั้นจึงช่วยให้เศรษฐกิจอยุธยาเจริญรุ่งเรืองขึ้น?",questionId:'APPROVED-Q20'});
 // Put the deployed Apps Script /exec URL here after deploying it.
 // Do NOT put a Google Sheet sharing URL here.
-const CLASSROOM_ANSWERS_WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbzxDMhsZe6AjfKRyYFitq8-LycZlVKJHNb2QWvo5I5BTATGBXbgRi8TV7hmXDlGpmAh/exec';
+const CLASSROOM_ANSWERS_WEBAPP_URL = ''; // Set to the NEW deployed AnswerCollectorV2 /exec URL after testing.
 const ANSWER_QUEUE_KEY = 'ayutthaya-written-answers-v1';
 const PLAYER_SESSION_KEY = 'ayutthaya-player-session-v1';
 function getClassroomSession(){
@@ -1322,16 +1322,17 @@ async function syncWrittenAnswers(){
   const queue=getAnswerQueue();
   const now=Date.now();
   // Send newly written answers first so previous retry history cannot delay classwork.
-  const next=[...queue].reverse().find(record=>[1,3,5,7,9].includes(Number(record.stage)) && (!record.lastAttemptAt ||
+  const next=[...queue].reverse().find(record=>[1,2,3,4,5].includes(Number(record.stage)) && (!record.lastAttemptAt ||
    now-record.lastAttemptAt>(record.status==='delivery-attempted-not-verified'?900000:60000)));
   if(!next)return;
-  // The currently deployed Apps Script accepts written answers only for stages 1, 3, 5, 7, 9.\n  // Keep other stages safely queued until the teacher updates the server; never mislabel a stage.\n  if(![1,3,5,7,9].includes(Number(next.stage)))return;\n  const answerId=next.answerId;\n  const stored=queue.find(record=>record.answerId===answerId);
+  const answerId=next.answerId;
+  const stored=queue.find(record=>record.answerId===answerId);
   if(stored){stored.lastAttemptAt=now;stored.status='sending';putAnswerQueue(queue);}
   try{
    await fetch(CLASSROOM_ANSWERS_WEBAPP_URL,{method:'POST',mode:'no-cors',
     body:new URLSearchParams({answerId:next.answerId,playerId:next.playerId,displayName:next.displayName,
      gender:next.gender,stage:String(next.stage),
-     questionId:({1:'S1-T1',3:'S3-T1',5:'S5-T1',7:'S7-T1',9:'S9-T1'}[next.stage] || next.questionId),
+     questionId:next.questionId,
      question:next.question,answer:next.answer,sessionId:next.sessionId})});
    const current=getAnswerQueue(),item=current.find(record=>record.answerId===answerId);
    if(item){item.status='delivery-attempted-not-verified';item.lastAttemptAt=Date.now();putAnswerQueue(current);}
@@ -1343,7 +1344,7 @@ async function syncWrittenAnswers(){
  }finally{
   answerSyncRunning=false;
   // Continue only for never-attempted answers; keep network work bounded.
-  if(getAnswerQueue().some(record=>[1,3,5,7,9].includes(Number(record.stage))&&!record.lastAttemptAt))
+  if(getAnswerQueue().some(record=>[1,2,3,4,5].includes(Number(record.stage))&&!record.lastAttemptAt))
    setTimeout(syncWrittenAnswers,3000);
  }
 }
@@ -1351,7 +1352,7 @@ function saveClassroomWrittenAnswer(stageIndex,item,answer){
  const sid=getClassroomSession();
  const record={answerId:crypto.randomUUID?crypto.randomUUID():'a-'+Date.now()+'-'+Math.random().toString(36).slice(2),
   submittedAt:new Date().toISOString(),playerId:sid,
-  playerName:String(playerName||'ผู้เล่น'),displayName:String(playerName||'ผู้เล่น'),gender:selectedGender||'unknown',stage:({4:4,7:5}[stageIndex]||stageIndex+1),
+  playerName:String(playerName||'ผู้เล่น'),displayName:String(playerName||'ผู้เล่น'),gender:selectedGender||'unknown',stage:({0:1,2:2,4:3,6:4,7:5}[stageIndex]||stageIndex+1),
   questionId:item.questionId,question:item.q,answer,sessionId:sid,status:'pending'};
  const stored=putAnswerQueue([...getAnswerQueue(),record]);
  if(stored)syncWrittenAnswers();
